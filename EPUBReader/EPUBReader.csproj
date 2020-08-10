@@ -36,8 +36,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSettings.cs" />
     <Compile Include="InitialClass.cs" />
     <Compile Include="Logger.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Entwicklungsverlauf.txt" />
+    <Content Include="FeatureList.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

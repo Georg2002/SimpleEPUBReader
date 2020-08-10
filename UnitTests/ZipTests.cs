@@ -5,6 +5,7 @@ using EPUBReader;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 namespace UnitTests
 {
@@ -39,6 +40,25 @@ namespace UnitTests
             var Fail = ZipEntry.GetEntry(Files, "1/3/6");
             Assert.IsNotNull(Success);
             Assert.IsNull(Fail);
+        }
+
+        [TestMethod]
+        public void TextFileTest()
+        {
+            string TestText = "Testてすと\nLine2";
+            var ByteData = Encoding.UTF8.GetBytes(TestText);
+            var File = new TextFile(ByteData);       
+            Assert.IsTrue(TestText == File.Text);          
+        }
+
+        [TestMethod]
+        public void ImageFileTest()
+        {
+            string TestImagePath = Path.Combine(TestResources.TestFolderPath, TestResources.TestImageName);
+            var ByteData = File.ReadAllBytes(TestImagePath);
+            ImageFile ImageFile = new ImageFile(ByteData);
+            var Image = ImageFile.GetImage();
+            Assert.IsTrue(Image.Width == 100 && Image.Height == 100);
         }
     }
 }

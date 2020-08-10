@@ -1,0 +1,52 @@
+
+
+.epub-Dateien auslesen können (Text und Bilder) -> fertig
+
+			||
+			||
+			\/
+			
+.xhtml-Dateien parsen (nur einfache Elemente/Einträge) -> fertig
+			
+			||
+			||
+			\/
+
+Kapitel in einfach verarbeitbare Form umarbeiten -> fertig
+			
+			||
+			||
+			\/
+
+Metadaten in einfach verarbeitbare Form umwandeln
+			
+			||
+			||
+			\/
+
+Bücher-Objekte verlässlich aus .epub-Dateien erstellen (verschiedene Namensstandards beachten!)
+						
+			||
+			||
+			\/
+
+Renderer, muss Text eines Kapitels in Seiten eingeteilt mit Bildern und
+Ruby unabhängig vom Rest der Anwendung in einem Fenster (WPF, WinForms?) darstellen können
+			
+			||
+			||
+			\/
+
+Markieren im Renderer
+			
+			||
+			||
+			\/
+
+Bibliothek
+			
+			||
+			||
+			\/
+
+restliches UI

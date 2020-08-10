@@ -21,20 +21,28 @@ namespace EPUBParser
         }
     }
 
-    //Test needed!!!!!!!!!!!!!!!
     public class TextFile : BaseFile
     {
-       public string[] Lines;
-        public TextFile(byte[] Data)
+        public string Text;
+
+        public TextFile(byte[] ByteData) : base(ByteData) { }
+
+        public override void Init(byte[] ByteData)
         {
-            Lines = Encoding.UTF8.GetString(Data).Split('\n');
+            Text = Encoding.UTF8.GetString(ByteData);
         }
     }
-
-    //Test needed!!!!!!!!!!!!
+       
     public class ImageFile : BaseFile
     {
-      public  byte[] ImageData;
+        public byte[] ImageData;
+
+        public ImageFile(byte[] ByteData) : base(ByteData) { }
+
+        public override void Init(byte[] ByteData)
+        {
+            ImageData = ByteData;
+        }
 
         public Image GetImage()
         {
@@ -51,13 +59,21 @@ namespace EPUBParser
                 Logger.Report(string.Format("Couldn't load image {0}", Name));
                 Logger.Report(ex);
             }
-           
             return Result;
         }
     }
 
     public class BaseFile
     {
-      public  string Name;
+        public string Name;
+        public BaseFile(byte[] ByteData)
+        {
+            Init(ByteData);
+        }
+
+        public virtual void Init(byte[] ByteData)
+        {
+
+        }
     }
 }

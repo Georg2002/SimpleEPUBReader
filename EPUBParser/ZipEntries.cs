@@ -30,20 +30,19 @@ namespace EPUBParser
 
         public static ZipEntry GetEntry(List<ZipEntry> Files, string FullName)
         {
-            return GetEntry(Files, FullName, 0);
+            return GetEntry(Files, FullName.Split('/'), 0);
         }
 
-        private static ZipEntry GetEntry(List<ZipEntry> Files, string FullName, int Step)
-        {
-            string[] PathParts = FullName.Split('/');
-            ZipEntry Entry = Files.FirstOrDefault(a => a.Name == PathParts[Step]);
+        private static ZipEntry GetEntry(List<ZipEntry> Files, string[] FullName, int Step)
+        {         
+            ZipEntry Entry = Files.FirstOrDefault(a => a.Name == FullName[Step]);
             if (Entry == null)
             {
                 return null;
             }
             else
             {
-                if (Step == PathParts.Length -1)
+                if (Step == FullName.Length -1)
                 {
                     return Entry;
                 }
