@@ -15,8 +15,10 @@ namespace UnitTests
         [TestMethod]
         public void BrokenDocumentTest()
         {
+            var TestFile = new TextFile(new byte[10]);
+            TestFile.Name = "FailedTestFile";
             //tests fails if throws, so no assert needed
-            var Page = new EpubPage(new TextFile(new byte[10]));
+            var Page = new EpubPage(TestFile);
             Assert.IsTrue(string.IsNullOrEmpty(Page.Title));
             Assert.IsTrue(Page.Lines.Count == 0);
         }
@@ -25,8 +27,10 @@ namespace UnitTests
         public void SimpleTest()
         {
             var Path = TestResources.GetTestHTMLFile(30);
-            var Text = new TextFile(File.ReadAllBytes(Path));
-            Text.Name = "Testpage1.xhtml";
+            var Text = new TextFile(File.ReadAllBytes(Path))
+            {
+                Name = "Testpage1.xhtml"
+            };
             var Page = new EpubPage(Text);
 
             Assert.IsTrue(Page.Title == "とある魔術の禁書目録４");
@@ -64,8 +68,10 @@ namespace UnitTests
         {
 
             var Path = TestResources.GetTestHTMLFile(31);
-            var Text = new TextFile(File.ReadAllBytes(Path));
-            Text.Name = "imagepage.xhtml";
+            var Text = new TextFile(File.ReadAllBytes(Path))
+            {
+                Name = "imagepage.xhtml"
+            };
             var Page = new EpubPage(Text);
             Assert.IsTrue(Page.Lines.Count == 1);
             Assert.IsTrue(Page.Lines[0].Parts.Count == 1);

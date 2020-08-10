@@ -11,6 +11,10 @@ namespace EPUBParser
 {
     public class EpubPage
     {
+        public string Title;
+        public bool Vertical;
+        public List<EpubLine> Lines;
+
         public override string ToString()
         {
             return Title;
@@ -19,20 +23,20 @@ namespace EPUBParser
         public EpubPage(TextFile File)
         {
             Lines = new List<EpubLine>();
-            Logger.Report(string.Format("Parsing page {0}", File.Name));
+            Logger.Report(string.Format("Parsing page {0}", File.Name), LogType.Info);
             var doc = HTMLParser.Parse(File);
 
             var htmlNode = doc.DocumentNode.Element("html");
             if (htmlNode == null)
             {
-                Logger.Report("html node not found, stopping parsing");
+                Logger.Report("html node not found, stopping parsing", LogType.Error);
                 return;
             }
 
             var LangAttr = htmlNode.Attributes.FirstOrDefault(a => a.Name == "lang");
             if (LangAttr == null)
             {
-                Logger.Report("language not found, orientation set to standard");
+                Logger.Report("language not found, orientation set to standard", LogType.Error);
                 Vertical = false;
             }
             else
@@ -44,14 +48,14 @@ namespace EPUBParser
             var HeadNode = htmlNode.Element("head");
             if (HeadNode == null)
             {
-                Logger.Report("head node not found, title no set");
+                Logger.Report("head node not found, title not set", LogType.Error);
             }
             else
             {
                 var TitleNode = HeadNode.Element("title");
                 if (TitleNode == null)
                 {
-                    Logger.Report("title node not found, title not set");
+                    Logger.Report("title node not found, title not set", LogType.Error);
                 }
                 else
                 {
@@ -62,7 +66,7 @@ namespace EPUBParser
             var BodyNode = htmlNode.Element("body");
             if (BodyNode == null)
             {
-                Logger.Report("body node not found, lines not set");
+                Logger.Report("body node not found, lines not set", LogType.Error);
             }
             else
             {
@@ -74,11 +78,7 @@ namespace EPUBParser
                     }
                 }
             }
-        }
-
-        public string Title;
-        public bool Vertical;
-        public List<EpubLine> Lines;
+        }       
     }
 
     public class EpubLine
@@ -103,7 +103,7 @@ namespace EPUBParser
             Parts = new List<LinePart>();
             if (HtmlLine == null)
             {
-                Logger.Report("node has value null");
+                Logger.Report("node has value null", LogType.Error);
                 return;
             }
             if (HtmlLine.Name == "p")
@@ -140,7 +140,7 @@ namespace EPUBParser
                     break;
                 default:
                     Logger.Report(string.Format("unknown element in line \"{0}\": \"{1}\""
-                        , Node.ParentNode.OuterHtml, Node.Name));
+                        , Node.ParentNode.OuterHtml, Node.Name), LogType.Error);
                     break;
             }
         }
@@ -151,7 +151,7 @@ namespace EPUBParser
             var classAttribute = node.Attributes.FirstOrDefault(a => a.Name == "class");
             if (classAttribute == null)
             {
-                Logger.Report("span is missing class attribute: " + node.OuterHtml);
+                Logger.Report("span is missing class attribute: " + node.OuterHtml, LogType.Error);
             }
             else
             {
@@ -166,7 +166,7 @@ namespace EPUBParser
                         if (SourceAttribute == null)
                         {
                             Logger.Report(string.Format("image source attribute not found in \"{0}\"",
-                                node.OuterHtml));
+                                node.OuterHtml), LogType.Error);
                         }
                         else
                         {
@@ -175,7 +175,7 @@ namespace EPUBParser
                         }
                         break;
                     default:
-                        Logger.Report("unknown span class: " + classAttribute.Value);
+                        Logger.Report("unknown span class: " + classAttribute.Value, LogType.Error);
                         break;
                 }
             }

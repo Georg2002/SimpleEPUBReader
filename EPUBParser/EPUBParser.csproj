@@ -194,10 +194,11 @@
   <ItemGroup>
     <Compile Include="CSSParser.cs" />
     <Compile Include="EpubPage.cs" />
-    <Compile Include="EpubParser.cs" />
+    <Compile Include="Epub.cs" />
     <Compile Include="HTMLParser.cs" />
     <Compile Include="RawBookData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TocInfo.cs" />
     <Compile Include="Unzipper.cs" />
     <Compile Include="ZipEntries.cs" />
   </ItemGroup>

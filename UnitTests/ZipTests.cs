@@ -31,8 +31,10 @@ namespace UnitTests
         [TestMethod]
         public void FileSearchTest()
         {
-            var Files = new List<ZipEntry>();
-            Files.Add(new ZipEntry() { Name = "1", FullName = "1" });
+            var Files = new List<ZipEntry>
+            {
+                new ZipEntry() { Name = "1", FullName = "1" }
+            };
             Files[0].Subentries.Add(new ZipEntry() { Name = "2", FullName = "1/2" });
             Files[0].Subentries.Add(new ZipEntry() { Name = "3", FullName = "1/3" });
             Files[0].Subentries[1].Subentries.Add(new ZipEntry() { Name = "4", FullName = "1/3/4" });

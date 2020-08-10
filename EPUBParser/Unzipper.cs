@@ -16,7 +16,7 @@ namespace EPUBParser
             var Files = new List<ZipEntry>();
             if (!File.Exists(FilePath))
             {
-                Logger.Report(String.Format("File {0} doesn't exist", FilePath));
+                Logger.Report(String.Format("File {0} doesn't exist", FilePath), LogType.Error);
                 return Files;
             }
 
@@ -34,11 +34,13 @@ namespace EPUBParser
                                 {
                                     using (var stream = entry.Open())
                                     {
-                                        Logger.Report(string.Format("Reading file {0}...", entry.FullName));
-                                        var NewEntry = new ZipEntry();
-                                        NewEntry.EntryType = ZipEntryType.File;
-                                        NewEntry.Name = entry.Name;
-                                        NewEntry.FullName = entry.FullName;
+                                        Logger.Report(string.Format("Reading file {0}...", entry.FullName), LogType.Info);
+                                        var NewEntry = new ZipEntry
+                                        {
+                                            EntryType = ZipEntryType.File,
+                                            Name = entry.Name,
+                                            FullName = entry.FullName
+                                        };
                                         int Length = (int)stream.Length;
                                         NewEntry.Content = new byte[Length];
                                         stream.Read(NewEntry.Content, 0, Length);
@@ -47,7 +49,7 @@ namespace EPUBParser
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.Report(string.Format("Failed to open zip entry {0} in file {1}:", entry.Name, FilePath));
+                                    Logger.Report(string.Format("Failed to open zip entry {0} in file {1}:", entry.Name, FilePath), LogType.Error);
                                     Logger.Report(ex);
                                 }
                             }
@@ -55,7 +57,7 @@ namespace EPUBParser
                     }
                     catch (Exception ex)
                     {
-                        Logger.Report(string.Format("Failed to open zip file at {0}:", FilePath));
+                        Logger.Report(string.Format("Failed to open zip file at {0}:", FilePath), LogType.Error);
                         Logger.Report(ex);
                         return Files;
                     }
@@ -64,7 +66,7 @@ namespace EPUBParser
             }
             catch (Exception ex)
             {
-                Logger.Report(string.Format("Failed to open file stream to {0}:", FilePath));
+                Logger.Report(string.Format("Failed to open file stream to {0}:", FilePath), LogType.Error);
                 Logger.Report(ex);
                 return Files;
             }
@@ -89,10 +91,12 @@ namespace EPUBParser
                     if (Missing || !LastFolderEntries.Exists(a => a.Name == Folder))
                     {
                         Missing = true;
-                        NewFolder = new ZipEntry();
-                        NewFolder.EntryType = ZipEntryType.Folder;
-                        NewFolder.Name = Folder;
-                        NewFolder.FullName = FullName;
+                        NewFolder = new ZipEntry
+                        {
+                            EntryType = ZipEntryType.Folder,
+                            Name = Folder,
+                            FullName = FullName
+                        };
                         LastFolderEntries.Add(NewFolder);
                     }
                     if (Missing)

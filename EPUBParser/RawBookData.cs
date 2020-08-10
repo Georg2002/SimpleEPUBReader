@@ -56,7 +56,7 @@ namespace EPUBParser
             }
             catch (Exception ex)
             {
-                Logger.Report(string.Format("Couldn't load image {0}", Name));
+                Logger.Report(string.Format("Couldn't load image {0}", Name), LogType.Error);
                 Logger.Report(ex);
             }
             return Result;

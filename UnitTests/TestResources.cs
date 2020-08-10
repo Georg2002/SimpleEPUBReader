@@ -14,17 +14,18 @@ namespace UnitTests
         public const string TestImageName = @"TestPicture.png";
         public const string TestEpub1 = @"Index4.epub";
         public const string TestEpub2 = @"星界の紋章第一巻.epub";
-        public const string TestEpubExtracted = @"Index4";
-        public static string TestHTMLFolder
+        public const string TestEpubExtracted1 = @"Index4";
+        public const string TestEpubExtracted2 = @"星界の紋章第一巻";
+        public static string TestHTMLFolder1
         {
             get
             {
-                return Path.Combine(TestFolderPath, TestEpubExtracted, "OPS","xhtml");
+                return Path.Combine(TestFolderPath, TestEpubExtracted1, "OPS","xhtml");
             }
         }
         public static string GetTestHTMLFile(int FileNumber)
         {
-            return Path.Combine(TestHTMLFolder, FileNumber.ToString("D4") + ".xhtml");
+            return Path.Combine(TestHTMLFolder1, FileNumber.ToString("D4") + ".xhtml");
         }
     }
 }

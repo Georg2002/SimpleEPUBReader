@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="jpn">
+  <head>
+    <meta content="5cf648f7-37c3-430d-b8d5-a740bc4d02ab" name="dtb:uid"/>
+    <meta content="2" name="dtb:depth"/>
+    <meta content="calibre (3.34.0)" name="dtb:generator"/>
+    <meta content="0" name="dtb:totalPageCount"/>
+    <meta content="0" name="dtb:maxPageNumber"/>
+  </head>
+  <docTitle>
+    <text>[森岡浩之] 星界の断章1</text>
+  </docTitle>
+  <navMap>
+    <navPoint class="chapter" id="num_1" playOrder="0">
+      <navLabel>
+        <text>星界の断章 Ⅰ</text>
+      </navLabel>
+      <content src="text/part0000.html#0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_2" playOrder="1">
+      <navLabel>
+        <text>ご参集の皆さん、壮挙が行なわれるこの場で、ご挨拶をさせていただくのを光栄に思います。</text>
+      </navLabel>
+      <content src="text/part0006.html#5N3C0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_3" playOrder="2">
+      <navLabel>
+        <text>創　　世</text>
+      </navLabel>
+      <content src="text/part0008.html#7K4G0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_4" playOrder="3">
+      <navLabel>
+        <text>饗　　宴</text>
+      </navLabel>
+      <content src="text/part0009.html#8IL20-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_5" playOrder="4">
+      <navLabel>
+        <text>蒐　　集</text>
+      </navLabel>
+      <content src="text/part0010.html#9H5K0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_6" playOrder="5">
+      <navLabel>
+        <text>哺　　畷</text>
+      </navLabel>
+      <content src="text/part0011.html#AFM60-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_7" playOrder="6">
+      <navLabel>
+        <text>君　　臨</text>
+      </navLabel>
+      <content src="text/part0012.html#BE6O0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_8" playOrder="7">
+      <navLabel>
+        <text>秘　　蹟</text>
+      </navLabel>
+      <content src="text/part0013.html#CCNA0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_9" playOrder="8">
+      <navLabel>
+        <text>夜　　想</text>
+      </navLabel>
+      <content src="text/part0014.html#DB7S0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_10" playOrder="9">
+      <navLabel>
+        <text>戦　　慄</text>
+      </navLabel>
+      <content src="text/part0015.html#E9OE0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_11" playOrder="10">
+      <navLabel>
+        <text>誕　　生</text>
+      </navLabel>
+      <content src="text/part0016.html#F8900-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_12" playOrder="11">
+      <navLabel>
+        <text>暴　　君</text>
+      </navLabel>
+      <content src="text/part0017.html#G6PI0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_13" playOrder="12">
+      <navLabel>
+        <text>接　　触</text>
+      </navLabel>
+      <content src="text/part0018.html#H5A40-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+    <navPoint class="chapter" id="num_14" playOrder="13">
+      <navLabel>
+        <text>原　　罪</text>
+      </navLabel>
+      <content src="text/part0019.html#I3QM0-d1843057403f470aacf5d547efc87160"/>
+    </navPoint>
+  </navMap>
+</ncx>

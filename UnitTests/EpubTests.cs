@@ -14,9 +14,22 @@ namespace UnitTests
         [TestMethod]
         public void SimpleEpubTest1()
         {
+            //   var TestCase = new TestCase()
+            //   {
+            //       FilePath = Path.Combine(TestResources.TestFolderPath,TestResources.TestEpub1),
+            //       Pages = 46,
+            //       Title = "とある魔術の禁書目録４",
+            //       Images = 22,
+            //       Chapters = 
+            //   }
+            Assert.Fail("not implemented, implement the actual parts first!");
 
-            ////////////left off!!!!!
+        }
+
+        private void EpubTester(TestCase test)
+        {
             var File = Path.Combine(TestResources.TestFolderPath, TestResources.TestEpub1);
+
         }
     }
 
@@ -24,7 +37,7 @@ namespace UnitTests
     public class TestCase
     {
         public string FilePath;
-        //xhtml files
+        //xhtml files, including title, navigation, and everything else in the folder
         public int Pages;
         public string Title;
         public int Images;

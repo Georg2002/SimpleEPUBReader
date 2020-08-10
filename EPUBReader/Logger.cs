@@ -10,15 +10,21 @@ namespace EPUBReader
     {
         public static List<string> Log = new List<string>();
 
-        public static void Report(string Message)
+        public static void Report(string Message, LogType type)
         {
+            Message = type.ToString() + ": " + Message;
             Log.Add(Message);
             Console.WriteLine(Message);
         }
 
         public static void Report (Exception exception)
         {
-            Report(exception.Message);
+            Report(exception.Message, LogType.Error);
         }
+    }
+
+    public enum LogType
+    {
+        Info, Error
     }
 }

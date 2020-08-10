@@ -9,7 +9,7 @@ namespace EPUBParser
 {
   public static  class CSSParser
     {
-        private static StylesheetParser Parser  = new StylesheetParser();
+        private static readonly StylesheetParser Parser  = new StylesheetParser();
 
         public static Stylesheet ParseCSS(TextFile File)
         {

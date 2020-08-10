@@ -15,30 +15,31 @@ namespace EPUBParser
         public string Name;
         public List<EpubPage> Chapters;
         public PackageInfo Package;
-        public tocInfo toc;
+        public TocInfo toc;
 
         public Epub(string FilePath)
         {
             Chapters = new List<EpubPage>();
-            Package = new PackageInfo();
-            toc = new tocInfo();
             if (!File.Exists(FilePath))
             {
                 Name = "file missing";
-                Logger.Report(string.Format("file missing: \"{0}\"", FilePath);
+                Logger.Report(string.Format("file missing: \"{0}\"", FilePath), LogType.Error);
                 return;
             }
             var Files = Unzipper.GetFiles(FilePath);
+
+
+            //find files first!!
+            //    Package = new PackageInfo();
+            //    toc = new TocInfo();
         }
     }
 
-
-
     public class PackageInfo
     {
-    }
+        public PackageInfo(TextFile file)
+        {
 
-    public class tocInfo
-    {
+        }
     }
 }

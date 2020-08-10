@@ -1,0 +1,177 @@
+.btm {
+    display: block;
+    text-align: right
+    }
+.calibre {
+    display: table-row;
+    vertical-align: middle
+    }
+.calibre1 {
+    display: table-cell;
+    height: 100%;
+    text-align: inherit;
+    vertical-align: middle;
+    width: 100%;
+    padding: 1px
+    }
+.calibre2 {
+    display: block
+    }
+.calibre3 {
+    display: block;
+    font-size: 1em;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0 5pt
+    }
+.calibre4 {
+    display: none
+    }
+.calibre5 {
+    display: block;
+    font-size: 1.66667em;
+    font-weight: bold;
+    line-height: 1.2;
+    margin: 0.83em 0
+    }
+.calibre6 {
+    display: block;
+    list-style-type: decimal;
+    margin-bottom: 1em;
+    margin-right: 0;
+    margin-top: 1em
+    }
+.calibre7 {
+    display: list-item;
+    list-style-image: none;
+    list-style-position: outside;
+    list-style-type: none;
+    padding: 0 0.25em 0 0
+    }
+.calibre8 {
+    border-right-style: solid;
+    border-right-width: 1px;
+    padding-right: 1px;
+    text-decoration: none
+    }
+.calibre9 {
+    display: block;
+    font-size: 1.66667em;
+    font-weight: bold;
+    line-height: 1.2;
+    padding-top: 1em;
+    margin: 0.67em 0
+    }
+.calibre10 {
+    display: block
+    }
+.calibre11 {
+    height: auto;
+    width: auto
+    }
+.calibre12 {
+    display: block;
+    text-align: justify;
+    margin: 0
+    }
+.calibre13 {
+    -webkit-text-combine: horizontal;
+    text-combine: horizontal
+    }
+.calibre14 {
+    white-space: nowrap
+    }
+.chapter {
+    display: list-item;
+    line-height: 1.75em;
+    list-style-image: none;
+    list-style-position: outside;
+    list-style-type: disc;
+    padding: 0 0.25em 0 0
+    }
+.creator {
+    display: block;
+    font-size: 1.29167em;
+    line-height: 1.25;
+    margin-bottom: 2em;
+    text-align: right
+    }
+.fullsp {
+    padding-top: 0.5em
+    }
+.kindle {
+    display: block;
+    font-family: "@ＭＳ 明朝", "@MS Mincho", "ヒラギノ明朝 ProN W3", "HiraMinProN-W3", serif, sans-serif;
+    font-size: 1em;
+    line-height: 1.5;
+    vertical-align: middle;
+    width: 100%;
+    margin: 0 5pt;
+    padding: 0
+    }
+.kindle_inner {
+    -webkit-writing-mode: vertical-rl;
+    display: inline-block;
+    height: 95%;
+    line-height: 1.5;
+    text-align: left;
+    writing-mode: vertical-rl
+    }
+.kindle_outer {
+    -webkit-writing-mode: horizontal-tb;
+    display: block;
+    line-height: 1.2;
+    text-align: center;
+    width: 100%;
+    writing-mode: horizontal-tb;
+    margin: 0;
+    padding: 0
+    }
+.kindle1 {
+    display: block;
+    font-size: 1em;
+    text-align: center;
+    margin: 0 5pt;
+    padding: 0
+    }
+.kindle2 {
+    display: block;
+    font-family: "@ＭＳ 明朝", "@MS Mincho", "ヒラギノ明朝 ProN W3", "HiraMinProN-W3", serif, sans-serif;
+    font-size: 1em;
+    line-height: 1.5;
+    vertical-align: baseline;
+    margin: 0 5pt;
+    padding: 0
+    }
+.middle {
+    border-collapse: separate;
+    border-spacing: 2px;
+    display: table;
+    height: 100%;
+    margin-bottom: 0;
+    margin-top: 0;
+    text-indent: 0;
+    width: 100%
+    }
+.pt {
+    display: block;
+    margin-top: 4em
+    }
+.title {
+    display: block;
+    font-size: 1.83333em;
+    line-height: 1.2
+    }
+.upr {
+    -epub-text-orientation: upright;
+    -webkit-text-orientation: upright;
+    text-orientation: upright
+    }
+.pcalibre:link {
+    background: transparent;
+    color: #00C
+    }
+.pcalibre1:visited {
+    background: transparent;
+    color: #609
+    }

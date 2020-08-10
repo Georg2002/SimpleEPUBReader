@@ -13,19 +13,19 @@ namespace EPUBParser
     {
         public static HtmlDocument Parse(TextFile File)
         {
-                Logger.Report(string.Format("Parsing html of file {0}", File.Name));
+                Logger.Report(string.Format("Parsing html of file {0}", File.Name), LogType.Info);
             var Doc = new HtmlDocument();
             try
             {
                 Doc.LoadHtml(File.Text);
                 foreach (var Error in Doc.ParseErrors)
                 {
-                    Logger.Report(string.Format("Error at line {0}: {1}", Error.Line, Error.Reason));
+                    Logger.Report(string.Format("Error at line {0}: {1}", Error.Line, Error.Reason), LogType.Error);
                 }
             }
             catch (Exception ex)
             {
-                Logger.Report("Parsing failed");
+                Logger.Report("Parsing failed", LogType.Error);
                 Logger.Report(ex);
             }
             return Doc;
