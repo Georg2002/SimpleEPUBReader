@@ -1,5 +1,4 @@
-﻿using EPUBReader;
-using ExCSS;
+﻿using ExCSS;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -13,13 +12,13 @@ namespace EPUBParser
     public class Epub
     {
         public string Name;
-        public List<EpubPage> Chapters;
+        public List<EpubPage> Pages;
         public PackageInfo Package;
         public TocInfo toc;
 
         public Epub(string FilePath)
         {
-            Chapters = new List<EpubPage>();
+            Pages = new List<EpubPage>();
             if (!File.Exists(FilePath))
             {
                 Name = "file missing";
@@ -33,13 +32,5 @@ namespace EPUBParser
             //    Package = new PackageInfo();
             //    toc = new TocInfo();
         }
-    }
-
-    public class PackageInfo
-    {
-        public PackageInfo(TextFile file)
-        {
-
-        }
-    }
+    }   
 }

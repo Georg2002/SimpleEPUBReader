@@ -1,5 +1,4 @@
-﻿using EPUBReader;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -13,7 +12,7 @@ namespace EPUBParser
     {
         public static HtmlDocument Parse(TextFile File)
         {
-                Logger.Report(string.Format("Parsing html of file {0}", File.Name), LogType.Info);
+            Logger.Report(string.Format("Parsing html of file {0}", File.Name), LogType.Info);
             var Doc = new HtmlDocument();
             try
             {
@@ -29,6 +28,62 @@ namespace EPUBParser
                 Logger.Report(ex);
             }
             return Doc;
+        }
+
+        internal static HtmlNode SafeNodeGet(HtmlNode ParentNode, string NodeName)
+        {
+            if (ParentNode == null)
+            {
+                Logger.Report(string.Format("Parent node is null, can't get node \"{0}\""
+                    , NodeName), LogType.Error);
+                return null;
+            }
+            var Node = ParentNode.Element(NodeName);
+            if (Node == null)
+            {
+                Logger.Report(string.Format("Node \"{0}\" couldn't be found"
+                    , NodeName), LogType.Error);
+                return null;
+            }
+            else
+            {
+                return Node;
+            }
+        }
+
+        internal static string SafeValueGet(HtmlNode ParentNode, string NodeName)
+        {
+            var Node = SafeNodeGet(ParentNode, NodeName);
+            if (Node == null)
+            {
+                return "";
+            }
+            else
+            {
+                return Node.InnerText;
+            }
+        }
+
+        internal static string SafeAttributeGet(HtmlNode Node, string AttributeName, bool IgnoreMissing = false)
+        {
+            if (Node == null)
+            {
+                Logger.Report(string.Format("no node passed to find attribute \"{0}\"", AttributeName), LogType.Error);
+                return "";
+            }
+            var Attribute = Node.Attributes.FirstOrDefault(a => a.Name == AttributeName);
+            if (Attribute == null)
+            {
+                if (!IgnoreMissing)
+                {
+                    Logger.Report(string.Format("attribute \"{0}\" not found", AttributeName), LogType.Error);
+                }
+                return "";
+            }
+            else
+            {
+                return Attribute.Value;
+            }
         }
     }
 }

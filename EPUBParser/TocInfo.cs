@@ -1,5 +1,4 @@
 ﻿using EPUBParser;
-using EPUBReader;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipes;

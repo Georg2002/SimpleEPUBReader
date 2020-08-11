@@ -57,6 +57,7 @@
     <Compile Include="EpubTests.cs" />
     <Compile Include="HTMLTests.cs" />
     <Compile Include="TestResources.cs" />
+    <Compile Include="PackageInfoTest.cs" />
     <Compile Include="ZipTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

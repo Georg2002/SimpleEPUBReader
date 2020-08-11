@@ -34,6 +34,7 @@ namespace UnitTests
             var Page = new EpubPage(Text);
 
             Assert.IsTrue(Page.Title == "とある魔術の禁書目録４");
+            Assert.IsTrue(Page.Language == "ja");
             Assert.IsTrue(Page.Lines.Count > 200);
             //<p>「問二。食べてみるか、というその質問から察するに、
             //これは<ruby>食物<rt>しよくもつ</rt></ruby>なのか？」</p>

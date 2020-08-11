@@ -1,5 +1,4 @@
-﻿using EPUBReader;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ namespace EPUBParser
     public class EpubPage
     {
         public string Title;
+        public string Language;
         public bool Vertical;
         public List<EpubLine> Lines;
 
@@ -41,8 +41,8 @@ namespace EPUBParser
             }
             else
             {
-                string lang = LangAttr.Value;
-                Vertical = GlobalSettings.VerticalLanguages.Contains(lang);
+                Language = LangAttr.Value;
+                Vertical = GlobalSettings.IsVerticalLanguage(Language);
             }
 
             var HeadNode = htmlNode.Element("head");

@@ -8,6 +8,6 @@ namespace EPUBReader
 {
     public static class GlobalSettings
     {
-        public static string[] VerticalLanguages = new string[] { "ja" };
+       
     }
 }

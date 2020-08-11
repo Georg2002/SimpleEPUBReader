@@ -2,7 +2,6 @@
 using System.IO;
 using System;
 using System.Collections.Generic;
-using EPUBReader;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
