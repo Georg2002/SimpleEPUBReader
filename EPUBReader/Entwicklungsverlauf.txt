@@ -18,7 +18,7 @@ Kapitel in einfach verarbeitbare Form umarbeiten -> fertig
 			||
 			\/
 
-Metadaten in einfach verarbeitbare Form umwandeln
+Metadaten in einfach verarbeitbare Form umwandeln -> fertig
 			
 			||
 			||

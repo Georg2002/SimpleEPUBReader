@@ -199,7 +199,7 @@
     <Compile Include="HTMLParser.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PackageInfo.cs" />
-    <Compile Include="RawBookData.cs" />
+    <Compile Include="RawBookDataTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TocInfo.cs" />
     <Compile Include="Unzipper.cs" />

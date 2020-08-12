@@ -12,8 +12,15 @@ namespace EPUBParser
     {
         public static HtmlDocument Parse(TextFile File)
         {
-            Logger.Report(string.Format("Parsing html of file {0}", File.Name), LogType.Info);
             var Doc = new HtmlDocument();
+            if (File == null)
+            {
+                Logger.Report("file is null, can't parse HTML", LogType.Error);
+                return Doc;
+            }
+
+            Logger.Report(string.Format("Parsing html of file {0}", File.Name), LogType.Info); 
+
             try
             {
                 Doc.LoadHtml(File.Text);

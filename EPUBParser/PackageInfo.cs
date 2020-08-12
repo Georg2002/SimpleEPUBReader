@@ -21,10 +21,15 @@ namespace EPUBParser
 
         public PackageInfo(TextFile file)
         {
-            Logger.Report(string.Format("Parsing package file \"{0}\"", file.Name), LogType.Info);
             Manifest = new List<ManifestItem>();
             Spine = new List<SpineItem>();
             Guide = new List<GuideItem>();
+            if (file == null)
+            {
+                Logger.Report("file is null, can't parse package", LogType.Error);
+                return;
+            }
+            Logger.Report(string.Format("Parsing package file \"{0}\"", file.Name), LogType.Info);
 
             var doc = HTMLParser.Parse(file);
             var PackageNode = HTMLParser.SafeNodeGet(doc.DocumentNode, "package");
@@ -52,9 +57,11 @@ namespace EPUBParser
                 {
                     foreach (var ItemNode in ItemNodes)
                     {
-                        var Item = new ManifestItem();
-                        Item.Id = HTMLParser.SafeAttributeGet(ItemNode, "id");
-                        Item.Path = HTMLParser.SafeAttributeGet(ItemNode, "href");
+                        var Item = new ManifestItem
+                        {
+                            Id = HTMLParser.SafeAttributeGet(ItemNode, "id"),
+                            Path = HTMLParser.SafeAttributeGet(ItemNode, "href")
+                        };
                         var MediaTypeString = HTMLParser.SafeAttributeGet(ItemNode, "media-type");
                         switch (MediaTypeString)
                         {
@@ -101,8 +108,10 @@ namespace EPUBParser
                 {
                     foreach (var Node in SpineNodes)
                     {
-                        var NewItem = new SpineItem();
-                        NewItem.Id = HTMLParser.SafeAttributeGet(Node, "idref");
+                        var NewItem = new SpineItem
+                        {
+                            Id = HTMLParser.SafeAttributeGet(Node, "idref")
+                        };
                         string LinearString = HTMLParser.SafeAttributeGet(Node, "linear", true);
                         if (string.IsNullOrEmpty(LinearString))
                         {

@@ -8,19 +8,23 @@ using System.Threading.Tasks;
 
 namespace EPUBParser
 {
-    public class EpubPage
+    public class EpubPage : IBaseFile
     {
         public string Title;
         public string Language;
         public bool Vertical;
         public List<EpubLine> Lines;
+        private BookSettings settings;
+
+        public string Name { get; set; }
+        public string FullName { get; set; }
 
         public override string ToString()
         {
             return Title;
         }
 
-        public EpubPage(TextFile File)
+        public EpubPage(TextFile File, BookSettings Settings)
         {
             Lines = new List<EpubLine>();
             Logger.Report(string.Format("Parsing page {0}", File.Name), LogType.Info);
@@ -37,7 +41,7 @@ namespace EPUBParser
             if (LangAttr == null)
             {
                 Logger.Report("language not found, orientation set to standard", LogType.Error);
-                Vertical = false;
+                Vertical = Settings.StandardVertical;
             }
             else
             {
@@ -78,7 +82,7 @@ namespace EPUBParser
                     }
                 }
             }
-        }       
+        }
     }
 
     public class EpubLine

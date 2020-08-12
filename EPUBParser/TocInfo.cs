@@ -11,8 +11,15 @@ public class TocInfo
 
     public TocInfo(TextFile file)
     {
-        Logger.Report(string.Format("parsing toc at \"{0}\"", file.Name), LogType.Info);
         Chapters = new List<string>();
+
+        if (file == null)
+        {
+            Logger.Report("file is null, can't parse toc file", LogType.Error);
+            return;
+        }
+
+        Logger.Report(string.Format("parsing toc at \"{0}\"", file.Name), LogType.Info);
         var doc = HTMLParser.Parse(file);
         var ncxNode = doc.DocumentNode.Element("ncx");
         if (ncxNode == null)

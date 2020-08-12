@@ -13,5 +13,7 @@ namespace EPUBParser
         {
             return VerticalLanguages.Contains(Language);
         }
+
+        public static string[] PackageFileNames = new string[] { "package.opf", "content.opf" };
     }
 }

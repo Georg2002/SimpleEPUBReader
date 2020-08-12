@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -10,47 +11,103 @@ namespace EPUBParser
         File, Folder
     }
 
-    public class ZipEntry
+    public class ZipEntry : IBaseFile
     {
-        public string Name;
-        public string FullName;
+        public string Name { get; set; }
+        public string FullName { get; set; }
         public byte[] Content;
-        public List<ZipEntry> Subentries;
-        public ZipEntryType EntryType;
-
-        public ZipEntry()
-        {
-            Subentries = new List<ZipEntry>();
-        }
 
         public override string ToString()
         {
             return FullName;
         }
 
-        public static ZipEntry GetEntry(List<ZipEntry> Files, string FullName)
+        public static ZipEntry GetEntryByPath(List<ZipEntry> files, string RelativePath, ZipEntry RelativeTo)
         {
-            return GetEntry(Files, FullName.Split('/'), 0);
-        }
-
-        private static ZipEntry GetEntry(List<ZipEntry> Files, string[] FullName, int Step)
-        {         
-            ZipEntry Entry = Files.FirstOrDefault(a => a.Name == FullName[Step]);
-            if (Entry == null)
+            if (files == null)
             {
+                Logger.Report(string.Format("file list was null, can't search for \"{0}}\"", RelativePath), LogType.Error);
                 return null;
             }
-            else
+            if (RelativeTo == null)
             {
-                if (Step == FullName.Length -1)
+                Logger.Report(string.Format("base entry for relative path is null, can't search for \"{0}\"", RelativePath), LogType.Error);
+                return null;
+            }
+
+            var RelativeBaseParts = RelativeTo.FullName.Split('/');
+            List<string> PathParts = RelativeBaseParts.Take(RelativeBaseParts.Length - 1).ToList();
+            var RelativeParts = RelativePath.Split('/');
+            int Index = PathParts.Count - 1;
+            foreach (var RelativePart in RelativeParts)
+            {
+                if (RelativePart == "..")
                 {
-                    return Entry;
+                    if (Index < 0)
+                    {
+                        Logger.Report(string.Format("relative path \"{0}\"} invalid, can't find file", RelativePart), LogType.Error);
+                        return null;
+                    }
+                    else
+                    {
+                        PathParts.RemoveAt(Index);
+                        Index--;
+                    }                   
                 }
                 else
                 {
-                    return GetEntry(Entry.Subentries, FullName, ++Step);
+                    PathParts.Add(RelativePart);
+                    Index++;
                 }
             }
+
+            string Path = "";
+            for (int i = 0; i < PathParts.Count; i++)
+            {
+                var Part = PathParts[i];
+                if (i != 0)
+                {
+                    Path += "/";
+                }
+                Path += Part;
+            }
+
+            ZipEntry Result = GetEntryByPath(files, Path);
+            if (Result == null)
+            {
+                Logger.Report(string.Format("file \"{0}\" not found", RelativePath), LogType.Error);
+            }
+            return Result;
+        }
+
+        public static ZipEntry GetEntryByPath(List<ZipEntry> files, string path)
+        {
+            if (files == null)
+            {
+                Logger.Report(string.Format("file list was null, can't search for \"{0}}\"", path), LogType.Error);
+                return null;
+            }
+            var Result = files.FirstOrDefault(a => a.FullName == path);
+            if (Result == null)
+            {
+                Logger.Report(string.Format("file \"{0}\" not found", path), LogType.Error);
+            }
+            return Result;
+        }
+
+        public static ZipEntry GetEntryByName(List<ZipEntry> files, string name, bool NoError = false)
+        {
+            if (files == null)
+            {
+                Logger.Report(string.Format("file list was null, can't search for \"{0}}\"", name), LogType.Error);
+                return null;
+            }
+            var Result = files.FirstOrDefault(a => a.Name == name);
+            if (Result == null && !NoError)
+            {
+                Logger.Report(string.Format("file \"{0}\" not found", name), LogType.Error);
+            }
+            return Result;
         }
     }
 }

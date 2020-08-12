@@ -35,15 +35,17 @@ namespace EPUBParser
                                     {
                                         Logger.Report(string.Format("Reading file {0}...", entry.FullName), LogType.Info);
                                         var NewEntry = new ZipEntry
-                                        {
-                                            EntryType = ZipEntryType.File,
+                                        {                                            
                                             Name = entry.Name,
                                             FullName = entry.FullName
                                         };
-                                        int Length = (int)stream.Length;
-                                        NewEntry.Content = new byte[Length];
-                                        stream.Read(NewEntry.Content, 0, Length);
-                                        AddFileWithFolders(Files, NewEntry);
+
+                                        using (var MemoryStream = new MemoryStream())
+                                        {
+                                            stream.CopyTo(MemoryStream);
+                                            NewEntry.Content = MemoryStream.ToArray();
+                                        }
+                                        Files.Add(NewEntry);
                                     }
                                 }
                                 catch (Exception ex)
@@ -70,50 +72,6 @@ namespace EPUBParser
                 return Files;
             }
             return Files;
-        }
-
-        private static void AddFileWithFolders(List<ZipEntry> Files, ZipEntry NewEntry)
-        {
-            //"Testsubfolder/Test2.txt"
-            //"Test2.txt"
-            if (NewEntry.Name != NewEntry.FullName)
-            {
-                string[] FolderTree = NewEntry.FullName.Split('/');
-                bool Missing = false;
-                string FullName = "";
-                List<ZipEntry> LastFolderEntries = Files;
-                for (int i = 0; i < FolderTree.Length - 1; i++)
-                {
-                    string Folder = FolderTree[i];
-                    FullName += Folder;
-                    ZipEntry NewFolder = null;
-                    if (Missing || !LastFolderEntries.Exists(a => a.Name == Folder))
-                    {
-                        Missing = true;
-                        NewFolder = new ZipEntry
-                        {
-                            EntryType = ZipEntryType.Folder,
-                            Name = Folder,
-                            FullName = FullName
-                        };
-                        LastFolderEntries.Add(NewFolder);
-                    }
-                    if (Missing)
-                    {
-                        LastFolderEntries = NewFolder.Subentries;
-                    }
-                    else
-                    {
-                        LastFolderEntries = LastFolderEntries.First(a => a.Name == Folder).Subentries;
-                    }
-                    FullName += "/";
-                }
-                LastFolderEntries.Add(NewEntry);
-            }
-            else
-            {
-                Files.Add(NewEntry);
-            }
-        }
+        }     
     }
 }

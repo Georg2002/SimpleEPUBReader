@@ -27,5 +27,10 @@ namespace UnitTests
         {
             return Path.Combine(TestHTMLFolder1, FileNumber.ToString("D4") + ".xhtml");
         }
+
+        public static void WriteLogToFile()
+        {
+            File.WriteAllLines(@"..\..\..\TestLog.txt", EPUBReader.Logger.Log);
+        }
     }
 }

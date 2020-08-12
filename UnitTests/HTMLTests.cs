@@ -16,7 +16,7 @@ namespace UnitTests
         public void SimpleParseTest()
         {
             var HTMLFilePath = TestResources.GetTestHTMLFile(30);
-            var Text = new TextFile(File.ReadAllBytes(HTMLFilePath));
+            var Text = new TextFile( new ZipEntry() { Content = File.ReadAllBytes(HTMLFilePath) });
             var Doc = HTMLParser.Parse(Text);
             Assert.IsTrue(Doc.DocumentNode.Descendants().Count() > 10);
         }

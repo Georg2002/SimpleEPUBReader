@@ -53,7 +53,7 @@ namespace UnitTests
                TestResources.TestEpubExtracted2, "content.opf"),
                 Title = "[森岡浩之] 星界の断章1",
                 Creator = "森岡浩之",
-                Language="ja",
+                Language = "ja",
                 Vertical = true,
                 RightToLeft = true,
                 ManifestItems = 49,
@@ -82,8 +82,11 @@ namespace UnitTests
 
         private void PackageInfoTester(PackageInfoTestcase TestCase)
         {
-            var TextFile = new TextFile(File.ReadAllBytes(TestCase.FilePath));
-            TextFile.Name = "TestTextFile";
+            var TextFile = new TextFile(new ZipEntry()
+            {
+                Content = File.ReadAllBytes(TestCase.FilePath),
+                Name = "TestTextFile"
+            });
             var Info = new PackageInfo(TextFile);
             Assert.IsTrue(Info.Title == TestCase.Title);
             Assert.IsTrue(Info.Creator == TestCase.Creator);
