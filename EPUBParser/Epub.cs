@@ -24,6 +24,7 @@ namespace EPUBParser
             Pages = new List<EpubPage>();
             Images = new List<ImageFile>();
             Settings = new BookSettings();
+            Logger.Report(string.Format("parsing epub file at \"{0}\"", FilePath), LogType.Info);
 
             if (!File.Exists(FilePath))
             {               
@@ -40,6 +41,7 @@ namespace EPUBParser
                 toc = new TocInfo(null);
                 Settings.StandardRTL = Package.RightToLeft;
                 Settings.StandardVertical = Package.Vertical;
+                Settings.Title = Package.Title;
             }
 
             Package = new PackageInfo(new TextFile(PackageFile));
@@ -101,5 +103,6 @@ namespace EPUBParser
     {
         public bool StandardVertical = false;
         public bool StandardRTL = false;
+        public string Title;
     }
 }

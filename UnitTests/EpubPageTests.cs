@@ -44,31 +44,31 @@ namespace UnitTests
             //威嚇<rt>いかく</rt></ruby>です。従わねば刀を抜きます」</p>
             var LastLine = Page.Lines.Last();
             Assert.IsTrue(FirstLine.Parts.Count == 3);
-            Assert.IsTrue(LinePartCorrect(FirstLine.Parts[0],
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[0],
                 "「問二。食べてみるか、というその質問から察するに、これは", ""));
-            Assert.IsTrue(LinePartCorrect(FirstLine.Parts[1],
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[1],
                 "食物", "しよくもつ"));
-            Assert.IsTrue(LinePartCorrect(FirstLine.Parts[2],
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[2],
                 "なのか？」", ""));
-            Assert.IsTrue(FirstLine.Parts[0].Format == TextFormat.none);
-            Assert.IsTrue(FirstLine.Parts[1].Format == TextFormat.none);
+            Assert.IsTrue(FirstLine.Parts[0].Type == LinePartTypes.normal);
+            Assert.IsTrue(FirstLine.Parts[1].Type == LinePartTypes.normal);
 
             Assert.IsTrue(LastLine.Parts.Count == 3);
             Assert.IsTrue(LastLine.Parts[0].Text ==
                 "「手を止めなさい、火野神作。これは警告ではなく");
 
-            Assert.IsTrue(Page.Lines.Exists(a => a.Parts.Exists(b => b.Format == TextFormat.sesame)));
+            Assert.IsTrue(Page.Lines.Exists(a => a.Parts.Exists(b => b.Type == LinePartTypes.sesame)));
         }
 
-        public bool LinePartCorrect(LinePart Part, string Text, string Ruby)
+        public bool TextLinePartCorrect(LinePart Part, string Text, string Ruby)
         {
-            return Part.Text == Text && Part.Ruby == Ruby;
+            var TextPart = (TextLinePart)Part;
+            return TextPart.Text == Text && TextPart.Ruby == Ruby;
         }
 
         [TestMethod]
         public void PageWithImageTest()
         {
-
             var Path = TestResources.GetTestHTMLFile(31);
             var Text = new TextFile(new ZipEntry() { Content = File.ReadAllBytes(Path) })
             {
@@ -78,8 +78,7 @@ namespace UnitTests
             Assert.IsTrue(Page.Lines.Count == 1);
             Assert.IsTrue(Page.Lines[0].Parts.Count == 1);
             var ImageSrcPart = Page.Lines[0].Parts[0];
-            Assert.IsTrue(ImageSrcPart.Format == TextFormat.image);
-            Assert.IsTrue(ImageSrcPart.Ruby == "");
+            Assert.IsTrue(ImageSrcPart.Type == LinePartTypes.image);         
             Assert.IsTrue(ImageSrcPart.Text == "../images/0018.jpg");
         }
     }

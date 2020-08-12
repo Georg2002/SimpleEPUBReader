@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,5 +16,12 @@ namespace EPUBParser
         }
 
         public static string[] PackageFileNames = new string[] { "package.opf", "content.opf" };
+
+        public static string[] PossibleImageSourceNames = new string[] { "src", "href", "xlink:href" };
+
+        public static string[] IgnoreableSpanClassParts = new string[]
+        {
+            "pcalibre1"
+        };
     }
 }

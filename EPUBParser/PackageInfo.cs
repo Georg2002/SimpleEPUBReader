@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -39,97 +40,22 @@ namespace EPUBParser
 
             if (MetadataNode != null)
             {
-                Title = HTMLParser.SafeValueGet(MetadataNode, "dc:title");
-                Creator = HTMLParser.SafeValueGet(MetadataNode, "dc:creator");
-                Language = HTMLParser.SafeValueGet(MetadataNode, "dc:language");
+                Title = HTMLParser.SafeNodeTextGet(MetadataNode, "dc:title");
+                Creator = HTMLParser.SafeNodeTextGet(MetadataNode, "dc:creator");
+                Language = HTMLParser.SafeNodeTextGet(MetadataNode, "dc:language");
                 Vertical = GlobalSettings.IsVerticalLanguage(Language);
             }
 
-            var ManifestNode = HTMLParser.SafeNodeGet(PackageNode, "manifest");
-            if (ManifestNode != null)
-            {
-                var ItemNodes = ManifestNode.Elements("item");
-                if (ItemNodes == null || ItemNodes.Count() == 0)
-                {
-                    Logger.Report("no manifest item nodes found", LogType.Error);
-                }
-                else
-                {
-                    foreach (var ItemNode in ItemNodes)
-                    {
-                        var Item = new ManifestItem
-                        {
-                            Id = HTMLParser.SafeAttributeGet(ItemNode, "id"),
-                            Path = HTMLParser.SafeAttributeGet(ItemNode, "href")
-                        };
-                        var MediaTypeString = HTMLParser.SafeAttributeGet(ItemNode, "media-type");
-                        switch (MediaTypeString)
-                        {
-                            case "application/xhtml+xml":
-                                Item.Type = MediaType.xhtml;
-                                break;
-                            case "application/x-dtbncx+xml":
-                                Item.Type = MediaType.toc;
-                                break;
-                            case "text/css":
-                                Item.Type = MediaType.css;
-                                break;
-                            case "image/jpeg":
-                                Item.Type = MediaType.image;
-                                break;
-                            case "":
-                                Logger.Report("Media type missing", LogType.Error);
-                                Item.Type = MediaType.empty;
-                                break;
-                            case null:
-                                Logger.Report("Media type missing" + MediaTypeString, LogType.Error);
-                                Item.Type = MediaType.empty;
-                                break;
-                            default:
-                                Logger.Report("unknown media type: " + MediaTypeString, LogType.Error);
-                                Item.Type = MediaType.unknown;
-                                break;
-                        }
-                        Manifest.Add(Item);
-                    }
-                }
-            }
+            SetManifest(PackageNode);
+            SetSpine(PackageNode);
+            SetGuide(PackageNode);
 
-            var SpineNode = HTMLParser.SafeNodeGet(PackageNode, "spine");
-            if (SpineNode != null)
-            {
-                RightToLeft = HTMLParser.SafeAttributeGet(SpineNode, "page-progression-direction") == "rtl";
-                var SpineNodes = SpineNode.Elements("itemref");
-                if (SpineNodes == null || SpineNodes.Count() == 0)
-                {
-                    Logger.Report("no spine item nodes found", LogType.Error);
-                }
-                else
-                {
-                    foreach (var Node in SpineNodes)
-                    {
-                        var NewItem = new SpineItem
-                        {
-                            Id = HTMLParser.SafeAttributeGet(Node, "idref")
-                        };
-                        string LinearString = HTMLParser.SafeAttributeGet(Node, "linear", true);
-                        if (string.IsNullOrEmpty(LinearString))
-                        {
-                            NewItem.Linear = true;
-                        }
-                        else
-                        {
-                            NewItem.Linear = HTMLParser.SafeAttributeGet(Node, "linear") == "yes";
-                        }
-                        Spine.Add(NewItem);
-                    }
-                    if (!Spine.First().Linear)
-                    {
-                        Spine = Spine.OrderBy(a => a.Id).ToList();
-                    }
-                }
-            }
 
+
+        }
+
+        private void SetGuide(HtmlNode PackageNode)
+        {
             var GuideNode = HTMLParser.SafeNodeGet(PackageNode, "guide");
             if (GuideNode != null)
             {
@@ -180,6 +106,97 @@ namespace EPUBParser
                                 break;
                         }
                         Guide.Add(NewReference);
+                    }
+                }
+            }
+        }
+
+        private void SetSpine(HtmlNode PackageNode)
+        {
+            var SpineNode = HTMLParser.SafeNodeGet(PackageNode, "spine");
+            if (SpineNode != null)
+            {
+                RightToLeft = HTMLParser.SafeAttributeGet(SpineNode, "page-progression-direction") == "rtl";
+                var SpineNodes = SpineNode.Elements("itemref");
+                if (SpineNodes == null || SpineNodes.Count() == 0)
+                {
+                    Logger.Report("no spine item nodes found", LogType.Error);
+                }
+                else
+                {
+                    foreach (var Node in SpineNodes)
+                    {
+                        var NewItem = new SpineItem
+                        {
+                            Id = HTMLParser.SafeAttributeGet(Node, "idref")
+                        };
+                        string LinearString = HTMLParser.SafeAttributeGet(Node, "linear", true);
+                        if (string.IsNullOrEmpty(LinearString))
+                        {
+                            NewItem.Linear = true;
+                        }
+                        else
+                        {
+                            NewItem.Linear = HTMLParser.SafeAttributeGet(Node, "linear") == "yes";
+                        }
+                        Spine.Add(NewItem);
+                    }
+                    if (!Spine.First().Linear)
+                    {
+                        Spine = Spine.OrderBy(a => a.Id).ToList();
+                    }
+                }
+            }
+        }
+
+        private void SetManifest(HtmlNode PackageNode)
+        {
+            var ManifestNode = HTMLParser.SafeNodeGet(PackageNode, "manifest");
+            if (ManifestNode != null)
+            {
+                var ItemNodes = ManifestNode.Elements("item");
+                if (ItemNodes == null || ItemNodes.Count() == 0)
+                {
+                    Logger.Report("no manifest item nodes found", LogType.Error);
+                }
+                else
+                {
+                    foreach (var ItemNode in ItemNodes)
+                    {
+                        var Item = new ManifestItem
+                        {
+                            Id = HTMLParser.SafeAttributeGet(ItemNode, "id"),
+                            Path = HTMLParser.SafeAttributeGet(ItemNode, "href")
+                        };
+                        var MediaTypeString = HTMLParser.SafeAttributeGet(ItemNode, "media-type");
+                        switch (MediaTypeString)
+                        {
+                            case "application/xhtml+xml":
+                                Item.Type = MediaType.xhtml;
+                                break;
+                            case "application/x-dtbncx+xml":
+                                Item.Type = MediaType.toc;
+                                break;
+                            case "text/css":
+                                Item.Type = MediaType.css;
+                                break;
+                            case "image/jpeg":
+                                Item.Type = MediaType.image;
+                                break;
+                            case "":
+                                Logger.Report("Media type missing", LogType.Error);
+                                Item.Type = MediaType.empty;
+                                break;
+                            case null:
+                                Logger.Report("Media type missing" + MediaTypeString, LogType.Error);
+                                Item.Type = MediaType.empty;
+                                break;
+                            default:
+                                Logger.Report("unknown media type: " + MediaTypeString, LogType.Error);
+                                Item.Type = MediaType.unknown;
+                                break;
+                        }
+                        Manifest.Add(Item);
                     }
                 }
             }

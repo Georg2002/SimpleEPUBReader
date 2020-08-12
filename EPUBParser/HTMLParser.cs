@@ -19,7 +19,7 @@ namespace EPUBParser
                 return Doc;
             }
 
-            Logger.Report(string.Format("Parsing html of file {0}", File.Name), LogType.Info); 
+            Logger.Report(string.Format("Parsing html of file \"{0}\"", File.Name), LogType.Info); 
 
             try
             {
@@ -58,7 +58,7 @@ namespace EPUBParser
             }
         }
 
-        internal static string SafeValueGet(HtmlNode ParentNode, string NodeName)
+        internal static string SafeNodeTextGet(HtmlNode ParentNode, string NodeName)
         {
             var Node = SafeNodeGet(ParentNode, NodeName);
             if (Node == null)

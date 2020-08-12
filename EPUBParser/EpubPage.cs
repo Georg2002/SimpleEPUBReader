@@ -2,6 +2,7 @@
 using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,6 @@ namespace EPUBParser
         public string Language;
         public bool Vertical;
         public List<EpubLine> Lines;
-        private BookSettings settings;
 
         public string Name { get; set; }
         public string FullName { get; set; }
@@ -27,52 +27,47 @@ namespace EPUBParser
         public EpubPage(TextFile File, BookSettings Settings)
         {
             Lines = new List<EpubLine>();
-            Logger.Report(string.Format("Parsing page {0}", File.Name), LogType.Info);
+            Name = File.Name;
+            FullName = File.FullName;
+            Logger.Report(string.Format("Parsing page \"{0}\"", File.Name), LogType.Info);
             var doc = HTMLParser.Parse(File);
 
-            var htmlNode = doc.DocumentNode.Element("html");
+            var htmlNode = HTMLParser.SafeNodeGet(doc.DocumentNode, "html");
             if (htmlNode == null)
             {
-                Logger.Report("html node not found, stopping parsing", LogType.Error);
+                Logger.Report("stopping parsing", LogType.Error);
                 return;
             }
 
-            var LangAttr = htmlNode.Attributes.FirstOrDefault(a => a.Name == "lang");
-            if (LangAttr == null)
+            var LangAttr = HTMLParser.SafeAttributeGet(htmlNode, "lang");
+            if (LangAttr == "")
             {
-                Logger.Report("language not found, orientation set to standard", LogType.Error);
+                Logger.Report("orientation set to standard", LogType.Error);
                 Vertical = Settings.StandardVertical;
             }
             else
             {
-                Language = LangAttr.Value;
+                Language = LangAttr;
                 Vertical = GlobalSettings.IsVerticalLanguage(Language);
             }
 
-            var HeadNode = htmlNode.Element("head");
-            if (HeadNode == null)
+            var HeadNode = HTMLParser.SafeNodeGet(htmlNode, "head");
+            if (HeadNode != null)
             {
-                Logger.Report("head node not found, title not set", LogType.Error);
-            }
-            else
-            {
-                var TitleNode = HeadNode.Element("title");
-                if (TitleNode == null)
+                var ParsedTitle = HTMLParser.SafeNodeTextGet(HeadNode, "title");
+                if (ParsedTitle == "")
                 {
-                    Logger.Report("title node not found, title not set", LogType.Error);
+                    Logger.Report("title set to standard", LogType.Error);
+                    Title = Settings.Title;
                 }
                 else
                 {
-                    Title = TitleNode.InnerText;
+                    Title = ParsedTitle;
                 }
             }
 
-            var BodyNode = htmlNode.Element("body");
-            if (BodyNode == null)
-            {
-                Logger.Report("body node not found, lines not set", LogType.Error);
-            }
-            else
+            var BodyNode = HTMLParser.SafeNodeGet(htmlNode, "body");
+            if (BodyNode != null)
             {
                 foreach (var Node in BodyNode.ChildNodes)
                 {
@@ -110,17 +105,7 @@ namespace EPUBParser
                 Logger.Report("node has value null", LogType.Error);
                 return;
             }
-            if (HtmlLine.Name == "p")
-            {
-                foreach (var Node in HtmlLine.ChildNodes)
-                {
-                    AddAppropriatePart(Node);
-                }
-            }
-            else
-            {
-                AddAppropriatePart(HtmlLine);
-            }
+            AddAppropriatePart(HtmlLine);
         }
 
         private void AddAppropriatePart(HtmlNode Node)
@@ -128,77 +113,131 @@ namespace EPUBParser
             switch (Node.Name)
             {
                 case "#text":
-                    Parts.Add(new LinePart(Node.InnerHtml, ""));
+                    Parts.Add(new TextLinePart(Node.InnerHtml, ""));
                     break;
+
                 case "ruby":
                     var Text = Node.ChildNodes[0].InnerHtml;
                     var Ruby = Node.ChildNodes[1].InnerHtml;
-                    Parts.Add(new LinePart(Text, Ruby));
+                    Parts.Add(new TextLinePart(Text, Ruby));
                     break;
                 case "br":
-                    Parts.Add(new LinePart("", ""));
+                    Parts.Add(new TextLinePart("", ""));
                     break;
                 case "span":
-                    var NewPart = GetSpanElement(Node);
-                    Parts.Add(NewPart);
+                    AddSpanElement(Node);                   
+                    break;
+                case "p":
+                case "svg":
+                case "div":
+                    foreach (var ChildNode in Node.ChildNodes)
+                    {
+                        AddAppropriatePart(ChildNode);
+                    }
+                    break;
+                case "image":
+                case "img":
+                    string Link = "";
+                    foreach (var ImageSourcAttribute in GlobalSettings.PossibleImageSourceNames)
+                    {
+                        Link = HTMLParser.SafeAttributeGet(Node, ImageSourcAttribute, true);
+                        if (Link != "")
+                            break;
+                    }
+                    if (Link == "")
+                    {
+                        Logger.Report("can't find link to image: " + Node.OuterHtml, LogType.Error);
+                        break;
+                    }
+                    Parts.Add(new ImageLinePart(Link));
+
                     break;
                 default:
-                    Logger.Report(string.Format("unknown element in line \"{0}\": \"{1}\""
-                        , Node.ParentNode.OuterHtml, Node.Name), LogType.Error);
+                    Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\" "
+                        , Node.OuterHtml, Node.ParentNode.Name, Node.Name), LogType.Error);
                     break;
             }
         }
 
-        private LinePart GetSpanElement(HtmlNode node)
+        private void AddSpanElement(HtmlNode node)
         {
-            var NewPart = new LinePart("ERROR", "");
-            var classAttribute = node.Attributes.FirstOrDefault(a => a.Name == "class");
-            if (classAttribute == null)
+            var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
+
+            switch (classAttribute)
             {
-                Logger.Report("span is missing class attribute: " + node.OuterHtml, LogType.Error);
-            }
-            else
-            {
-                switch (classAttribute.Value)
-                {
-                    case "sesame":
-                        NewPart.Text = node.ChildNodes[0].InnerHtml;
-                        NewPart.Format = TextFormat.sesame;
-                        break;
-                    case "img":
-                        var SourceAttribute = node.ChildNodes[0].Attributes.FirstOrDefault(a => a.Name == "src");
-                        if (SourceAttribute == null)
+                case "sesame":
+                    var NewSesamePart = new TextLinePart
+                    {
+                        Text = node.ChildNodes[0].InnerHtml,
+                        Type = LinePartTypes.sesame
+                    };
+                    Parts.Add( NewSesamePart);
+                    return;
+                case "img":
+                    foreach (var ChildNode in node.ChildNodes)
+                    {
+                        AddAppropriatePart(ChildNode);
+                    }
+                    return;
+                default:
+
+                    if (classAttribute != "")
+                    {
+                        bool Ignore = GlobalSettings.IgnoreableSpanClassParts.Any(a => classAttribute.Contains(a));
+                        if (!Ignore)
                         {
-                            Logger.Report(string.Format("image source attribute not found in \"{0}\"",
-                                node.OuterHtml), LogType.Error);
+                            Logger.Report(string.Format("unknown span class \"{0}\"," +
+                                " trying to parse inner HTML...", classAttribute), LogType.Error);
                         }
-                        else
-                        {
-                            NewPart.Text = SourceAttribute.Value;
-                            NewPart.Format = TextFormat.image;
-                        }
-                        break;
-                    default:
-                        Logger.Report("unknown span class: " + classAttribute.Value, LogType.Error);
-                        break;
-                }
+                    }
+                    foreach (var ChildNode in node.ChildNodes)
+                    {
+                        AddAppropriatePart(ChildNode);
+                    }
+                    return;
             }
-            return NewPart;
         }
     }
+
+    public class TextLinePart : LinePart
+    {
+        public string Ruby;
+
+        public TextLinePart(string Text, string Ruby)
+        {
+            this.Text = Text;
+            this.Ruby = Ruby;
+            Type = LinePartTypes.normal;
+        }
+
+
+        public TextLinePart()
+        {
+            Type = LinePartTypes.normal;
+        }
+    }
+
+    public class ImageLinePart : LinePart
+    {
+        public ZipEntry Image;
+
+        public ImageLinePart(string Path)
+        {
+            this.Text = Path;
+            this.Type = LinePartTypes.image;
+        }
+
+        public void SetImage(List<ZipEntry> Entries)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     public class LinePart
     {
         public string Text;
-        public string Ruby;
-        public TextFormat Format;
-
-        public LinePart(string Text, string Ruby)
-        {
-            this.Text = Text;
-            this.Ruby = Ruby;
-            Format = TextFormat.none;
-        }
+        public LinePartTypes Type;
 
         public override string ToString()
         {
@@ -206,8 +245,8 @@ namespace EPUBParser
         }
     }
 
-    public enum TextFormat
+    public enum LinePartTypes
     {
-        none, sesame, image
+        normal, sesame, image
     }
 }
