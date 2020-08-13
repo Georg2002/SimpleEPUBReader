@@ -14,8 +14,11 @@ namespace UnitTests
         public const string TestImageName = @"TestPicture.png";
         public const string TestEpub1 = @"Index4.epub";
         public const string TestEpub2 = @"星界の紋章第一巻.epub";
+        public const string TestEpub3 = @"DanMachi.epub";
         public const string TestEpubExtracted1 = @"Index4";
         public const string TestEpubExtracted2 = @"星界の紋章第一巻";
+        public const string TestEpubExtracted3 = @"DanMachi";
+
         public static string TestHTMLFolder1
         {
             get

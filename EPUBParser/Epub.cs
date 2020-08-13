@@ -16,7 +16,7 @@ namespace EPUBParser
         public List<ImageFile> Images;
         public PackageInfo Package;
         public TocInfo toc;
-        public BookSettings Settings;
+        public BookSettings Settings;     
 
         public Epub(string FilePath)
         {
@@ -27,7 +27,7 @@ namespace EPUBParser
             Logger.Report(string.Format("parsing epub file at \"{0}\"", FilePath), LogType.Info);
 
             if (!File.Exists(FilePath))
-            {               
+            {
                 Logger.Report(string.Format("file missing: \"{0}\"", FilePath), LogType.Error);
                 return;
             }
@@ -39,12 +39,14 @@ namespace EPUBParser
                 Logger.Report("Package file could not be found", LogType.Error);
                 Package = new PackageInfo(null);
                 toc = new TocInfo(null);
-                Settings.StandardRTL = Package.RightToLeft;
-                Settings.StandardVertical = Package.Vertical;
-                Settings.Title = Package.Title;
             }
 
             Package = new PackageInfo(new TextFile(PackageFile));
+            Settings.StandardRTL = Package.RightToLeft;
+            Settings.StandardVertical = Package.Vertical;
+            Settings.Title = Package.Title;
+            Settings.Language = Package.Language;
+
             if (Package.Manifest.Count > 0)
             {
                 foreach (var ManifestItem in Package.Manifest)
@@ -73,12 +75,12 @@ namespace EPUBParser
                         default:
                             break;
                     }
-                }              
+                }
             }
             if (toc == null)
             {
                 Logger.Report("toc not set", LogType.Error);
-            }          
+            }
         }
 
         private ZipEntry GetFile(List<ZipEntry> Files, string[] PossibleNames)
@@ -94,7 +96,7 @@ namespace EPUBParser
                 {
                     return Result;
                 }
-            }          
+            }
             return null;
         }
     }
@@ -104,5 +106,6 @@ namespace EPUBParser
         public bool StandardVertical = false;
         public bool StandardRTL = false;
         public string Title;
+        public string Language;
     }
 }

@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+  <metadata xmlns:calibre="http://calibre.kovidgoyal.net/2009/metadata" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <meta name="calibre:timestamp" content="2019-08-20T17:00:38.971519+00:00"/>
+    <dc:identifier id="uuid_id" opf:scheme="uuid">03e4b5f6-e92a-4dd2-97ee-5a119b5c549d</dc:identifier>
+    <dc:language>en</dc:language>
+    <dc:title>ダンジョンに出会いを求めるのは間違っているだろうか外伝</dc:title>
+    <dc:creator>Unknown</dc:creator>
+  </metadata>
+  <manifest>
+    <item href="satu002429_split_000.html" id="html4" media-type="application/xhtml+xml"/>
+    <item href="satu002429_split_001.html" id="html3" media-type="application/xhtml+xml"/>
+    <item href="satu002429_split_002.html" id="html2" media-type="application/xhtml+xml"/>
+    <item href="satu002429_split_003.html" id="html1" media-type="application/xhtml+xml"/>
+    <item href="page_styles.css" id="page_css" media-type="text/css"/>
+    <item href="stylesheet.css" id="css" media-type="text/css"/>
+    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="html4"/>
+    <itemref idref="html3"/>
+    <itemref idref="html2"/>
+    <itemref idref="html1"/>
+  </spine>
+  <guide/>
+</package>

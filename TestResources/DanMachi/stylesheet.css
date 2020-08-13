@@ -1,0 +1,50 @@
+.ashi {
+    display: block
+    }
+.calibre {
+    display: block;
+    font-size: 1em;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0 5pt
+    }
+.calibre1 {
+    border-collapse: separate;
+    border-spacing: 2px;
+    display: table;
+    margin-bottom: 0;
+    margin-top: 0;
+    text-indent: 0
+    }
+.calibre2 {
+    display: table-row-group;
+    vertical-align: middle
+    }
+.calibre3 {
+    display: table-row;
+    vertical-align: inherit
+    }
+.calibre4 {
+    display: table-cell;
+    text-align: inherit;
+    vertical-align: inherit;
+    padding: 1px
+    }
+.calibre5 {
+    font-style: italic
+    }
+.calibre6 {
+    display: block;
+    margin: 1em 0
+    }
+.calibre7 {
+    height: auto;
+    width: auto
+    }
+.calibre8 {
+    color: gray;
+    display: block;
+    height: 2px;
+    margin: 0.5em auto;
+    border: currentColor inset 1px
+    }

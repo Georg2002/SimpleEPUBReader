@@ -42,8 +42,9 @@ namespace EPUBParser
             var LangAttr = HTMLParser.SafeAttributeGet(htmlNode, "lang");
             if (LangAttr == "")
             {
-                Logger.Report("orientation set to standard", LogType.Error);
+                Logger.Report("language not found, set to standard", LogType.Info);
                 Vertical = Settings.StandardVertical;
+                Language = Settings.Language;
             }
             else
             {
@@ -57,7 +58,7 @@ namespace EPUBParser
                 var ParsedTitle = HTMLParser.SafeNodeTextGet(HeadNode, "title");
                 if (ParsedTitle == "")
                 {
-                    Logger.Report("title set to standard", LogType.Error);
+                    Logger.Report("title not found, set to standard", LogType.Info);
                     Title = Settings.Title;
                 }
                 else
@@ -73,7 +74,11 @@ namespace EPUBParser
                 {
                     if (Node.Name != "#text")
                     {
-                        Lines.Add(new EpubLine(Node));
+                        var NewLine = new EpubLine(Node);
+                        if (NewLine.Parts.Count > 0)
+                        {
+                            Lines.Add(new EpubLine(Node));
+                        }
                     }
                 }
             }
@@ -113,9 +118,12 @@ namespace EPUBParser
             switch (Node.Name)
             {
                 case "#text":
+                case "nav":
                     Parts.Add(new TextLinePart(Node.InnerHtml, ""));
                     break;
-
+                case "hr":
+                    Parts.Add(new SeparatorLinePart());
+                    break;
                 case "ruby":
                     var Text = Node.ChildNodes[0].InnerHtml;
                     var Ruby = Node.ChildNodes[1].InnerHtml;
@@ -125,11 +133,18 @@ namespace EPUBParser
                     Parts.Add(new TextLinePart("", ""));
                     break;
                 case "span":
-                    AddSpanElement(Node);                   
+                    AddSpanElement(Node);
+                    break;
+                case "a":
+                    var Ref = HTMLParser.SafeAttributeGet(Node, "href");
+                    if (Ref != "")
+                    {
+                        Parts.Add(new LinkLinePart(Node.InnerText, Ref));
+                    }
                     break;
                 case "p":
                 case "svg":
-                case "div":
+                case "div":               
                     foreach (var ChildNode in Node.ChildNodes)
                     {
                         AddAppropriatePart(ChildNode);
@@ -150,11 +165,15 @@ namespace EPUBParser
                         break;
                     }
                     Parts.Add(new ImageLinePart(Link));
-
                     break;
                 default:
                     Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\" "
                         , Node.OuterHtml, Node.ParentNode.Name, Node.Name), LogType.Error);
+                    Logger.Report("trying to force parse...", LogType.Info);
+                    foreach (var ChildNode in Node.ChildNodes)
+                    {
+                        AddAppropriatePart(ChildNode);
+                    }
                     break;
             }
         }
@@ -171,7 +190,7 @@ namespace EPUBParser
                         Text = node.ChildNodes[0].InnerHtml,
                         Type = LinePartTypes.sesame
                     };
-                    Parts.Add( NewSesamePart);
+                    Parts.Add(NewSesamePart);
                     return;
                 case "img":
                     foreach (var ChildNode in node.ChildNodes)
@@ -199,6 +218,26 @@ namespace EPUBParser
         }
     }
 
+    public class SeparatorLinePart : LinePart
+    {
+        public SeparatorLinePart()
+        {
+            this.Type = LinePartTypes.separator;
+        }
+    }
+
+    public class LinkLinePart :LinePart
+    {
+        public string Link;
+
+        public LinkLinePart(string Text, string Link)
+        {
+            this.Text = Text;
+            this.Link = Link;
+            this.Type = LinePartTypes.link;
+        }
+    }
+
     public class TextLinePart : LinePart
     {
         public string Ruby;
@@ -209,7 +248,6 @@ namespace EPUBParser
             this.Ruby = Ruby;
             Type = LinePartTypes.normal;
         }
-
 
         public TextLinePart()
         {
@@ -247,6 +285,6 @@ namespace EPUBParser
 
     public enum LinePartTypes
     {
-        normal, sesame, image
+        normal, sesame, image, link, separator
     }
 }

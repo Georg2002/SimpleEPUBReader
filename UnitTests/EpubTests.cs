@@ -21,7 +21,11 @@ namespace UnitTests
                 Pages = 46,
                 Images = 22,
                 Chapters = 15,
-                MaxLogLength = 200
+                MaxLogLength = 200,
+                GuidCount = 3,
+                Title = "とある魔術の禁書目録４",
+                RTL = true,
+                Vertical = true
             };
             EpubTester(TestCase);
         }
@@ -35,7 +39,28 @@ namespace UnitTests
                 Pages = 38,
                 Images = 8,
                 Chapters = 14,
-                MaxLogLength = 200
+                MaxLogLength = 200,
+                GuidCount = 4,
+                Title = "[森岡浩之] 星界の断章1",
+                 RTL = true,
+                Vertical = true
+            };
+            EpubTester(TestCase);
+        }
+
+        [TestMethod]
+        public void SimpleEpubTest3()
+        {
+            var TestCase = new TestCase()
+            {
+                FilePath = Path.Combine(TestResources.TestFolderPath, TestResources.TestEpub3),
+                Pages = 4,
+                Images = 0,
+                Chapters = 9,
+                MaxLogLength = 200,
+                Title = "ダンジョンに出会いを求めるのは間違っているだろうか外伝",
+                RTL = true,
+                Vertical = true
             };
             EpubTester(TestCase);
         }
@@ -47,11 +72,15 @@ namespace UnitTests
             var Book = new Epub(FilePath);
             TestResources.WriteLogToFile();
             Assert.IsTrue(Book.Pages.Count == test.Pages);
-            Assert.IsFalse(string.IsNullOrEmpty(Book.Pages[0].Name) );
+            Assert.IsFalse(string.IsNullOrEmpty(Book.Pages[0].Name));
             Assert.IsFalse(string.IsNullOrEmpty(Book.Pages[0].FullName));
-            Assert.IsTrue(Book.Package.Guide.Count != 0);
+            Assert.IsTrue(Book.Package.Guide.Count == test.GuidCount);
             Assert.IsTrue(Book.Images.Count == test.Images);
-            Assert.IsTrue(Book.Images[0].ImageData != null);
+            Assert.IsTrue(Book.Settings.Title == test.Title);
+            foreach (var Image in Book.Images)
+            {
+                Assert.IsTrue(Image.ImageData != null);
+            }
             Assert.IsTrue(Book.toc.Chapters.Count == test.Chapters);
             Assert.IsTrue(EPUBReader.Logger.Log.Count < test.MaxLogLength);
         }
@@ -67,6 +96,9 @@ namespace UnitTests
         public int Images;
         //as written in the toc.ncx file
         public int Chapters;
+        public int GuidCount;
         public int MaxLogLength;
+        public bool RTL;
+        public bool Vertical;
     }
 }

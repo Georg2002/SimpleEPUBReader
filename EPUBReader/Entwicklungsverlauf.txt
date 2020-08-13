@@ -24,7 +24,7 @@ Metadaten in einfach verarbeitbare Form umwandeln -> fertig
 			||
 			\/
 
-Bücher-Objekte verlässlich aus .epub-Dateien erstellen(verschiedene Namensstandards beachten!)
+Bücher-Objekte verlässlich aus .epub-Dateien erstellen(verschiedene Namensstandards beachten!) -> fertig
 									
 			||
 			||

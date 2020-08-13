@@ -21,7 +21,7 @@ namespace EPUBParser
 
         public static string[] IgnoreableSpanClassParts = new string[]
         {
-            "pcalibre1"
+            "calibre"
         };
     }
 }
