@@ -1,11 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPUBParser;
-using EPUBReader;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using System.Text;
 
 namespace UnitTests
 {

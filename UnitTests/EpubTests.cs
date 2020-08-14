@@ -67,7 +67,7 @@ namespace UnitTests
 
         private void EpubTester(TestCase test)
         {
-            EPUBReader.Logger.Log.Clear();
+            Logger.Log.Clear();
             var FilePath = test.FilePath;
             var Book = new Epub(FilePath);
             TestResources.WriteLogToFile();
@@ -82,7 +82,7 @@ namespace UnitTests
                 Assert.IsTrue(Image.ImageData != null);
             }
             Assert.IsTrue(Book.toc.Chapters.Count == test.Chapters);
-            Assert.IsTrue(EPUBReader.Logger.Log.Count < test.MaxLogLength);
+            Assert.IsTrue(Logger.Log.Count < test.MaxLogLength);
         }
     }
 

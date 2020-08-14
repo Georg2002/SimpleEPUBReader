@@ -9,7 +9,7 @@ namespace UnitTests
 {
     public static class TestResources
     {
-        public const string TestFolderPath = @"..\..\..\TestResources";
+        public const string TestFolderPath = @"..\..\..\..\TestResources";
         public const string TestZipName = @"Test.zip";
         public const string TestImageName = @"TestPicture.png";
         public const string TestEpub1 = @"Index4.epub";

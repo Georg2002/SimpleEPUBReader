@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPUBParser
+namespace EPUBRenderer
 {
     public static class Logger
     {
-        private static List<string> _Log = new List<string>();
-        public static List<string> Log { get => _Log; set => _Log = value; }
+        public static List<string> Log = new List<string>();
 
         internal static void Report(string Message, LogType type)
         {
@@ -21,7 +20,6 @@ namespace EPUBParser
                 Log = Log.Take(50).ToList();
             }
         }
-    
 
         internal static void Report(Exception exception)
         {

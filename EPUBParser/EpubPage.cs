@@ -121,14 +121,12 @@ namespace EPUBParser
                 case "nav":
                     Parts.Add(new TextLinePart(Node.InnerHtml, ""));
                     break;
-                case "hr":
-                    Parts.Add(new SeparatorLinePart());
-                    break;
                 case "ruby":
                     var Text = Node.ChildNodes[0].InnerHtml;
                     var Ruby = Node.ChildNodes[1].InnerHtml;
                     Parts.Add(new TextLinePart(Text, Ruby));
                     break;
+                case "hr":
                 case "br":
                     Parts.Add(new TextLinePart("", ""));
                     break;
@@ -218,14 +216,6 @@ namespace EPUBParser
         }
     }
 
-    public class SeparatorLinePart : LinePart
-    {
-        public SeparatorLinePart()
-        {
-            this.Type = LinePartTypes.separator;
-        }
-    }
-
     public class LinkLinePart :LinePart
     {
         public string Link;
@@ -285,6 +275,6 @@ namespace EPUBParser
 
     public enum LinePartTypes
     {
-        normal, sesame, image, link, separator
+        normal, sesame, image, link
     }
 }

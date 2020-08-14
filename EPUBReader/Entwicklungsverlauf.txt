@@ -31,7 +31,7 @@ Bücher-Objekte verlässlich aus .epub-Dateien erstellen(verschiedene Namensstan
 			\/
 
 Renderer, muss Text eines Kapitels in Seiten eingeteilt mit Bildern und
-Ruby unabhängig vom Rest der Anwendung in einem Fenster (WPF, WinForms?) darstellen können
+Ruby unabhängig vom Rest der Anwendung in einem WPF-Fenster darstellen können
 			
 			||
 			||
