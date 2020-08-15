@@ -11,9 +11,7 @@ namespace EPUBParser
 {
     public class EpubPage : IBaseFile
     {
-        public string Title;
-        public string Language;
-        public bool Vertical;
+        public EpubSettings PageSettings;
         public List<EpubLine> Lines;
 
         public string Name { get; set; }
@@ -21,11 +19,12 @@ namespace EPUBParser
 
         public override string ToString()
         {
-            return Title;
+            return PageSettings.Title;
         }
 
-        public EpubPage(TextFile File, BookSettings Settings)
+        public EpubPage(TextFile File, EpubSettings Settings)
         {
+            PageSettings = new EpubSettings();
             Lines = new List<EpubLine>();
             Name = File.Name;
             FullName = File.FullName;
@@ -43,13 +42,15 @@ namespace EPUBParser
             if (LangAttr == "")
             {
                 Logger.Report("language not found, set to standard", LogType.Info);
-                Vertical = Settings.StandardVertical;
-                Language = Settings.Language;
+                PageSettings.Language = Settings.Language;
+                PageSettings.Vertical = Settings.Vertical;
+                PageSettings.RTL = Settings.RTL;
             }
             else
             {
-                Language = LangAttr;
-                Vertical = GlobalSettings.IsVerticalLanguage(Language);
+                PageSettings.Language = LangAttr;
+                PageSettings.Vertical = GlobalSettings.IsVerticalLanguage(LangAttr);
+                PageSettings.RTL = GlobalSettings.IsRtLLanguage(LangAttr);
             }
 
             var HeadNode = HTMLParser.SafeNodeGet(htmlNode, "head");
@@ -59,11 +60,11 @@ namespace EPUBParser
                 if (ParsedTitle == "")
                 {
                     Logger.Report("title not found, set to standard", LogType.Info);
-                    Title = Settings.Title;
+                    PageSettings.Title = Settings.Title;
                 }
                 else
                 {
-                    Title = ParsedTitle;
+                    PageSettings.Title = ParsedTitle;
                 }
             }
 
@@ -132,17 +133,11 @@ namespace EPUBParser
                     break;
                 case "span":
                     AddSpanElement(Node);
-                    break;
+                    break;                  
                 case "a":
-                    var Ref = HTMLParser.SafeAttributeGet(Node, "href");
-                    if (Ref != "")
-                    {
-                        Parts.Add(new LinkLinePart(Node.InnerText, Ref));
-                    }
-                    break;
                 case "p":
                 case "svg":
-                case "div":               
+                case "div":
                     foreach (var ChildNode in Node.ChildNodes)
                     {
                         AddAppropriatePart(ChildNode);
@@ -214,19 +209,7 @@ namespace EPUBParser
                     return;
             }
         }
-    }
-
-    public class LinkLinePart :LinePart
-    {
-        public string Link;
-
-        public LinkLinePart(string Text, string Link)
-        {
-            this.Text = Text;
-            this.Link = Link;
-            this.Type = LinePartTypes.link;
-        }
-    }
+    }  
 
     public class TextLinePart : LinePart
     {
@@ -275,6 +258,6 @@ namespace EPUBParser
 
     public enum LinePartTypes
     {
-        normal, sesame, image, link
+        normal, sesame, image
     }
 }

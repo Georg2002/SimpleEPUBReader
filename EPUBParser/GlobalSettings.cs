@@ -10,9 +10,16 @@ namespace EPUBParser
     internal static class GlobalSettings
     {
         public static string[] VerticalLanguages = new string[] { "ja" };
+        public static string[] RtLLanguages = new string[] { "ja" };
+
         public static bool IsVerticalLanguage(string Language)
         {
             return VerticalLanguages.Contains(Language);
+        }
+
+        public static bool IsRtLLanguage(string Language)
+        {
+            return RtLLanguages.Contains(Language);
         }
 
         public static string[] PackageFileNames = new string[] { "package.opf", "content.opf" };

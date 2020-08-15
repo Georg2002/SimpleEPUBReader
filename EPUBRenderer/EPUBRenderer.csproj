@@ -80,6 +80,7 @@
       <DependentUpon>PageRenderer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RenderLinePart.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj">

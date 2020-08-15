@@ -17,8 +17,8 @@ namespace UnitTests
         {
             var TestFile = new TextFile(new ZipEntry() {Name= "FailedTestFile" });        
             //tests fails if throws, so no assert needed
-            var Page = new EpubPage(TestFile, new BookSettings());
-            Assert.IsTrue(string.IsNullOrEmpty(Page.Title));
+            var Page = new EpubPage(TestFile, new EpubSettings());
+            Assert.IsTrue(string.IsNullOrEmpty(Page.PageSettings.Title));
             Assert.IsTrue(Page.Lines.Count == 0);
         }
 
@@ -32,10 +32,12 @@ namespace UnitTests
                 Name = "Testpage1.xhtml"
             });
                             
-            var Page = new EpubPage(Text, new BookSettings());
+            var Page = new EpubPage(Text, new EpubSettings());
 
-            Assert.IsTrue(Page.Title == "とある魔術の禁書目録４");
-            Assert.IsTrue(Page.Language == "ja");
+            Assert.IsTrue(Page.PageSettings.Title == "とある魔術の禁書目録４");
+            Assert.IsTrue(Page.PageSettings.Language == "ja");
+            Assert.IsTrue(Page.PageSettings.RTL == true);
+            Assert.IsTrue(Page.PageSettings.Vertical == true);
             Assert.IsTrue(Page.Lines.Count > 200);
             //<p>「問二。食べてみるか、というその質問から察するに、
             //これは<ruby>食物<rt>しよくもつ</rt></ruby>なのか？」</p>
@@ -74,7 +76,7 @@ namespace UnitTests
             {
                 Name = "imagepage.xhtml"
             };
-            var Page = new EpubPage(Text, new BookSettings());
+            var Page = new EpubPage(Text, new EpubSettings());
             Assert.IsTrue(Page.Lines.Count == 1);
             Assert.IsTrue(Page.Lines[0].Parts.Count == 1);
             var ImageSrcPart = Page.Lines[0].Parts[0];

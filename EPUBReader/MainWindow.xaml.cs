@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPUBRenderer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,11 @@ namespace EPUBReader
     {
         public MainWindow()
         {
+            var PageSettings = new EPUBParser.EpubSettings();         
+           PageSettings.Language = "ja";
+           PageSettings.Vertical = true;
+           PageSettings.RTL = true;
+            RenderLinePart.PageSettings = PageSettings;
             InitializeComponent();
         }
     }

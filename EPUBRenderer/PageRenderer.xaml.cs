@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EPUBParser;
@@ -40,6 +41,7 @@ namespace EPUBRenderer
         public PageRenderer()
         {
             InitializeComponent();
+            TestLinePart.Part = new TextLinePart("MainTextTest", "RubyTest");
         }
 
         private void SetToPage(EpubPage Page)
