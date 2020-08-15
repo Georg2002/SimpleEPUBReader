@@ -41,7 +41,9 @@ namespace EPUBRenderer
         public PageRenderer()
         {
             InitializeComponent();
-            TestLinePart.Part = new TextLinePart("MainTextTest", "RubyTest");
+            TestLinePart.Part = new TextLinePart("III", "III");
+            TestLinePart2.Part = new TextLinePart("これはテストです", "RubyTest");
+            TestLinePart3.Part = new TextLinePart("試験", "しけん");
         }
 
         private void SetToPage(EpubPage Page)
