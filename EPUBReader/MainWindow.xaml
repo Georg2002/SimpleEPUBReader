@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EPUBReader"
         xmlns:Renderer="clr-namespace:EPUBRenderer;assembly=EPUBRenderer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
     <Grid>     
         <Renderer:PageRenderer></Renderer:PageRenderer>
     </Grid>

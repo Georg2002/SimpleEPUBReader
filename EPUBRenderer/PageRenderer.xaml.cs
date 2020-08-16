@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,9 +42,17 @@ namespace EPUBRenderer
         public PageRenderer()
         {
             InitializeComponent();
-            TestLinePart.Part = new TextLinePart("III", "III");
-            TestLinePart2.Part = new TextLinePart("これはテストです", "RubyTest");
-            TestLinePart3.Part = new TextLinePart("試験", "しけん");
+            ScrollViewer.ScrollToRightEnd();
+            var Page = new EpubPage(new TextFile(new ZipEntry()
+            { Content = File.ReadAllBytes(@"D:\Informatik\EPUBReader\TestResources\Index4\OPS\xhtml\0030.xhtml") }), new EpubSettings());
+            var Parts = new List<LinePart>();
+            Page.Lines.ForEach(a => Parts.AddRange(a.Parts));
+            foreach (var Part in Parts)
+            {
+                var NewPart = new RenderLinePart();
+                NewPart.Part = Part;
+                ItemsControl.Items.Add(NewPart);
+            }
         }
 
         private void SetToPage(EpubPage Page)

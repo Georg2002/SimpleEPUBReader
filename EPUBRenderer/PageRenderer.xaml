@@ -9,14 +9,18 @@
        xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>        
         </Grid.ColumnDefinitions>
-        <ItemsControl>
-            <local:RenderLinePart x:Name="TestLinePart" Grid.Column="0"/>
-    <local:RenderLinePart x:Name="TestLinePart2" Grid.Column="1"/>        
-    <local:RenderLinePart x:Name="TestLinePart3" Grid.Column="2"/>
-        </ItemsControl>
+        <ScrollViewer x:Name="ScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">           
+            <ItemsControl x:Name="ItemsControl" ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                      ScrollViewer.VerticalScrollBarVisibility="Visible" HorizontalContentAlignment="Right"
+                      VerticalContentAlignment="Top">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Vertical" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="5"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>

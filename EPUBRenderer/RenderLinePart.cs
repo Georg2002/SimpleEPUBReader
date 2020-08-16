@@ -8,14 +8,18 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using EPUBParser;
+using EPUBReader;
 
 namespace EPUBRenderer
 {
     public class RenderLinePart : FrameworkElement
     {
-        private static int FontSize = 35;
+        private static int FontSize = 25;
 
         private static DirectionDefiner Direction = DirectionDefiner.VRTL;
+
+        private static readonly Typeface Typeface = new Typeface(new FontFamily("Hiragino Sans GB W6"), FontStyles.Normal,
+            FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
 
         private static EpubSettings _PageSettings;
         public static EpubSettings PageSettings
@@ -73,13 +77,22 @@ namespace EPUBRenderer
                 {
                     Out += '\n';
                 }
-                Out += In[i];
+                char Addition = In[i];
+                if (GlobalSettings.VerticalVisualFixes.ContainsKey(Addition))
+                {
+                    Out += GlobalSettings.VerticalVisualFixes[Addition];
+                }
+                else
+                {
+                    Out += Addition;
+                }
             }
             return Out;
         }
 
         protected override void OnRender(DrawingContext Context)
         {
+            if (Part == null) return;
             if (Part.Type == LinePartTypes.image)
             {
 
@@ -101,22 +114,22 @@ namespace EPUBRenderer
             }
 
 
-            //    Context.DrawLine(new Pen(Brushes.Blue, 2.0),
-            //        new Point(0.0, 0.0),
-            //        new Point(ActualWidth, ActualHeight));
-            //    Context.DrawLine(new Pen(Brushes.Green, 2.0),
-            //        new Point(ActualWidth, 0.0),
-            //        new Point(0.0, ActualHeight));
-        }
+            //   Context.DrawLine(new Pen(Brushes.Blue, 2.0),
+            //       new Point(0.0, 0.0),
+            //       new Point(ActualWidth, ActualHeight));
+            //   Context.DrawLine(new Pen(Brushes.Green, 2.0),
+            //       new Point(ActualWidth, 0.0),
+            //       new Point(0.0, ActualHeight));
+        }  //
 
         private void RenderVRTL(DrawingContext Context)
         {
-            Width = FontSize * 1.5;
-            var Stretch = new FontStretch();
-            var Typeface = new Typeface(new FontFamily("Hiragino Sans GB W6"), FontStyles.Normal, FontWeights.Normal, Stretch);
+            double TopFreeSpace = 5;
+
+            Width = FontSize * 1.45;
             var MainFormattedText = new FormattedText(VMainText, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, Typeface, FontSize, Brushes.Black, 1);
             MainFormattedText.LineHeight = FontSize;
-            Height = MainFormattedText.LineHeight * MainText.Length;
+            Height = MainFormattedText.LineHeight * MainText.Length + TopFreeSpace;
             MainFormattedText.TextAlignment = TextAlignment.Center;
             var RubyFontSize = FontSize * 0.5;
             var UpperFormattedText = new FormattedText(VUpperText, CultureInfo.InvariantCulture, FlowDirection.RightToLeft, Typeface, RubyFontSize, Brushes.Black, 1);
@@ -124,9 +137,8 @@ namespace EPUBRenderer
             UpperFormattedText.LineHeight = Math.Max(UpperFormattedText.LineHeight, RubyFontSize);
             UpperFormattedText.TextAlignment = TextAlignment.Center;
 
-         //   Context.DrawRectangle(Brushes.LightBlue, new Pen(Brushes.Red, 3), new Rect(0, 0, Width, Height));
-            Context.DrawText(MainFormattedText, new Point(FontSize * 0.5, 0));
-            Context.DrawText(UpperFormattedText, new Point(FontSize * 1.2, -FontSize / 8));
+            Context.DrawText(MainFormattedText, new Point(FontSize * 0.5, TopFreeSpace));
+            Context.DrawText(UpperFormattedText, new Point(FontSize * 1.2, -FontSize / 8 + TopFreeSpace));
         }
 
         private static void SetDirectionDefiner()

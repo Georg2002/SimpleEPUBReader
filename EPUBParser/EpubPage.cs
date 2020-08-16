@@ -120,7 +120,16 @@ namespace EPUBParser
             {
                 case "#text":
                 case "nav":
-                    Parts.Add(new TextLinePart(Node.InnerHtml, ""));
+                    var FullText = Node.InnerHtml;
+                    const int MaxLength = 6;
+                    int CurrentIndex = 0;
+                    while (CurrentIndex * MaxLength < FullText.Length)
+                    {
+                        var Amount = Math.Min(FullText.Length - CurrentIndex * MaxLength, MaxLength);
+                        var PartialText = FullText.Substring(CurrentIndex * MaxLength, Amount);
+                        Parts.Add(new TextLinePart(PartialText, ""));
+                        CurrentIndex++;
+                    }
                     break;
                 case "ruby":
                     var Text = Node.ChildNodes[0].InnerHtml;
@@ -133,7 +142,7 @@ namespace EPUBParser
                     break;
                 case "span":
                     AddSpanElement(Node);
-                    break;                  
+                    break;
                 case "a":
                 case "p":
                 case "svg":
@@ -209,7 +218,7 @@ namespace EPUBParser
                     return;
             }
         }
-    }  
+    }
 
     public class TextLinePart : LinePart
     {

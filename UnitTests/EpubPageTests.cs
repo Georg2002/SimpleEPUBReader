@@ -44,20 +44,18 @@ namespace UnitTests
             var FirstLine = Page.Lines.First();
             //<p>「手を止めなさい、火野神作。これは警告ではなく<ruby>
             //威嚇<rt>いかく</rt></ruby>です。従わねば刀を抜きます」</p>
-            var LastLine = Page.Lines.Last();
-            Assert.IsTrue(FirstLine.Parts.Count == 3);
+            var LastLine = Page.Lines.Last();          
             Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[0],
-                "「問二。食べてみるか、というその質問から察するに、これは", ""));
-            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[1],
+                "「問二。食べ", ""));
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[4],
                 "食物", "しよくもつ"));
-            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[2],
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[5],
                 "なのか？」", ""));
             Assert.IsTrue(FirstLine.Parts[0].Type == LinePartTypes.normal);
             Assert.IsTrue(FirstLine.Parts[1].Type == LinePartTypes.normal);
-
-            Assert.IsTrue(LastLine.Parts.Count == 3);
+         
             Assert.IsTrue(LastLine.Parts[0].Text ==
-                "「手を止めなさい、火野神作。これは警告ではなく");
+                "「手を止めな");
 
             Assert.IsTrue(Page.Lines.Exists(a => a.Parts.Exists(b => b.Type == LinePartTypes.sesame)));
         }
