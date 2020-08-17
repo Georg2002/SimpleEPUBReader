@@ -22,11 +22,11 @@ namespace EPUBReader
     {
         public MainWindow()
         {
-            var PageSettings = new EPUBParser.EpubSettings();         
-           PageSettings.Language = "ja";
-           PageSettings.Vertical = true;
-           PageSettings.RTL = true;
-            RenderLinePart.PageSettings = PageSettings;
+          //  var PageSettings = new EPUBParser.EpubSettings();         
+          // PageSettings.Language = "ja";
+          // PageSettings.Vertical = true;
+          // PageSettings.RTL = true;
+          //  PageRenderer.PageSettings = PageSettings;
             InitializeComponent();
         }
     }

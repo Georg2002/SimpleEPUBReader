@@ -1,11 +1,15 @@
-﻿using HtmlAgilityPack;
+﻿using ExCSS;
+using HtmlAgilityPack;
 using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace EPUBParser
 {
@@ -22,7 +26,7 @@ namespace EPUBParser
             return PageSettings.Title;
         }
 
-        public EpubPage(TextFile File, EpubSettings Settings)
+        public EpubPage(TextFile File, EpubSettings Settings, List<ZipEntry> Entries)
         {
             PageSettings = new EpubSettings();
             Lines = new List<EpubLine>();
@@ -75,10 +79,10 @@ namespace EPUBParser
                 {
                     if (Node.Name != "#text")
                     {
-                        var NewLine = new EpubLine(Node);
+                        var NewLine = new EpubLine(Node, Entries, ZipEntry.GetEntryByName(Entries, File.FullName));
                         if (NewLine.Parts.Count > 0)
                         {
-                            Lines.Add(new EpubLine(Node));
+                            Lines.Add(NewLine);
                         }
                     }
                 }
@@ -103,7 +107,7 @@ namespace EPUBParser
         {
             Parts = new List<LinePart>();
         }
-        public EpubLine(HtmlNode HtmlLine)
+        public EpubLine(HtmlNode HtmlLine, List<ZipEntry> Entries, ZipEntry File)
         {
             Parts = new List<LinePart>();
             if (HtmlLine == null)
@@ -111,25 +115,16 @@ namespace EPUBParser
                 Logger.Report("node has value null", LogType.Error);
                 return;
             }
-            AddAppropriatePart(HtmlLine);
+            AddAppropriatePart(HtmlLine, Entries, File);
         }
 
-        private void AddAppropriatePart(HtmlNode Node)
+        private void AddAppropriatePart(HtmlNode Node, List<ZipEntry> Entries, ZipEntry File)
         {
             switch (Node.Name)
             {
                 case "#text":
                 case "nav":
-                    var FullText = Node.InnerHtml;
-                    const int MaxLength = 6;
-                    int CurrentIndex = 0;
-                    while (CurrentIndex * MaxLength < FullText.Length)
-                    {
-                        var Amount = Math.Min(FullText.Length - CurrentIndex * MaxLength, MaxLength);
-                        var PartialText = FullText.Substring(CurrentIndex * MaxLength, Amount);
-                        Parts.Add(new TextLinePart(PartialText, ""));
-                        CurrentIndex++;
-                    }
+                    Parts.Add(new TextLinePart(Node.InnerText, ""));
                     break;
                 case "ruby":
                     var Text = Node.ChildNodes[0].InnerHtml;
@@ -141,7 +136,7 @@ namespace EPUBParser
                     Parts.Add(new TextLinePart("", ""));
                     break;
                 case "span":
-                    AddSpanElement(Node);
+                    AddSpanElement(Node, Entries, File);
                     break;
                 case "a":
                 case "p":
@@ -149,7 +144,7 @@ namespace EPUBParser
                 case "div":
                     foreach (var ChildNode in Node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode);
+                        AddAppropriatePart(ChildNode, Entries, File);
                     }
                     break;
                 case "image":
@@ -166,7 +161,9 @@ namespace EPUBParser
                         Logger.Report("can't find link to image: " + Node.OuterHtml, LogType.Error);
                         break;
                     }
-                    Parts.Add(new ImageLinePart(Link));
+                    var Image = new ImageLinePart(Link);
+                    Image.SetImage(Entries, File);
+                    Parts.Add(Image);
                     break;
                 default:
                     Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\" "
@@ -174,13 +171,13 @@ namespace EPUBParser
                     Logger.Report("trying to force parse...", LogType.Info);
                     foreach (var ChildNode in Node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode);
+                        AddAppropriatePart(ChildNode, Entries, File);
                     }
                     break;
             }
         }
 
-        private void AddSpanElement(HtmlNode node)
+        private void AddSpanElement(HtmlNode node, List<ZipEntry> Entries, ZipEntry File)
         {
             var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
 
@@ -197,7 +194,7 @@ namespace EPUBParser
                 case "img":
                     foreach (var ChildNode in node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode);
+                        AddAppropriatePart(ChildNode, Entries, File);
                     }
                     return;
                 default:
@@ -213,7 +210,7 @@ namespace EPUBParser
                     }
                     foreach (var ChildNode in node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode);
+                        AddAppropriatePart(ChildNode, Entries, File);
                     }
                     return;
             }
@@ -239,7 +236,29 @@ namespace EPUBParser
 
     public class ImageLinePart : LinePart
     {
-        public ZipEntry Image;
+        private byte[] ImageData;
+
+        public ImageSource GetImage()
+        {
+            if (ImageData == null)
+            {
+                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
+                return null;
+            }
+            BitmapImage Image = new BitmapImage();
+            using (var mem = new MemoryStream(ImageData))
+            {
+                mem.Position = 0;
+                Image.BeginInit();
+                Image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                Image.CacheOption = BitmapCacheOption.OnLoad;
+                Image.UriSource = null;
+                Image.StreamSource = mem;
+                Image.EndInit();
+            }
+            Image.Freeze();
+            return Image;
+        }
 
         public ImageLinePart(string Path)
         {
@@ -247,9 +266,9 @@ namespace EPUBParser
             this.Type = LinePartTypes.image;
         }
 
-        public void SetImage(List<ZipEntry> Entries)
+        public void SetImage(List<ZipEntry> Entries, ZipEntry PageEntry)
         {
-            throw new NotImplementedException();
+            ImageData = ZipEntry.GetEntryByPath(Entries, Text, PageEntry).Content;
         }
     }
 

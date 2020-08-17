@@ -77,12 +77,11 @@
   <ItemGroup>
     <Compile Include="GlobalSettings.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="PageRenderer.xaml.cs">
-      <DependentUpon>PageRenderer.xaml</DependentUpon>
+    <Compile Include="Renderer.xaml.cs">
+      <DependentUpon>Renderer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RenderLinePart.cs" />
-    <Compile Include="RenderPage.cs" />
+    <Compile Include="PageRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj">
@@ -91,7 +90,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="PageRenderer.xaml">
+    <Page Include="Renderer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

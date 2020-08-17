@@ -56,7 +56,7 @@ namespace EPUBParser
                     {
                         case MediaType.xhtml:
                             File = new TextFile(ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile));
-                            Pages.Add(new EpubPage((TextFile)File, Settings));
+                            Pages.Add(new EpubPage((TextFile)File, Settings, Files));
                             break;
                         case MediaType.toc:
                             File = new TextFile(ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile));

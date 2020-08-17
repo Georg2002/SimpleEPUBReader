@@ -12,64 +12,43 @@ using EPUBReader;
 
 namespace EPUBRenderer
 {
-    public class RenderLinePart : FrameworkElement
+    public class PageRenderer : FrameworkElement
     {
-        private static int FontSize = 25;
-
-        private static DirectionDefiner Direction = DirectionDefiner.VRTL;
+        private static int FontSize = 25;      
 
         private static readonly Typeface Typeface = new Typeface(new FontFamily("Hiragino Sans GB W6"), FontStyles.Normal,
-            FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
-
-        private static EpubSettings _PageSettings;
-        public static EpubSettings PageSettings
-        {
-            get => _PageSettings; set { _PageSettings = value; SetDirectionDefiner(); }
-        }
-
-        private LinePart _Part;
-        public LinePart Part
-        {
-            get => _Part;
-            set
-            {
-                _Part = value;
-                SetContent();
-                InvalidateVisual();
-            }
-        }
-
+            FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));      
+      
         private string MainText;
         private string VMainText;
         private string UpperText;
         private string VUpperText;
-        private System.Drawing.Image Image;
 
-        private void SetContent()
+        private EpubPage Page;
+
+        private List<LinePart> Parts;
+
+        public ChapterPosition StartPos;
+        public ChapterPosition EndPos;
+
+        private ChapterPosition CurrentPos;
+
+        private Point CurrentWritePosition;
+
+        public PageRenderer()
         {
-            if (Part.Type == LinePartTypes.image)
-            {
-                throw new NotImplementedException();
-            }
-            else
-            {
-                var TextPart = (TextLinePart)Part;
-                MainText = TextPart.Text;
-                VMainText = MakeVertical(MainText);
-                if (Part.Type == LinePartTypes.sesame)
-                {
-                    UpperText = new string('﹅', MainText.Length);
-                }
-                else
-                {
-                    UpperText = TextPart.Ruby;
-                }
-                VUpperText = MakeVertical(UpperText);
-            }
+            Parts = new List<LinePart>();
+        }
+            
+
+        public void SetContent(EpubPage Page)
+        {
+            this.Page = Page;
+            InvalidateVisual();
         }
 
         private string MakeVertical(string In)
-        {
+        {     
             string Out = "";
             for (int i = 0; i < In.Length; i++)
             {
@@ -88,31 +67,30 @@ namespace EPUBRenderer
                 }
             }
             return Out;
-        }
+        }    
 
         protected override void OnRender(DrawingContext Context)
         {
-            if (Part == null) return;
-            if (Part.Type == LinePartTypes.image)
-            {
+            CurrentWritePosition = new Point();
+            CurrentPos = new ChapterPosition();
 
-            }
-            else
+            bool LimitReached = false;
+
+            for (CurrentPos.LineIndex = StartPos.LineIndex; CurrentPos.LineIndex < Page.Lines.Count; CurrentPos.LineIndex++)
             {
-                switch (Direction)
+                var Line = Page.Lines[CurrentPos.LineIndex];
+                for (CurrentPos.PartIndex = StartPos.PartIndex; CurrentPos.PartIndex < Line.Parts.Count; CurrentPos.PartIndex++)
                 {
-                    case DirectionDefiner.HLTR:
-                        break;
-                    case DirectionDefiner.HRTL:
-                        break;
-                    case DirectionDefiner.VLTR:
-                        break;
-                    case DirectionDefiner.VRTL:
-                        RenderVRTL(Context);
+                    var Part = Line.Parts[CurrentPos.PartIndex];
+                    LimitReached = AddPartIfPossible(Part, Context);
+                    if (LimitReached)
                         break;
                 }
+                if (LimitReached)
+                    break;
             }
 
+            EndPos = CurrentPos;
 
             //   Context.DrawLine(new Pen(Brushes.Blue, 2.0),
             //       new Point(0.0, 0.0),
@@ -121,6 +99,25 @@ namespace EPUBRenderer
             //       new Point(ActualWidth, 0.0),
             //       new Point(0.0, ActualHeight));
         }  //
+
+        //returns false if impossible
+        private bool AddPartIfPossible(LinePart Part, DrawingContext Context)
+        {
+            return false;
+           // if (Part.Type == LinePartTypes.image)
+           // {
+           //     var Source = ((ImageLinePart)Part).GetImage();
+           //     Context.DrawImage(Source, new Rect(0, 0, ActualWidth, ActualHeight));
+           // }
+           // else
+           // {
+           //     foreach (char C in Part.Text)
+           //     {
+           //
+           //     }
+           // }
+        }
+
 
         private void RenderVRTL(DrawingContext Context)
         {
@@ -139,25 +136,6 @@ namespace EPUBRenderer
 
             Context.DrawText(MainFormattedText, new Point(FontSize * 0.5, TopFreeSpace));
             Context.DrawText(UpperFormattedText, new Point(FontSize * 1.2, -FontSize / 8 + TopFreeSpace));
-        }
-
-        private static void SetDirectionDefiner()
-        {
-            int i = 0;
-            if (PageSettings.Vertical)
-            {
-                i = 2;
-            }
-            if (PageSettings.RTL)
-            {
-                i++;
-            }
-            Direction = (DirectionDefiner)i;
-        }
-
-        private enum DirectionDefiner
-        {
-            HLTR, HRTL, VLTR, VRTL
         }
     }
 }

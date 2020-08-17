@@ -17,7 +17,7 @@ namespace UnitTests
         {
             var TestFile = new TextFile(new ZipEntry() {Name= "FailedTestFile" });        
             //tests fails if throws, so no assert needed
-            var Page = new EpubPage(TestFile, new EpubSettings());
+            var Page = new EpubPage(TestFile, new EpubSettings(), null);
             Assert.IsTrue(string.IsNullOrEmpty(Page.PageSettings.Title));
             Assert.IsTrue(Page.Lines.Count == 0);
         }
@@ -32,7 +32,7 @@ namespace UnitTests
                 Name = "Testpage1.xhtml"
             });
                             
-            var Page = new EpubPage(Text, new EpubSettings());
+            var Page = new EpubPage(Text, new EpubSettings(), null);
 
             Assert.IsTrue(Page.PageSettings.Title == "とある魔術の禁書目録４");
             Assert.IsTrue(Page.PageSettings.Language == "ja");
@@ -46,16 +46,16 @@ namespace UnitTests
             //威嚇<rt>いかく</rt></ruby>です。従わねば刀を抜きます」</p>
             var LastLine = Page.Lines.Last();          
             Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[0],
-                "「問二。食べ", ""));
-            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[4],
+                "「問二。食べてみるか、というその質問から察するに、これは", ""));
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[1],
                 "食物", "しよくもつ"));
-            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[5],
+            Assert.IsTrue(TextLinePartCorrect(FirstLine.Parts[2],
                 "なのか？」", ""));
             Assert.IsTrue(FirstLine.Parts[0].Type == LinePartTypes.normal);
             Assert.IsTrue(FirstLine.Parts[1].Type == LinePartTypes.normal);
          
             Assert.IsTrue(LastLine.Parts[0].Text ==
-                "「手を止めな");
+                "「手を止めなさい、火野神作。これは警告ではなく");
 
             Assert.IsTrue(Page.Lines.Exists(a => a.Parts.Exists(b => b.Type == LinePartTypes.sesame)));
         }
@@ -70,16 +70,18 @@ namespace UnitTests
         public void PageWithImageTest()
         {
             var Path = TestResources.GetTestHTMLFile(31);
-            var Text = new TextFile(new ZipEntry() { Content = File.ReadAllBytes(Path) })
+            var ZipEntry = new ZipEntry() { Content = File.ReadAllBytes(Path) };
+            var Text = new TextFile(ZipEntry)
             {
                 Name = "imagepage.xhtml"
             };
-            var Page = new EpubPage(Text, new EpubSettings());
+            var Page = new EpubPage(Text, new EpubSettings(), new List<ZipEntry>() { ZipEntry });
             Assert.IsTrue(Page.Lines.Count == 1);
             Assert.IsTrue(Page.Lines[0].Parts.Count == 1);
             var ImageSrcPart = Page.Lines[0].Parts[0];
             Assert.IsTrue(ImageSrcPart.Type == LinePartTypes.image);         
             Assert.IsTrue(ImageSrcPart.Text == "../images/0018.jpg");
+            Assert.IsTrue(((ImageLinePart)ImageSrcPart).GetImage().Width != 0);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace EPUBParser
         {
             if (files == null)
             {
-                Logger.Report(string.Format("file list was null, can't search for \"{0}}\"", RelativePath), LogType.Error);
+                Logger.Report(string.Format("file list was null, can't search for \"{0}\"", RelativePath), LogType.Error);
                 return null;
             }
             if (RelativeTo == null)
@@ -34,7 +34,8 @@ namespace EPUBParser
                 Logger.Report(string.Format("base entry for relative path is null, can't search for \"{0}\"", RelativePath), LogType.Error);
                 return null;
             }
-
+            if (RelativePath == null) RelativePath = "";
+            if (RelativeTo.FullName == null) RelativeTo.FullName = "";
             var RelativeBaseParts = RelativeTo.FullName.Split('/');
             List<string> PathParts = RelativeBaseParts.Take(RelativeBaseParts.Length - 1).ToList();
             var RelativeParts = RelativePath.Split('/');
@@ -45,7 +46,7 @@ namespace EPUBParser
                 {
                     if (Index < 0)
                     {
-                        Logger.Report(string.Format("relative path \"{0}\"} invalid, can't find file", RelativePart), LogType.Error);
+                        Logger.Report(string.Format("relative path \"{0}\" invalid, can't find file", RelativePart), LogType.Error);
                         return null;
                     }
                     else
@@ -99,7 +100,7 @@ namespace EPUBParser
         {
             if (files == null)
             {
-                Logger.Report(string.Format("file list was null, can't search for \"{0}}\"", name), LogType.Error);
+                Logger.Report(string.Format("file list was null, can't search for \"{0}\"", name), LogType.Error);
                 return null;
             }
             var Result = files.FirstOrDefault(a => a.Name == name);
