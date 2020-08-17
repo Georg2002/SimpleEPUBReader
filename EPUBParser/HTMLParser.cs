@@ -10,7 +10,7 @@ namespace EPUBParser
 {
     public static class HTMLParser
     {
-        public static HtmlDocument Parse(TextFile File)
+        public static HtmlDocument Parse(ZipEntry File)
         {
             var Doc = new HtmlDocument();
             if (File == null)
@@ -23,7 +23,12 @@ namespace EPUBParser
 
             try
             {
-                Doc.LoadHtml(File.Text);
+                if (File.Content == null)
+                {
+                    File.Content = new byte[0];
+                }
+
+                Doc.LoadHtml(Encoding.UTF8.GetString(File.Content));
                 foreach (var Error in Doc.ParseErrors)
                 {
                     Logger.Report(string.Format("Error at line {0}: {1}", Error.Line, Error.Reason), LogType.Error);

@@ -50,8 +50,8 @@ namespace EPUBRenderer
             InitializeComponent();
             Pages = new List<PageRenderer>();
 
-            var Page = new EpubPage(new TextFile(new ZipEntry()
-            { Content = File.ReadAllBytes(@"D:\Informatik\EPUBReader\TestResources\Index4\OPS\xhtml\0030.xhtml") }), new EpubSettings(), null);
+            var Page = new EpubPage(new ZipEntry()
+            { Content = File.ReadAllBytes(@"D:\Informatik\EPUBReader\TestResources\Index4\OPS\xhtml\0030.xhtml") }, new EpubSettings(), null);
             var Parts = new List<LinePart>();
             Page.Lines.ForEach(a => Parts.AddRange(a.Parts));
 
@@ -114,6 +114,19 @@ namespace EPUBRenderer
             {
                 return false;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() == typeof(ChapterPosition))
+            {
+                return this == (ChapterPosition)obj;
+            }
+            else
+            {
+                return false;
+            }
+           
         }
 
         public static bool operator >(ChapterPosition a, ChapterPosition b)

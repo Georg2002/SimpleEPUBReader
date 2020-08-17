@@ -74,13 +74,8 @@ namespace UnitTests
             Assert.IsTrue(Book.Pages.Count == test.Pages);
             Assert.IsFalse(string.IsNullOrEmpty(Book.Pages[0].Name));
             Assert.IsFalse(string.IsNullOrEmpty(Book.Pages[0].FullName));
-            Assert.IsTrue(Book.Package.Guide.Count == test.GuidCount);
-            Assert.IsTrue(Book.Images.Count == test.Images);
-            Assert.IsTrue(Book.Settings.Title == test.Title);
-            foreach (var Image in Book.Images)
-            {
-                Assert.IsTrue(Image.ImageData != null);
-            }
+            Assert.IsTrue(Book.Package.Guide.Count == test.GuidCount);          
+            Assert.IsTrue(Book.Settings.Title == test.Title);          
             Assert.IsTrue(Book.toc.Chapters.Count == test.Chapters);
             Assert.IsTrue(Logger.Log.Count < test.MaxLogLength);
         }

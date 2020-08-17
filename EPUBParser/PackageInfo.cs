@@ -20,7 +20,7 @@ namespace EPUBParser
         public string Title;
         public string Language;
 
-        public PackageInfo(TextFile file)
+        public PackageInfo(ZipEntry file)
         {
             Manifest = new List<ManifestItem>();
             Spine = new List<SpineItem>();

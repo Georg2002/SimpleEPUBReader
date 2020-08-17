@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing.Design;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -26,7 +27,7 @@ namespace EPUBParser
             return PageSettings.Title;
         }
 
-        public EpubPage(TextFile File, EpubSettings Settings, List<ZipEntry> Entries)
+        public EpubPage(ZipEntry File, EpubSettings Settings, List<ZipEntry> Entries)
         {
             PageSettings = new EpubSettings();
             Lines = new List<EpubLine>();
@@ -79,7 +80,7 @@ namespace EPUBParser
                 {
                     if (Node.Name != "#text")
                     {
-                        var NewLine = new EpubLine(Node, Entries, ZipEntry.GetEntryByName(Entries, File.FullName));
+                        var NewLine = new EpubLine(Node, Entries, File);
                         if (NewLine.Parts.Count > 0)
                         {
                             Lines.Add(NewLine);
@@ -87,6 +88,9 @@ namespace EPUBParser
                     }
                 }
             }
+            //to make getting images from web faster
+            Lines.AsParallel().ForAll(a => a.Parts.Where(b => b.Type == LinePartTypes.image)
+            .AsParallel().ForAll(c => ((ImageLinePart)c).SetImage(Entries, File)));
         }
     }
 
@@ -162,11 +166,11 @@ namespace EPUBParser
                         break;
                     }
                     var Image = new ImageLinePart(Link);
-                    Image.SetImage(Entries, File);
+                    //Set later to allow parallelization
                     Parts.Add(Image);
                     break;
                 default:
-                    Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\" "
+                    Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\""
                         , Node.OuterHtml, Node.ParentNode.Name, Node.Name), LogType.Error);
                     Logger.Report("trying to force parse...", LogType.Info);
                     foreach (var ChildNode in Node.ChildNodes)
@@ -268,7 +272,30 @@ namespace EPUBParser
 
         public void SetImage(List<ZipEntry> Entries, ZipEntry PageEntry)
         {
-            ImageData = ZipEntry.GetEntryByPath(Entries, Text, PageEntry).Content;
+            ImageData = null;
+            if (Text.StartsWith("http"))
+            {
+                try
+                {
+                    using (var client = new WebClient())
+                    {
+                        ImageData = client.DownloadData(Text);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+            else
+            {
+                ZipEntry Entry = ZipEntry.GetEntryByPath(Entries, Text, PageEntry);
+                ImageData = Entry.Content;
+            }
+            if (ImageData == null)
+            {
+                Logger.Report("Image not found", LogType.Error);
+                return;
+            }
         }
     }
 

@@ -15,7 +15,7 @@ namespace UnitTests
         [TestMethod]
         public void BrokenDocumentTest()
         {
-            var TestFile = new TextFile(new ZipEntry() {Name= "FailedTestFile" });        
+            var TestFile = new ZipEntry() {Name= "FailedTestFile" };        
             //tests fails if throws, so no assert needed
             var Page = new EpubPage(TestFile, new EpubSettings(), null);
             Assert.IsTrue(string.IsNullOrEmpty(Page.PageSettings.Title));
@@ -26,11 +26,11 @@ namespace UnitTests
         public void SimpleTest()
         {
             var Path = TestResources.GetTestHTMLFile(30);
-            var Text = new TextFile(new ZipEntry()
+            var Text = new ZipEntry()
             {
                 Content = File.ReadAllBytes(Path),
                 Name = "Testpage1.xhtml"
-            });
+            };
                             
             var Page = new EpubPage(Text, new EpubSettings(), null);
 
@@ -71,17 +71,13 @@ namespace UnitTests
         {
             var Path = TestResources.GetTestHTMLFile(31);
             var ZipEntry = new ZipEntry() { Content = File.ReadAllBytes(Path) };
-            var Text = new TextFile(ZipEntry)
-            {
-                Name = "imagepage.xhtml"
-            };
-            var Page = new EpubPage(Text, new EpubSettings(), new List<ZipEntry>() { ZipEntry });
+          
+            var Page = new EpubPage(ZipEntry, new EpubSettings(), new List<ZipEntry>() { ZipEntry });
             Assert.IsTrue(Page.Lines.Count == 1);
             Assert.IsTrue(Page.Lines[0].Parts.Count == 1);
             var ImageSrcPart = Page.Lines[0].Parts[0];
             Assert.IsTrue(ImageSrcPart.Type == LinePartTypes.image);         
-            Assert.IsTrue(ImageSrcPart.Text == "../images/0018.jpg");
-            Assert.IsTrue(((ImageLinePart)ImageSrcPart).GetImage().Width != 0);
+            Assert.IsTrue(ImageSrcPart.Text == "../images/0018.jpg");           
         }
     }
 }

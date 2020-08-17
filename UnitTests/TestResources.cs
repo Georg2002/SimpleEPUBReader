@@ -33,7 +33,7 @@ namespace UnitTests
 
         public static void WriteLogToFile()
         {
-            File.WriteAllLines(@"..\..\..\TestLog.txt", EPUBReader.Logger.Log);
+            File.WriteAllLines(@"..\..\..\..\TestLog.txt", EPUBParser.Logger.Log);
         }
     }
 }

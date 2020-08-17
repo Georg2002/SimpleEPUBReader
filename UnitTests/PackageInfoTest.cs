@@ -82,11 +82,11 @@ namespace UnitTests
 
         private void PackageInfoTester(PackageInfoTestcase TestCase)
         {
-            var TextFile = new TextFile(new ZipEntry()
+            var TextFile = new ZipEntry()
             {
                 Content = File.ReadAllBytes(TestCase.FilePath),
                 Name = "TestTextFile"
-            });
+            };
             var Info = new PackageInfo(TextFile);
             Assert.IsTrue(Info.Title == TestCase.Title);
             Assert.IsTrue(Info.Creator == TestCase.Creator);

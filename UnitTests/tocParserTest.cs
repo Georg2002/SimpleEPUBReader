@@ -41,7 +41,7 @@ namespace UnitTests
 
 		private void TocTester(TocTestCase testCase)
 		{
-			var TextFile = new TextFile(new ZipEntry() { Content = File.ReadAllBytes(testCase.FilePath) });
+			var TextFile = new ZipEntry() { Content = File.ReadAllBytes(testCase.FilePath) };
 			TocInfo toc = new TocInfo(TextFile);
 			Assert.IsTrue(toc.Title == testCase.Title);
 			Assert.IsTrue(toc.Chapters.Count == testCase.Chapters);

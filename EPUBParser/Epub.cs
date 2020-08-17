@@ -12,8 +12,7 @@ namespace EPUBParser
     public class Epub
     {
         public string FilePath;
-        public List<EpubPage> Pages;
-        public List<ImageFile> Images;
+        public List<EpubPage> Pages;        
         public PackageInfo Package;
         public TocInfo toc;
         public EpubSettings Settings;     
@@ -22,7 +21,6 @@ namespace EPUBParser
         {
             this.FilePath = FilePath;
             Pages = new List<EpubPage>();
-            Images = new List<ImageFile>();
             Settings = new EpubSettings();
             Logger.Report(string.Format("parsing epub file at \"{0}\"", FilePath), LogType.Info);
 
@@ -41,7 +39,7 @@ namespace EPUBParser
                 toc = new TocInfo(null);
             }
 
-            Package = new PackageInfo(new TextFile(PackageFile));
+            Package = new PackageInfo(PackageFile);
             Settings.RTL = Package.RightToLeft;
             Settings.Vertical = Package.Vertical;
             Settings.Title = Package.Title;
@@ -51,22 +49,19 @@ namespace EPUBParser
             {
                 foreach (var ManifestItem in Package.Manifest)
                 {
-                    BaseDataFile File;
+                    ZipEntry File = ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile);
                     switch (ManifestItem.Type)
                     {
                         case MediaType.xhtml:
-                            File = new TextFile(ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile));
-                            Pages.Add(new EpubPage((TextFile)File, Settings, Files));
+                            
+                            Pages.Add(new EpubPage(File, Settings, Files));
                             break;
-                        case MediaType.toc:
-                            File = new TextFile(ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile));
-                            toc = new TocInfo((TextFile)File);
+                        case MediaType.toc:                            
+                            toc = new TocInfo(File);
                             break;
                         case MediaType.css:
                             break;
                         case MediaType.image:
-                            File = new ImageFile(ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile));
-                            Images.Add((ImageFile)File);
                             break;
                         case MediaType.empty:
                             break;

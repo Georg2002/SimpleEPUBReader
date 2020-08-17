@@ -11,7 +11,7 @@ namespace EPUBParser
         public string Title;
         public List<string> Chapters;
 
-        public TocInfo(TextFile file)
+        public TocInfo(ZipEntry file)
         {
             Chapters = new List<string>();
 
