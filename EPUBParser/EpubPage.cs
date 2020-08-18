@@ -235,6 +235,8 @@ namespace EPUBParser
         public TextLinePart()
         {
             Type = LinePartTypes.normal;
+            Text = "";
+            Ruby = "";
         }
     }
 
@@ -249,18 +251,28 @@ namespace EPUBParser
                 Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
                 return null;
             }
-            BitmapImage Image = new BitmapImage();
-            using (var mem = new MemoryStream(ImageData))
+            BitmapImage Image = null;
+            try
             {
-                mem.Position = 0;
-                Image.BeginInit();
-                Image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                Image.CacheOption = BitmapCacheOption.OnLoad;
-                Image.UriSource = null;
-                Image.StreamSource = mem;
-                Image.EndInit();
+                Image = new BitmapImage();
+                using (var mem = new MemoryStream(ImageData))
+                {
+                    mem.Position = 0;
+                    Image.BeginInit();
+                    Image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                    Image.CacheOption = BitmapCacheOption.OnLoad;
+                    Image.UriSource = null;
+                    Image.StreamSource = mem;
+                    Image.EndInit();
+                }
+                Image.Freeze();
             }
-            Image.Freeze();
+            catch (Exception ex)
+            {
+                Logger.Report(string.Format("image from \"{0}\" couldn't be loaded", Text), LogType.Error);
+                Logger.Report(ex.Message, LogType.Error);
+            }
+
             return Image;
         }
 
@@ -289,11 +301,14 @@ namespace EPUBParser
             else
             {
                 ZipEntry Entry = ZipEntry.GetEntryByPath(Entries, Text, PageEntry);
-                ImageData = Entry.Content;
+                if (Entry != null)
+                {
+                    ImageData = Entry.Content;
+                }
             }
             if (ImageData == null)
             {
-                Logger.Report("Image not found", LogType.Error);
+                Logger.Report(string.Format("Image from \"{0}\" not found", Text), LogType.Error);
                 return;
             }
         }

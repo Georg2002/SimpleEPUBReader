@@ -75,6 +75,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChapterPosition.cs" />
     <Compile Include="GlobalSettings.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Renderer.xaml.cs">
