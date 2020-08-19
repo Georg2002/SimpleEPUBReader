@@ -80,18 +80,11 @@ namespace EPUBRenderer
 
         public FormattedText GetFormattedText(string Text, double FontSize)
         {
-            FlowDirection flowDirection;
-            if (renderer.Page.PageSettings.RTL)
-            {
-                flowDirection = FlowDirection.RightToLeft;
-            }
-            else
-            {
-                flowDirection = FlowDirection.LeftToRight;
-            }
+            FlowDirection flowDirection;          
             string DrawnText = "";
             if (renderer.Page.PageSettings.Vertical)
             {
+                flowDirection = FlowDirection.LeftToRight;
                 foreach (char c in Text)
                 {
                     if (GlobalSettings.VerticalVisualFixes.ContainsKey(c))
@@ -106,6 +99,14 @@ namespace EPUBRenderer
             }
             else
             {
+                if (renderer.Page.PageSettings.RTL)
+                {
+                    flowDirection = FlowDirection.RightToLeft;
+                }
+                else
+                {
+                    flowDirection = FlowDirection.LeftToRight;
+                }
                 DrawnText = Text;
             }
             var res = new FormattedText(DrawnText, CultureInfo.InvariantCulture,

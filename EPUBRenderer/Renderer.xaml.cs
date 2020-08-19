@@ -46,7 +46,6 @@ namespace EPUBRenderer
 
             set
             {
-                _CurrentPage = value;
                 SetPage(value);
             }
         }
@@ -67,6 +66,7 @@ namespace EPUBRenderer
             }
             var Page = Pages[PageNumber - 1];       
             Content = Page;
+            _CurrentPage = PageNumber;
             Page.InvalidateVisual();
         }
 

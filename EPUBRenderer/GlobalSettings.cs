@@ -19,7 +19,9 @@ namespace EPUBReader
             {'。',new SpecialCharacterInfo(" 。" ,0,0)},
             {'、',new SpecialCharacterInfo("、" ,0,0)},
             {'?',new SpecialCharacterInfo("?",0,0) },
-            { 'ー',new SpecialCharacterInfo( "ｌ",0,0)}
+            { 'ー',new SpecialCharacterInfo( "ｌ",0,0)},
+            { '─',new SpecialCharacterInfo( "ｌ",0,-0.25) }
+
             };
     }
 
