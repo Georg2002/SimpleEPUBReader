@@ -61,9 +61,9 @@ namespace EPUBRenderer
             {
                 PageNumber = PageCount;            
             }
-            if (PageNumber < 0)
+            if (PageNumber < 1)
             {
-                PageNumber = 0;        
+                PageNumber = 1;        
             }
             var Page = Pages[PageNumber - 1];       
             Content = Page;
@@ -79,8 +79,8 @@ namespace EPUBRenderer
             foreach (var Page in epub.Pages)
             {
                 AddPages(Page);
-
             }
+            CurrentPage = 40;
         }
 
         private void AddPages(EpubPage Page)

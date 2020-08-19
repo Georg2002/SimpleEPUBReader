@@ -142,12 +142,12 @@ namespace EPUBRenderer
                     }
                     else
                     {
-                        var NewPart = AddPartIfPossible((TextLinePart)Part);
+                        AddPartIfPossible((TextLinePart)Part);
                         if (CurrentPos.CharIndex != 0)
                         {
                             while (!WritingDirection.PageFull() && CurrentPos.CharIndex != 0)
                             {
-                                NewPart = AddPartIfPossible((TextLinePart)Part);
+                                AddPartIfPossible((TextLinePart)Part);
                             }
                         }
                         LimitReached = WritingDirection.PageFull();

@@ -110,7 +110,15 @@ namespace EPUBRenderer
             }
             var res = new FormattedText(DrawnText, CultureInfo.InvariantCulture,
                 flowDirection, PageRenderer.Typeface, FontSize, Brushes.Black, 1);
-            res.TextAlignment = TextAlignment.Center;
+            if (renderer.Page.PageSettings.Vertical)
+            {
+                res.LineHeight = PageRenderer.FontSize;
+            }
+            else
+            {
+                res.LineHeight = PageRenderer.FontSize * PageRenderer.LineSpace;
+            }
+           
             return res;
         }
 

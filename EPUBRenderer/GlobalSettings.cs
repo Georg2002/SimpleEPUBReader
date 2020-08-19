@@ -12,13 +12,13 @@ namespace EPUBReader
         //no brake space: " "
         public static Dictionary<char, SpecialCharacterInfo> VerticalVisualFixes = new Dictionary<char, SpecialCharacterInfo>()
             {
-            {'」',new SpecialCharacterInfo("  」",0,0) },
-            {'「',new SpecialCharacterInfo("「   " ,0,0)},
-            {'『',new SpecialCharacterInfo("『   ",0,0) },
-            {'』',new SpecialCharacterInfo("  』" ,0,0)},
-            {'。',new SpecialCharacterInfo("  。" ,0,0)},
-            {'、',new SpecialCharacterInfo("   、" ,0,0)},
-            {'?',new SpecialCharacterInfo("  ?",0,0) },
+            {'」',new SpecialCharacterInfo(" 」",0,0) },
+            {'「',new SpecialCharacterInfo("「 " ,0,0)},
+            {'『',new SpecialCharacterInfo("『 ",0,0) },
+            {'』',new SpecialCharacterInfo(" 』" ,0,0)},
+            {'。',new SpecialCharacterInfo(" 。" ,0,0)},
+            {'、',new SpecialCharacterInfo("、" ,0,0)},
+            {'?',new SpecialCharacterInfo("?",0,0) },
             { 'ー',new SpecialCharacterInfo( "ｌ",0,0)}
             };
     }
