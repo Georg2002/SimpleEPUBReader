@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPUBRenderer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,6 +35,19 @@ namespace UnitTests
         public static void WriteLogToFile()
         {
             File.WriteAllLines(@"..\..\..\..\TestLog.txt", EPUBParser.Logger.Log);
+        }
+
+        public static PageRenderer CommonInit()
+        {
+            PageRenderer.FontSize = 10;
+            PageRenderer.LineSpace = 2;
+
+          var  renderer = new PageRenderer
+            {
+                PageHeight = 1000,
+                PageWidth = 500,
+            };           
+            return renderer;
         }
     }
 }

@@ -10,18 +10,13 @@ namespace UnitTests.RendererTests
     public class PageFullTests
     {
         private PageRenderer renderer;
+        private WritingDirection WritingDirection;
 
         [TestInitialize]
         public void Init()
         {
-            PageRenderer.FontSize = 10;
-            PageRenderer.LineSpace = 2;
-
-            renderer = new PageRenderer
-            {
-                PageHeight = 1000,
-                PageWidth = 500,
-            };
+            renderer = TestResources.CommonInit();
+            WritingDirection = renderer.WritingDirection;
         }
 
         [TestMethod]
@@ -31,7 +26,7 @@ namespace UnitTests.RendererTests
             {
                 NotFullPos = new Point(20, 0),
                 FullPos = new Point(19, 0),
-                Direction = PageRenderer.WritingFlow.VRTL
+                Direction = WritingFlow.VRTL
             };
             PageFullTester(Testcase);
         }
@@ -43,7 +38,7 @@ namespace UnitTests.RendererTests
             {
                 NotFullPos = new Point(480, 0),
                 FullPos = new Point(481, 0),
-                Direction = PageRenderer.WritingFlow.VLTR
+                Direction = WritingFlow.VLTR
             };
             PageFullTester(Testcase);
         }
@@ -52,16 +47,17 @@ namespace UnitTests.RendererTests
         {
             renderer.Direction = Testcase.Direction;
             renderer.CurrentWritePosition = Testcase.NotFullPos;
-            Assert.IsTrue(!renderer.PageFull());
+            Assert.IsTrue(!WritingDirection.PageFull());
             renderer.CurrentWritePosition = Testcase.FullPos;
-            Assert.IsTrue(renderer.PageFull());
+            WritingDirection.renderer = renderer;
+            Assert.IsTrue(WritingDirection.PageFull());
         }
 
         private class PageFullTestcase
         {
             public Point NotFullPos;
             public Point FullPos;      
-            public PageRenderer.WritingFlow Direction;
+            public WritingFlow Direction;
         }
     }
 }

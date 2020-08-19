@@ -17,18 +17,13 @@ namespace UnitTests.RendererTests
     public class WrapNeededTests
     {
         private PageRenderer renderer;
+        private WritingDirection WritingDirection;
 
         [TestInitialize]
         public void Init()
         {
-            PageRenderer.FontSize = 10;
-            PageRenderer.LineSpace = 2;
-
-            renderer = new PageRenderer
-            {
-                PageHeight = 1000,
-                PageWidth = 500,
-            };           
+              renderer = TestResources.CommonInit();
+            WritingDirection = renderer.WritingDirection;
         }
 
         [TestMethod]
@@ -37,7 +32,7 @@ namespace UnitTests.RendererTests
             var Testcase = new WrapTestcase()
             {
                 NoWrapPos = new Point(480, 0),
-                Direction = PageRenderer.WritingFlow.VRTL,
+                Direction = WritingFlow.VRTL,
                 SingleCharWrapPos = new Point(480, 991),
                 SingleCharNearlyWrapPos = new Point(480, 990),
                 TwoCharWrapPos = new Point(480, 981)
@@ -51,7 +46,7 @@ namespace UnitTests.RendererTests
             var Testcase = new WrapTestcase()
             {
                 NoWrapPos = new Point(480, 0),
-                Direction = PageRenderer.WritingFlow.VRTL,
+                Direction = WritingFlow.VRTL,
                 SingleCharWrapPos = new Point(480, 991),
                 SingleCharNearlyWrapPos = new Point(480, 990),
                 TwoCharWrapPos = new Point(480, 981)
@@ -90,18 +85,18 @@ namespace UnitTests.RendererTests
         private void WrapTest(WrapTestcase testcase)
         {
             renderer.Direction =testcase.Direction;
-            renderer.CurrentWritePosition = testcase.NoWrapPos;
-            Assert.IsTrue(!renderer.NeedsToWrap(1));
-            Assert.IsTrue(!renderer.NeedsToWrap(2));
+            renderer.CurrentWritePosition = testcase.NoWrapPos;       
+            Assert.IsTrue(!WritingDirection.NeedsToWrap(1));
+            Assert.IsTrue(!WritingDirection.NeedsToWrap(2));
             renderer.CurrentWritePosition = testcase.SingleCharWrapPos;
-            Assert.IsTrue(renderer.NeedsToWrap(1));
-            Assert.IsTrue(renderer.NeedsToWrap(2));
+            Assert.IsTrue(WritingDirection.NeedsToWrap(1));
+            Assert.IsTrue(WritingDirection.NeedsToWrap(2));
             renderer.CurrentWritePosition = testcase.SingleCharNearlyWrapPos;
-            Assert.IsTrue(!renderer.NeedsToWrap(1));
-            Assert.IsTrue(renderer.NeedsToWrap(2));
+            Assert.IsTrue(!WritingDirection.NeedsToWrap(1));
+            Assert.IsTrue(WritingDirection.NeedsToWrap(2));
             renderer.CurrentWritePosition = testcase.TwoCharWrapPos;
-            Assert.IsTrue(!renderer.NeedsToWrap(1));
-            Assert.IsTrue(renderer.NeedsToWrap(2));
+            Assert.IsTrue(!WritingDirection.NeedsToWrap(1));
+            Assert.IsTrue(WritingDirection.NeedsToWrap(2));
         }
 
         private class WrapTestcase
@@ -110,7 +105,7 @@ namespace UnitTests.RendererTests
             public Point SingleCharNearlyWrapPos;
             public Point SingleCharWrapPos;
             public Point TwoCharWrapPos;
-            public PageRenderer.WritingFlow Direction;
+            public WritingFlow Direction;
         }
     }
 }

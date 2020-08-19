@@ -29,6 +29,7 @@ namespace EPUBParser
                 Logger.Report(string.Format("file missing: \"{0}\"", FilePath), LogType.Error);
                 return;
             }
+         
             var Files = Unzipper.GetFiles(FilePath);
 
             var PackageFile = GetFile(Files, GlobalSettings.PackageFileNames);

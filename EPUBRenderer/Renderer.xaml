@@ -6,5 +6,6 @@
              xmlns:local="clr-namespace:EPUBRenderer"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-       xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf">   
+       xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf">       
+    
 </UserControl>

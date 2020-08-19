@@ -35,38 +35,55 @@ namespace EPUBRenderer
             set
             {
                 _EpubPage = value;
-                SetToPage(value);
+                AddPages(value);
             }
         }
 
-        public int CurrentPage;
+        private int _CurrentPage;
+        public int CurrentPage
+        {
+            get => _CurrentPage;
+
+            set
+            {
+                _CurrentPage = value;
+                SetPage(value);
+            }
+        }
 
         public int PageCount { get => Pages.Count; }
 
         public List<PageRenderer> Pages;
+
+        private void SetPage(int PageNumber)
+        {
+            if (PageNumber > PageCount)
+            {
+                PageNumber = PageCount;            
+            }
+            if (PageNumber < 0)
+            {
+                PageNumber = 0;        
+            }
+            var Page = Pages[PageNumber - 1];       
+            Content = Page;
+            Page.InvalidateVisual();
+        }
 
         public Renderer()
         {
             InitializeComponent();
             Pages = new List<PageRenderer>();
 
-            var Page = new EpubPage(new ZipEntry()
-            { Content = File.ReadAllBytes(@"D:\Informatik\EPUBReader\TestResources\Index4\OPS\xhtml\0030.xhtml") }, new EpubSettings(), null);
-            var Parts = new List<LinePart>();
-            Page.Lines.ForEach(a => Parts.AddRange(a.Parts));
+            var epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");          
+            foreach (var Page in epub.Pages)
+            {
+                AddPages(Page);
 
-
-
-
+            }
         }
 
-        public void SetPage(int Page)
-        {
-            CurrentPage = Page;
-            Content = Pages[Page];
-        }
-
-        private void SetToPage(EpubPage Page)
+        private void AddPages(EpubPage Page)
         {
             var CurrentPos = new ChapterPosition();
             var MaxPos = new ChapterPosition(Page.Lines.Count - 1,
@@ -77,8 +94,12 @@ namespace EPUBRenderer
             {
                 var NewPage = new PageRenderer();
                 NewPage.StartPos = CurrentPos;
-                CurrentPos = NewPage.EndPos;
+                NewPage.PageHeight = 700;
+                NewPage.PageWidth = 1000;
+                NewPage.SetContent(Page);               
+                Pages.Add(NewPage);              
+                CurrentPos = NewPage.EndPos;              
             }
         }
-    }  
+    }
 }

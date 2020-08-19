@@ -14,14 +14,7 @@ namespace UnitTests.RendererTests
         [TestInitialize]
         public void Init()
         {
-            PageRenderer.FontSize = 10;
-            PageRenderer.LineSpace = 2;
-
-            renderer = new PageRenderer
-            {
-                PageHeight = 1000,
-                PageWidth = 500,
-            };
+            renderer = TestResources.CommonInit();
         }
 
         [TestMethod]
@@ -29,7 +22,7 @@ namespace UnitTests.RendererTests
         {
             renderer.CurrentWritePosition = new Point(480, 961);
 
-            renderer.Direction = PageRenderer.WritingFlow.VRTL;
+            renderer.Direction = WritingFlow.VRTL;
 
             var Part = new TextLinePart("Test", "Test");
 
@@ -106,7 +99,6 @@ namespace UnitTests.RendererTests
 した。隠者たるわれわれがなぜ他者の評価を欲するのか理解できません。", "");
            var  res = renderer.GetLargestFittingLinePart(Part);
             Assert.IsTrue(res.Text.Length == 100);
-
         }
 
         [TestMethod]
@@ -128,6 +120,10 @@ namespace UnitTests.RendererTests
             QuickFindTester(0, 10, 0, 10);
 
             QuickFindTester(10, 20, 0, 10000);
+
+            QuickFindTester(5, 10, 3, 10);
+
+            QuickFindTester(10, 20, 3, 10000);
         }
 
         private void QuickFindTester(int Aim, int Attempts, int charIndex, int Length)

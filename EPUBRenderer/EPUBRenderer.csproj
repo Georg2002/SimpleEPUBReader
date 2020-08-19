@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PageRenderer.cs" />
+    <Compile Include="WritingDirection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj">

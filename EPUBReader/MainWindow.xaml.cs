@@ -21,13 +21,18 @@ namespace EPUBReader
     public partial class MainWindow : Window
     {
         public MainWindow()
-        {
-          //  var PageSettings = new EPUBParser.EpubSettings();         
-          // PageSettings.Language = "ja";
-          // PageSettings.Vertical = true;
-          // PageSettings.RTL = true;
-          //  PageRenderer.PageSettings = PageSettings;
+        {        
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Renderer.CurrentPage--;
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Renderer.CurrentPage++;
         }
     }
 }
