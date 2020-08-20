@@ -14,7 +14,7 @@
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
 
-        <Renderer:Renderer x:Name="Renderer" Grid.Column="1"/>
+        <Renderer:Viewer x:Name="Renderer" Grid.Column="1"/>
         <Button Grid.Column="0" Click="Button_Click"/>
         <Button Grid.Column="2" Click="Button_Click_1"/>
     </Grid>

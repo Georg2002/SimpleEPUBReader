@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using EPUBParser;
-using EPUBReader;
 
 namespace EPUBRenderer
 {
@@ -21,24 +20,14 @@ namespace EPUBRenderer
         public static double RubyOffSet = 1.5;
 
         public WritingDirection WritingDirection;
-
-        public static readonly Typeface Typeface = new Typeface(new FontFamily("Hiragino Sans GB W6"), FontStyles.Normal,
-            FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
-
         public WritingFlow Direction;
 
         public EpubPage Page;
-
-        private List<FormattedText> TextParts;
-        private List<Point> TextPartPositions;
-
-        private ImageSource Image;
-
-        private bool IsImagePage;
-
         public ChapterPosition StartPos;
         public ChapterPosition EndPos;
 
+        public static readonly Typeface Typeface = new Typeface(new FontFamily("Hiragino Sans GB W6"), FontStyles.Normal,
+            FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
 
         //CurrentWritePosition must always be at the point on the corner of the last added part that is closest to the limitations
         //VRTL: bottom left, VLTR: bottom right, HRTL: bottom left, HLTR: bottom right
@@ -48,6 +37,17 @@ namespace EPUBRenderer
 
         public double PageWidth;
         public double PageHeight;
+
+
+        private List<FormattedText> TextParts;
+        private List<Point> TextPartPositions;
+
+        private ImageSource Image;
+
+        private bool IsImagePage;
+
+
+
 
         public PageRenderer()
         {
@@ -128,10 +128,10 @@ namespace EPUBRenderer
 
             bool LimitReached = false;
 
-            for (CurrentPos.LineIndex = StartPos.LineIndex; CurrentPos.LineIndex < Page.Lines.Count; CurrentPos.LineIndex++)
+            while (CurrentPos.LineIndex < Page.Lines.Count)
             {
                 var Line = Page.Lines[CurrentPos.LineIndex];
-                for (CurrentPos.PartIndex = StartPos.PartIndex; CurrentPos.PartIndex < Line.Parts.Count; CurrentPos.PartIndex++)
+                while (CurrentPos.PartIndex < Line.Parts.Count)
                 {
                     var Part = Line.Parts[CurrentPos.PartIndex];
                     if (Part.Type == LinePartTypes.image)
@@ -152,9 +152,11 @@ namespace EPUBRenderer
                         }
                         LimitReached = WritingDirection.PageFull();
                     }
+                    CurrentPos.PartIndex++;
                     if (LimitReached)
                         break;
                 }
+                CurrentPos.LineIndex++;
                 if (LimitReached)
                     break;
                 WritingDirection.Wrap();

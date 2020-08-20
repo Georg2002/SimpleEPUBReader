@@ -21,7 +21,7 @@ namespace EPUBRenderer
     /// <summary>
     /// Interaction logic for PageRenderer.xaml
     /// </summary>
-    public partial class Renderer : UserControl
+    public partial class Viewer : UserControl
     {
         //separate images into new lines, if they aren't already
         //merge
@@ -52,54 +52,35 @@ namespace EPUBRenderer
 
         public int PageCount { get => Pages.Count; }
 
-        public List<PageRenderer> Pages;
+        public List<PageRenderer2> Pages;
 
         private void SetPage(int PageNumber)
         {
             if (PageNumber > PageCount)
             {
-                PageNumber = PageCount;            
+                PageNumber = PageCount;
             }
             if (PageNumber < 1)
             {
-                PageNumber = 1;        
+                PageNumber = 1;
             }
-            var Page = Pages[PageNumber - 1];       
+            var Page = Pages[PageNumber - 1];
             Content = Page;
             _CurrentPage = PageNumber;
             Page.InvalidateVisual();
         }
 
-        public Renderer()
+        public Viewer()
         {
             InitializeComponent();
-            Pages = new List<PageRenderer>();
+            Pages = new List<PageRenderer2>();
 
-            var epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");          
+            var epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
             foreach (var Page in epub.Pages)
             {
-                AddPages(Page);
+                Pages.AddRange(ChapterPagesCreator.GetRenderPages(Page, 1000, 700));
             }
             CurrentPage = 40;
-        }
-
-        private void AddPages(EpubPage Page)
-        {
-            var CurrentPos = new ChapterPosition();
-            var MaxPos = new ChapterPosition(Page.Lines.Count - 1,
-                Page.Lines.Last().Parts.Count - 1,
-                Page.Lines.Last().Parts.Last().Text.Length - 1);
-
-            while (CurrentPos < MaxPos)
-            {
-                var NewPage = new PageRenderer();
-                NewPage.StartPos = CurrentPos;
-                NewPage.PageHeight = 700;
-                NewPage.PageWidth = 1000;
-                NewPage.SetContent(Page);               
-                Pages.Add(NewPage);              
-                CurrentPos = NewPage.EndPos;              
-            }
         }
     }
 }

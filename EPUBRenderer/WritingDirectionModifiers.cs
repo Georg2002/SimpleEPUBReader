@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPUBRenderer;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -6,15 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using Point = System.Windows.Point;
 
 namespace EPUBRenderer
 {
-    public class WritingDirection
+  public  class WritingDirectionModifiers
     {
-        public PageRenderer renderer;
+        public PageRenderer2 renderer;
 
-        public WritingDirection(PageRenderer renderer)
+        public WritingDirectionModifiers(PageRenderer2 renderer)
         {
             this.renderer = renderer;
         }
@@ -78,13 +78,13 @@ namespace EPUBRenderer
 
         public FormattedText GetFormattedText(string Text, double FontSize)
         {
-            FlowDirection flowDirection;          
+            FlowDirection flowDirection;
             string DrawnText = "";
             if (renderer.Page.PageSettings.Vertical)
             {
                 flowDirection = FlowDirection.LeftToRight;
                 foreach (char c in Text)
-                {
+                {                    
                     if (GlobalSettings.VerticalVisualFixes.ContainsKey(c))
                     {
                         DrawnText += GlobalSettings.VerticalVisualFixes[c].Replacement + "\n";
@@ -93,7 +93,7 @@ namespace EPUBRenderer
                     {
                         DrawnText += c + "\n";
                     }
-                }               
+                }
             }
             else
             {
@@ -117,7 +117,7 @@ namespace EPUBRenderer
             {
                 res.LineHeight = PageRenderer.FontSize * PageRenderer.LineSpace;
             }
-           
+
             return res;
         }
 
@@ -129,10 +129,10 @@ namespace EPUBRenderer
                 case WritingFlow.VRTL:
                     return new Point(renderer.PageWidth - PageRenderer.FontSize * PageRenderer.LineSpace, 0);
                 case WritingFlow.VLTR:
-                    return new Point(PageRenderer.FontSize * PageRenderer.LineSpace, 0);                    ;           
+                    return new Point(PageRenderer.FontSize * PageRenderer.LineSpace, 0); ;
                 default:
                     throw new NotImplementedException();
-            }            
+            }
         }
 
         public Point GetPageEndPos()
@@ -153,9 +153,9 @@ namespace EPUBRenderer
             switch (renderer.Direction)
             {
                 case WritingFlow.VRTL:
-                  return  new Point( PageRenderer.FontSize / 2,0);         
+                    return new Point(PageRenderer.FontSize / 2, 0);
                 case WritingFlow.VLTR:
-                    return new Point(-PageRenderer.FontSize / 2, 0);   
+                    return new Point(-PageRenderer.FontSize / 2, 0);
                 default:
                     throw new NotImplementedException();
             }
@@ -186,10 +186,5 @@ namespace EPUBRenderer
                     throw new NotImplementedException();
             }
         }
-    }
-
-    public enum WritingFlow
-    {
-        VRTL, VLTR, HRTL, HLTR
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPUBReader
+namespace EPUBRenderer
 {
     public static class GlobalSettings
     {
@@ -20,9 +20,10 @@ namespace EPUBReader
             {'、',new SpecialCharacterInfo("、" ,0,0)},
             {'?',new SpecialCharacterInfo("?",0,0) },
             { 'ー',new SpecialCharacterInfo( "ｌ",0,0)},
-            { '─',new SpecialCharacterInfo( "ｌ",0,-0.25) }
+            { '─',new SpecialCharacterInfo( "ｌ",0,-0.25) } 
+        };
 
-            };
+        public static char[] PossibleLineBreaks = ", .」?！。─".ToCharArray();
     }
 
     public class SpecialCharacterInfo
