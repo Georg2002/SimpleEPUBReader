@@ -79,14 +79,12 @@
     <Compile Include="ChapterPosition.cs" />
     <Compile Include="GlobalSettings.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="PageRenderer2.cs" />
+    <Compile Include="PageRenderer.cs" />
     <Compile Include="Viewer.xaml.cs">
       <DependentUpon>Viewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PageRenderer.cs" />
-    <Compile Include="WritingDirection.cs" />
-    <Compile Include="WritingDirectionModifiers.cs" />
+    <Compile Include="FlowDirectionModifiers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj">

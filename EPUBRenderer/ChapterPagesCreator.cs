@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Navigation;
 
 namespace EPUBRenderer
 {
@@ -17,11 +18,12 @@ namespace EPUBRenderer
         public static double RubyFontSize = 0.5;
         public static double RubyOffSet = 1.5;
 
-        public static List<PageRenderer2> GetRenderPages(EpubPage Page, double Width, double Height)
+        public static List<PageRenderer> GetRenderPages(EpubPage Page, double Width, double Height)
         {
-            PageRenderer2 NewPage = new PageRenderer2(Page.PageSettings);
+            FlowDirectionModifiers.SetDirection(Page.PageSettings);
 
-            List<PageRenderer2> Pages = new List<PageRenderer2>();
+            PageRenderer NewPage = new PageRenderer(Page.PageSettings, Width, Height);            
+            List<PageRenderer> Pages = new List<PageRenderer>();
 
             foreach (var Line in Page.Lines)
             {
@@ -29,10 +31,10 @@ namespace EPUBRenderer
                 {
                     if (Part.Type == LinePartTypes.image)
                     {
-                        if (!NewPage.Fits(Part))
+                        if (!NewPage.Fits((ImageLinePart)Part))
                         {
                             Pages.Add(NewPage);
-                            NewPage = new PageRenderer2(Page.PageSettings);
+                            NewPage = new PageRenderer(Page.PageSettings, Width, Height);
                         }
                         NewPage.AddImage(Part);
                     }
@@ -48,10 +50,11 @@ namespace EPUBRenderer
                             var Words = TextPart.Text.Split(GlobalSettings.PossibleLineBreaks);
                             foreach (var Word in Words)
                             {
-                                if (!NewPage.Fits(Word))
+                                List<Writing> writings = NewPage.GetMainTextWritings(Word);
+                                if (!NewPage.InPage(writings.Last().WritingPosition))
                                 {
                                     Pages.Add(NewPage);
-                                    NewPage = new PageRenderer2(Page.PageSettings);
+                                    NewPage = new PageRenderer(Page.PageSettings, Width, Height);
                                 }
                                 NewPage.Write(Word);
                             }

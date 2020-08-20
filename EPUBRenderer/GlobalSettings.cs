@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace EPUBRenderer
 {
@@ -12,15 +13,15 @@ namespace EPUBRenderer
         //no brake space: " "
         public static Dictionary<char, SpecialCharacterInfo> VerticalVisualFixes = new Dictionary<char, SpecialCharacterInfo>()
             {
-            {'」',new SpecialCharacterInfo(" 」",0,0) },
-            {'「',new SpecialCharacterInfo("「 " ,0,0)},
-            {'『',new SpecialCharacterInfo("『 ",0,0) },
-            {'』',new SpecialCharacterInfo(" 』" ,0,0)},
-            {'。',new SpecialCharacterInfo(" 。" ,0,0)},
-            {'、',new SpecialCharacterInfo("、" ,0,0)},
-            {'?',new SpecialCharacterInfo("?",0,0) },
-            { 'ー',new SpecialCharacterInfo( "ｌ",0,0)},
-            { '─',new SpecialCharacterInfo( "ｌ",0,-0.25) } 
+            {'」',new SpecialCharacterInfo('」', new Vector(0,0), new Vector(0,0)) },
+            {'「',new SpecialCharacterInfo('「', new Vector(0,0), new Vector(0,0)) },
+            {'『',new SpecialCharacterInfo('『', new Vector(0,0), new Vector(0,0)) },
+            {'』',new SpecialCharacterInfo('』', new Vector(0,0), new Vector(0,0)) },
+            {'。',new SpecialCharacterInfo('。', new Vector(0,0), new Vector(0,0)) },
+            {'、',new SpecialCharacterInfo('、', new Vector(0,0), new Vector(0,0)) },
+            {'?',new SpecialCharacterInfo('?'    , new Vector(0,0), new Vector(0,0)) },
+            { 'ー',new SpecialCharacterInfo('ー' , new Vector(0,0), new Vector(0,0)) },
+            { '─',new SpecialCharacterInfo( '─'  , new Vector(0,0), new Vector(0,0)) }
         };
 
         public static char[] PossibleLineBreaks = ", .」?！。─".ToCharArray();
@@ -28,11 +29,12 @@ namespace EPUBRenderer
 
     public class SpecialCharacterInfo
     {
-        public string Replacement;
-        //in parts of the font size,positive means up
-        public double StartOffset;
-        public double EndOffset;
-        public SpecialCharacterInfo(string Replacement, double StartOffset, double EndOffset)
+        public char Replacement;
+        //in parts of the font size
+        public Vector StartOffset;
+        public Vector EndOffset;
+
+        public SpecialCharacterInfo(char Replacement, Vector StartOffset, Vector EndOffset)
         {
             this.Replacement = Replacement;
             this.StartOffset = StartOffset;

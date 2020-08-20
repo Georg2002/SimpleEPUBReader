@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,22 +24,6 @@ namespace EPUBRenderer
     /// </summary>
     public partial class Viewer : UserControl
     {
-        //separate images into new lines, if they aren't already
-        //merge
-        private EpubPage _EpubPage;
-        public EpubPage Page
-        {
-            get
-            {
-                return _EpubPage;
-            }
-            set
-            {
-                _EpubPage = value;
-                AddPages(value);
-            }
-        }
-
         private int _CurrentPage;
         public int CurrentPage
         {
@@ -52,7 +37,7 @@ namespace EPUBRenderer
 
         public int PageCount { get => Pages.Count; }
 
-        public List<PageRenderer2> Pages;
+        public List<PageRenderer> Pages;
 
         private void SetPage(int PageNumber)
         {
@@ -73,14 +58,19 @@ namespace EPUBRenderer
         public Viewer()
         {
             InitializeComponent();
-            Pages = new List<PageRenderer2>();
+            Pages = new List<PageRenderer>();
 
             var epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
+            SetToEpub(epub);
+            CurrentPage = 40;
+        }
+
+        public void SetToEpub(Epub epub)
+        {
             foreach (var Page in epub.Pages)
             {
                 Pages.AddRange(ChapterPagesCreator.GetRenderPages(Page, 1000, 700));
             }
-            CurrentPage = 40;
         }
     }
 }

@@ -86,10 +86,6 @@
     <Compile Include="EpubPageTests.cs" />
     <Compile Include="EpubTests.cs" />
     <Compile Include="HTMLTests.cs" />
-    <Compile Include="RendererTests\PageFullTests.cs" />
-    <Compile Include="RendererTests\LargestFittingPartTests.cs" />
-    <Compile Include="RendererTests\WrapTests.cs" />
-    <Compile Include="RendererTests\WrapNeededTests.cs" />
     <Compile Include="TestResources.cs" />
     <Compile Include="PackageInfoTest.cs" />
     <Compile Include="ZipTests.cs" />
@@ -113,6 +109,9 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="tocParserTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="RendererTests\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
