@@ -1,9 +1,4 @@
-﻿using CefSharp.Structs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 
 namespace EPUBRenderer
@@ -13,32 +8,37 @@ namespace EPUBRenderer
         //no brake space: " "
         public static Dictionary<char, SpecialCharacterInfo> VerticalVisualFixes = new Dictionary<char, SpecialCharacterInfo>()
             {
-            {'」',new SpecialCharacterInfo('」', new Vector(0,0), new Vector(0,0)) },
-            {'「',new SpecialCharacterInfo('「', new Vector(0,0), new Vector(0,0)) },
-            {'『',new SpecialCharacterInfo('『', new Vector(0,0), new Vector(0,0)) },
-            {'』',new SpecialCharacterInfo('』', new Vector(0,0), new Vector(0,0)) },
-            {'。',new SpecialCharacterInfo('。', new Vector(0,0), new Vector(0,0)) },
-            {'、',new SpecialCharacterInfo('、', new Vector(0,0), new Vector(0,0)) },
-            {'?',new SpecialCharacterInfo('?'    , new Vector(0,0), new Vector(0,0)) },
-            { 'ー',new SpecialCharacterInfo('ー' , new Vector(0,0), new Vector(0,0)) },
-            { '─',new SpecialCharacterInfo( '─'  , new Vector(0,0), new Vector(0,0)) }
+            {'」',new SpecialCharacterInfo('﹂',0, new Vector(0,0)) },
+            {'「',new SpecialCharacterInfo('﹁',0, new Vector(0,0)) },
+            {'（',new SpecialCharacterInfo('︵',0, new Vector(0,0)) },
+            {'）',new SpecialCharacterInfo('︶',0, new Vector(0,0)) },
+            {'『',new SpecialCharacterInfo('﹃',0, new Vector(-0,0)) },
+            {'』',new SpecialCharacterInfo('﹄',0, new Vector(0,0)) },
+            {'。',new SpecialCharacterInfo('。',0, new Vector(0.35,-0.6)) },
+            {'、',new SpecialCharacterInfo('、',-0.40, new Vector(0,-0.2)) },
+            {'？',new SpecialCharacterInfo('?',0, new Vector(0.2,0)) },
+            {'!',new SpecialCharacterInfo('!',0, new Vector(0,0)) },
+            {'！',new SpecialCharacterInfo('!',0, new Vector(0.5,0)) },
+            { 'ー',new SpecialCharacterInfo('|',0, new Vector(0,0.2)) },
+            { '─',new SpecialCharacterInfo( '|', -0.25, new Vector(0,0)) },
+            { '…',new SpecialCharacterInfo( '⋮', -0.41, new Vector(0,0)) }
         };
 
-        public static char[] PossibleLineBreaks = ", .」?！。─".ToCharArray();
+        public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）:\n\r　\t".ToCharArray();
     }
 
     public class SpecialCharacterInfo
     {
         public char Replacement;
         //in parts of the font size
-        public Vector StartOffset;
-        public Vector EndOffset;
+        public double WriteOffsetStart;
+        public Vector RenderOffset;
 
-        public SpecialCharacterInfo(char Replacement, Vector StartOffset, Vector EndOffset)
+        public SpecialCharacterInfo(char Replacement, double WriteOffsetStart, Vector RenderOffset)
         {
             this.Replacement = Replacement;
-            this.StartOffset = StartOffset;
-            this.EndOffset = EndOffset;
+            this.WriteOffsetStart = WriteOffsetStart;         
+            this.RenderOffset = RenderOffset;
         }
     }
 }

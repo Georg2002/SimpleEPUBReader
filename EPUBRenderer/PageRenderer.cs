@@ -1,10 +1,7 @@
 ﻿using EPUBParser;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -27,10 +24,12 @@ namespace EPUBRenderer
         private List<ImageInText> Images;
         private EpubSettings Settings;
 
-        public PageRenderer(EpubSettings pageSettings, double Width, double Height)
+        public PageRenderer(EpubSettings pageSettings, Vector PageSize)
         {
-            this.PageSize = new Vector(Width, Height);
+            this.PageSize = PageSize;
             this.Settings = pageSettings;
+            TextParts = new List<Writing>();
+            Images = new List<ImageInText>();
         }
 
         protected override void OnRender(DrawingContext Context)
@@ -40,16 +39,49 @@ namespace EPUBRenderer
 
             foreach (var TextPart in TextParts)
             {
+                TextPart.RenderPosition = FlowDirectionModifiers.SetRenderPos(TextPart);
                 FormattedText Text = GetText(TextPart);
                 Context.DrawText(Text, new Point(TextPart.RenderPosition.X, TextPart.RenderPosition.Y));
             }
+
+            foreach (var Image in Images)
+            {
+                if (Images.Count == 1 && TextParts.Count == 0)
+                {
+
+                    Vector Dimensions = new Vector(Image.Image.Width, Image.Image.Height);
+                    double ImageRatio = Dimensions.X / Dimensions.Y;
+                    double PageRatio = PageSize.X / PageSize.Y;
+                    Vector ScaleSize;
+                    Vector Start;
+                    if (ImageRatio > PageRatio)
+                    {
+                        ScaleSize = new Vector(PageSize.X, PageSize.Y / ImageRatio * PageRatio);
+                        Start = new Vector(0, (PageSize.Y - ScaleSize.Y) / 2);
+                    }
+                    else
+                    {
+                        ScaleSize = new Vector(PageSize.X * ImageRatio / PageRatio, PageSize.Y);
+                        Start = new Vector((PageSize.X - ScaleSize.X) / 2, 0);
+                    }
+                    Context.DrawImage(Image.Image, new Rect(Start.X, Start.Y, ScaleSize.X, ScaleSize.Y));
+                }
+                else
+                {
+                    Context.DrawImage(Image.Image, Image.Rectangle);
+                }
+            }
+
+            Context.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(0, 0, Width, Height));
         }
 
         private FormattedText GetText(Writing textPart)
         {
-            return new FormattedText(textPart.ToString(),
+            var Text = new FormattedText(textPart.Text.ToString(),
                  CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                  Typeface, textPart.FontSize, Brushes.Black, 1);
+            Text.TextAlignment = TextAlignment.Center;
+            return Text;
         }
 
         public bool Fits(ImageLinePart part)
@@ -65,79 +97,152 @@ namespace EPUBRenderer
                 Dimensions = new Vector(img.Width, img.Height);
             }
             Vector AfterImagePos = FlowDirectionModifiers.GetAfterImagePosition(CurrentWritePos, PageSize, Dimensions);
-            return InPage(AfterImagePos);
+            return FlowDirectionModifiers.InPage(AfterImagePos, PageSize);
         }
 
-        public bool InPage(Vector WritePos)
+        internal static string GetRuby(TextLinePart textPart)
         {
-            throw new NotImplementedException();
+            if (textPart.Type == LinePartTypes.sesame)
+            {
+                //change to real thing !!
+                return new string('+', textPart.Text.Length);
+            }
+            else
+            {
+                return textPart.Ruby;
+            }
         }
 
-        public List<Writing> GetMainTextWritings(string word)
+        internal bool InPage(Vector writingPosition)
+        {
+            return FlowDirectionModifiers.InPage(writingPosition, PageSize);
+        }
+
+        internal List<Writing> GetMainTextWritings(string word)
         {
             Vector WritingPosCopy = CurrentWritePos;
             List<Writing> Result = new List<Writing>();
             bool HadFix = false;
-            Vector StartOffset = new Vector();
-            Vector EndOffset = new Vector();
-            foreach (char c in word)
+
+            if (word == "")
             {
+                var Item = new Writing();
+                Item.Text = ' ';
+                Item.WritingPosition = WritingPosCopy;
+                Item.FontSize = 1;
+                Result.Add(Item);
+                return Result;
+            }
+
+            foreach (char c in word)
+            {             
+                double StartOffset = 0;
                 var NewItem = new Writing();
+                NewItem.FontSize = ChapterPagesCreator.FontSize;
                 if (Settings.Vertical)
                 {
                     if (GlobalSettings.VerticalVisualFixes.ContainsKey(c))
                     {
                         var Info = GlobalSettings.VerticalVisualFixes[c];
                         NewItem.Text = Info.Replacement;
-                        StartOffset = Info.StartOffset;
-                        EndOffset = Info.EndOffset;
+                        StartOffset = Info.WriteOffsetStart * ChapterPagesCreator.FontSize;
                         HadFix = true;
                     }
                     else
-                    {
                         NewItem.Text = c;
-                    }
                 }
                 else
-                {
-                    NewItem.Text = c;
-                }
-
-                NewItem.WritingPosition = WritingPosCopy;
+                { NewItem.Text = c; }
 
                 if (HadFix)
                 {
-                    NewItem.WritingPosition += StartOffset * ChapterPagesCreator.FontSize;
+                    NewItem.WritingPosition.Y += StartOffset;
+                    HadFix = false;
                 }
-                NewItem.RenderPosition = FlowDirectionModifiers.GetRenderPos(NewItem.WritingPosition);
-
-                WritingPosCopy = FlowDirectionModifiers.GetAfterWritingPosition(WritingPosCopy, NewItem);
-                if (HadFix)
-                {
-                    WritingPosCopy += EndOffset * ChapterPagesCreator.FontSize;
-                }
+                NewItem.WritingPosition += FlowDirectionModifiers.GetAfterWritingPosition(WritingPosCopy, NewItem);
+                WritingPosCopy = NewItem.WritingPosition;
+                Result.Add(NewItem);
             }
 
-            foreach (var Writing in Result)
+            if (FlowDirectionModifiers.NeedsToWrap(Result.Last().WritingPosition, PageSize))
             {
-                FlowDirectionModifiers.WrapIntoPage(Writing);
+               // if (TextParts.Count != 0)
+                {
+                    Vector StartPos = Result.First().WritingPosition;
+                    Vector ReferenceOffset = FlowDirectionModifiers.NewLinePosition(StartPos, PageSize) - StartPos;
+                    if (FlowDirectionModifiers.NeedsToWrap(Result.Last().WritingPosition + ReferenceOffset, PageSize))
+                    {
+                        foreach (var item in Result)
+                        {
+
+                        }
+                        Result.ForEach(a => FlowDirectionModifiers.WrapIntoPage(a, PageSize));
+                    }
+                    else
+                    {
+                        Result.ForEach(a => a.WritingPosition += ReferenceOffset);                     
+                    }
+                }
             }
             return Result;
         }
 
-        internal void Write(TextLinePart textPart)
+        internal List<Writing> GetRubyWritings(string ruby, List<Writing> mainTextWritings)
         {
-            throw new NotImplementedException();
+            List<Writing> Result = new List<Writing>();
+            Vector StartPosition = mainTextWritings.First().WritingPosition;
+            Vector EndPosition = mainTextWritings.Last().WritingPosition;
+            Vector Length = EndPosition - StartPosition;
+            Length = FlowDirectionModifiers.GetAfterWritingPosition(Length, mainTextWritings.First());
+            Vector Offset = Length / ruby.Length;
+            Offset = FlowDirectionModifiers.RubyMinimumDistance(Offset);
+            Vector RubyLength = Offset * ruby.Length;
+            Vector FirstLetterLength = FlowDirectionModifiers.GetAfterWritingPosition(RubyLength,
+                new Writing() { Text = ruby[0], FontSize = ChapterPagesCreator.FontSize * ChapterPagesCreator.RubyFontSize }) - RubyLength;
+            RubyLength = FirstLetterLength + RubyLength;
+            Vector Middle = EndPosition - (Length) / 2;
+            Vector RubyWritePosition = Middle - RubyLength / 2 + 2 * FirstLetterLength + FlowDirectionModifiers.GetRubyStartOffset();
+            foreach (char c in ruby)
+            {
+                char Text;
+                if (GlobalSettings.VerticalVisualFixes.ContainsKey(c))
+                {
+                    Text = GlobalSettings.VerticalVisualFixes[c].Replacement;
+                }
+                else
+                {
+                    Text = c;
+                }
+
+                var Writing = new Writing
+                {
+                    Text = Text,
+                    FontSize = ChapterPagesCreator.RubyFontSize * ChapterPagesCreator.FontSize,
+                    WritingPosition = RubyWritePosition
+                };
+                Result.Add(Writing);
+                RubyWritePosition += Offset;
+            }
+            return Result;
         }
 
-        public void AddImage(LinePart part)
+        internal void Write(List<Writing> writings)
         {
-            throw new NotImplementedException();
+            TextParts.AddRange(writings);
         }
 
-        public void Write(string word)
+        public void AddImage(ImageLinePart part)
         {
-            throw new NotImplementedException();
+            var Image = new ImageInText();
+            Image.Image = part.GetImage();
+            Vector Dimensions = new Vector(Image.Image.Width, Image.Image.Height);
+            if (CurrentWritePos != FlowDirectionModifiers.GetStartWritingPosition(PageSize))
+            {
+                CurrentWritePos = FlowDirectionModifiers.NewLinePosition(CurrentWritePos, PageSize);
+            }
+            Image.Rectangle = FlowDirectionModifiers.GetImageRect(CurrentWritePos, PageSize, Dimensions);
+            CurrentWritePos = FlowDirectionModifiers.GetAfterImagePosition(CurrentWritePos, PageSize, Dimensions);
+            Images.Add(Image);
         }
     }
 
@@ -145,7 +250,7 @@ namespace EPUBRenderer
     public class ImageInText
     {
         public ImageSource Image;
-        public Point RenderPosition;
+        public Rect Rectangle;
     }
 
     public class Writing

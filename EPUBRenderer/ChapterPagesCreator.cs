@@ -1,12 +1,7 @@
 ﻿using EPUBParser;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Navigation;
 
 namespace EPUBRenderer
 {
@@ -18,12 +13,18 @@ namespace EPUBRenderer
         public static double RubyFontSize = 0.5;
         public static double RubyOffSet = 1.5;
 
-        public static List<PageRenderer> GetRenderPages(EpubPage Page, double Width, double Height)
-        {
+        public static List<PageRenderer> GetRenderPages(EpubPage Page, Vector PageSize)
+        {           
             FlowDirectionModifiers.SetDirection(Page.PageSettings);
 
-            PageRenderer NewPage = new PageRenderer(Page.PageSettings, Width, Height);            
+            PageRenderer NewPage;
             List<PageRenderer> Pages = new List<PageRenderer>();
+            void GetNewPage()
+            {
+                NewPage = new PageRenderer(Page.PageSettings, PageSize);
+                NewPage.CurrentWritePos = FlowDirectionModifiers.GetStartWritingPosition(PageSize);               
+            }
+            GetNewPage();
 
             foreach (var Line in Page.Lines)
             {
@@ -31,38 +32,73 @@ namespace EPUBRenderer
                 {
                     if (Part.Type == LinePartTypes.image)
                     {
-                        if (!NewPage.Fits((ImageLinePart)Part))
+                        var ImagePart = (ImageLinePart)Part;
+                        if (!NewPage.Fits(ImagePart))
                         {
                             Pages.Add(NewPage);
-                            NewPage = new PageRenderer(Page.PageSettings, Width, Height);
+                            GetNewPage();
                         }
-                        NewPage.AddImage(Part);
+                        NewPage.AddImage(ImagePart);
                     }
                     else
                     {
                         var TextPart = (TextLinePart)Part;
                         if (TextPart.Type == LinePartTypes.sesame || !string.IsNullOrEmpty(TextPart.Ruby))
                         {
-                            NewPage.Write(TextPart);
+                            List<Writing> MainTextWritings = NewPage.GetMainTextWritings(TextPart.Text);
+                            if (!NewPage.InPage(MainTextWritings.Last().WritingPosition))
+                            {
+                                Pages.Add(NewPage);
+                                GetNewPage();
+                                MainTextWritings = NewPage.GetMainTextWritings(TextPart.Text);
+                            }
+
+                            NewPage.Write(MainTextWritings);
+                            NewPage.CurrentWritePos = MainTextWritings.Last().WritingPosition;
+                            string Ruby = PageRenderer.GetRuby(TextPart);
+                            List<Writing> RubyWritings = NewPage.GetRubyWritings(Ruby, MainTextWritings);
+                            NewPage.Write(RubyWritings);
                         }
                         else
                         {
-                            var Words = TextPart.Text.Split(GlobalSettings.PossibleLineBreaks);
+                            List<string> Words = new List<string>();
+                            int Index = 0;
+                            int SubstringIndex = 0;
+                            int Length = 0;
+                            foreach (var c in TextPart.Text)
+                            {
+                                Length++;
+                                if (GlobalSettings.PossibleLineBreaks.Contains(c))
+                                {
+                                    Words.Add(TextPart.Text.Substring(SubstringIndex, Length));
+                                    Length = 0;
+                                    SubstringIndex = Index + 1;
+                                }
+                                Index++;                                
+                            }
+                            Words.Add(TextPart.Text.Substring(SubstringIndex, Length));
                             foreach (var Word in Words)
                             {
-                                List<Writing> writings = NewPage.GetMainTextWritings(Word);
-                                if (!NewPage.InPage(writings.Last().WritingPosition))
+                                if (Word.Length == 0)
+                                {
+                                    continue;
+                                }
+                                List<Writing> MainTextWritings = NewPage.GetMainTextWritings(Word);
+                                if (!NewPage.InPage(MainTextWritings.Last().WritingPosition))
                                 {
                                     Pages.Add(NewPage);
-                                    NewPage = new PageRenderer(Page.PageSettings, Width, Height);
+                                    GetNewPage();
+                                    MainTextWritings = NewPage.GetMainTextWritings(Word);
                                 }
-                                NewPage.Write(Word);
+                                NewPage.CurrentWritePos = MainTextWritings.Last().WritingPosition;
+                                NewPage.Write(MainTextWritings);
                             }
-                        }
+                        }                        
                     }
                 }
+                NewPage.CurrentWritePos = FlowDirectionModifiers.NewLinePosition(NewPage.CurrentWritePos, PageSize);
             }
-
+            Pages.Add(NewPage);
             return Pages;
         }
     }

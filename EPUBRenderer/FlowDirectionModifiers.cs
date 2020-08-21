@@ -1,12 +1,6 @@
 ﻿using EPUBParser;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
 
 namespace EPUBRenderer
 {
@@ -14,14 +8,19 @@ namespace EPUBRenderer
     {
         public static WritingFlow Direction;
 
-        internal static Vector GetNewLinePos(Vector currentWritePos, Vector pageSize)
+        internal static Vector GetAfterImagePosition(Vector currentWritePos, Vector PageSize, Vector dimensions)
         {
-            throw new NotImplementedException();
-        }
+            Vector AfterImagePos = NewLinePosition(currentWritePos, PageSize);
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    AfterImagePos.X -= dimensions.X;
 
-        internal static Vector GetAfterImagePosition(Vector currentWritePos, Vector pageSize, Vector dimensions)
-        {
-            throw new NotImplementedException();
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return NewLinePosition(AfterImagePos, PageSize);
         }
 
         internal static void SetDirection(EpubSettings pageSettings)
@@ -36,6 +35,17 @@ namespace EPUBRenderer
                 EnumIndex += 1;
             }
             Direction = (WritingFlow)EnumIndex;
+        }
+
+        internal static Vector GetStartWritingPosition(Vector PageSize)
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    return new Vector(PageSize.X - ChapterPagesCreator.FontSize * ChapterPagesCreator.LineSpace, 0);
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         internal static bool InPage(Vector Position, Vector PageSize)
@@ -60,19 +70,101 @@ namespace EPUBRenderer
             }
         }
 
-        internal static Vector GetRenderPos(Vector writingPosition)
+        internal static Vector GetAfterWritingPosition(Vector writingPos, Writing newItem)
         {
-            throw new NotImplementedException();
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    return new Vector(writingPos.X, writingPos.Y + newItem.FontSize);
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
-        internal static Vector GetAfterWritingPosition(Vector writingPosCopy, Writing newItem)
+        internal static void WrapIntoPage(Writing Writing, Vector PageSize)
         {
-            throw new NotImplementedException();
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    int Wraps = (int)(Writing.WritingPosition.Y / (PageSize.Y + 0.01));
+                    Writing.WritingPosition.Y = Writing.WritingPosition.Y - PageSize.Y * Wraps;
+                    Writing.WritingPosition.X -= Wraps * ChapterPagesCreator.FontSize * ChapterPagesCreator.LineSpace;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
-        internal static void WrapIntoPage(Writing writing)
+        internal static Vector NewLinePosition(Vector WritingPosition, Vector PageSize)
         {
-            throw new NotImplementedException();
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    WritingPosition.Y = ChapterPagesCreator.FontSize;
+                    WritingPosition.X -= ChapterPagesCreator.FontSize * ChapterPagesCreator.LineSpace;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return WritingPosition;
+        }
+
+        internal static Vector GetRubyStartOffset()
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    return new Vector(ChapterPagesCreator.FontSize * ChapterPagesCreator.LineSpace * 0.6,- ChapterPagesCreator.FontSize * 0.05);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector SetRenderPos(Writing Writing)
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    Vector Offset = new Vector();
+                    if (GlobalSettings.VerticalVisualFixes.ContainsKey(Writing.Text))
+                    {
+                        var Info = GlobalSettings.VerticalVisualFixes[Writing.Text];
+                        Offset = Info.RenderOffset * Writing.FontSize;
+                    }
+                    return Offset + new Vector(Writing.FontSize / 2 + Writing.WritingPosition.X, Writing.WritingPosition.Y - Writing.FontSize);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Rect GetImageRect(Vector basePosition, Vector pageSize, Vector Dimensions)
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    return new Rect(basePosition.X - Dimensions.X,
+                      (basePosition.Y + pageSize.Y + Dimensions.Y) / 2, Dimensions.X, Dimensions.Y);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector RubyMinimumDistance(Vector offset)
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    if (offset.Y < ChapterPagesCreator.RubyFontSize * ChapterPagesCreator.FontSize)
+                    {
+                        return new Vector(0, ChapterPagesCreator.RubyFontSize * ChapterPagesCreator.FontSize);
+                    }
+                    else
+                    {
+                        return offset;
+                    }
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 

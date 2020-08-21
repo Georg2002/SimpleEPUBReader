@@ -296,6 +296,7 @@ namespace EPUBParser
                 }
                 catch (Exception)
                 {
+                    Logger.Report(string.Format("failed to download image from \"{0}\"", Text), LogType.Error);
                 }
             }
             else
@@ -310,7 +311,7 @@ namespace EPUBParser
             {
                 Logger.Report(string.Format("Image from \"{0}\" not found", Text), LogType.Error);
                 return;
-            }
+            }          
         }
     }
 

@@ -12,9 +12,8 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="8*"/>
             <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions>
-
-        <Renderer:Viewer x:Name="Renderer" Grid.Column="1"/>
+        </Grid.ColumnDefinitions> 
+        <Renderer:Viewer x:Name="Viewer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         <Button Grid.Column="0" Click="Button_Click"/>
         <Button Grid.Column="2" Click="Button_Click_1"/>
     </Grid>

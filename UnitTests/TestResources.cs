@@ -36,18 +36,5 @@ namespace UnitTests
         {
             File.WriteAllLines(@"..\..\..\..\TestLog.txt", EPUBParser.Logger.Log);
         }
-
-        public static PageRenderer CommonInit()
-        {
-            PageRenderer.FontSize = 10;
-            PageRenderer.LineSpace = 2;
-
-          var  renderer = new PageRenderer
-            {
-                PageHeight = 1000,
-                PageWidth = 500,
-            };           
-            return renderer;
-        }
     }
 }
