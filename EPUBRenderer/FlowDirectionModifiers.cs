@@ -81,20 +81,6 @@ namespace EPUBRenderer
             }
         }
 
-        internal static void WrapIntoPage(Writing Writing, Vector PageSize)
-        {
-            switch (Direction)
-            {
-                case WritingFlow.VRTL:
-                    int Wraps = (int)(Writing.WritingPosition.Y / (PageSize.Y + 0.01));
-                    Writing.WritingPosition.Y = Writing.WritingPosition.Y - PageSize.Y * Wraps;
-                    Writing.WritingPosition.X -= Wraps * ChapterPagesCreator.FontSize * ChapterPagesCreator.LineSpace;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
         internal static Vector NewLinePosition(Vector WritingPosition, Vector PageSize)
         {
             switch (Direction)

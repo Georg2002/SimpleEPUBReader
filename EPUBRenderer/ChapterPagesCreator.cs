@@ -20,7 +20,7 @@ namespace EPUBRenderer
             PageRenderer NewPage;
             List<PageRenderer> Pages = new List<PageRenderer>();
             void GetNewPage()
-            {
+            {               
                 NewPage = new PageRenderer(Page.PageSettings, PageSize);
                 NewPage.CurrentWritePos = FlowDirectionModifiers.GetStartWritingPosition(PageSize);               
             }
@@ -33,7 +33,7 @@ namespace EPUBRenderer
                     if (Part.Type == LinePartTypes.image)
                     {
                         var ImagePart = (ImageLinePart)Part;
-                        if (!NewPage.Fits(ImagePart))
+                        if (!NewPage.Fits(ImagePart) && (Line.Parts.Count > 1 || Page.Lines.Count >1 ))
                         {
                             Pages.Add(NewPage);
                             GetNewPage();

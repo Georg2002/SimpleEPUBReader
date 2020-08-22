@@ -6,14 +6,18 @@
         xmlns:local="clr-namespace:EPUBReader"
         xmlns:Renderer="clr-namespace:EPUBRenderer;assembly=EPUBRenderer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
+        Title="MainWindow" Height="450" Width="800" WindowState="Maximized"
+        Loaded="Window_Loaded" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="8*"/>
             <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions> 
-        <Renderer:Viewer x:Name="Viewer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </Grid.ColumnDefinitions>
+        <Rectangle x:Name="SizeRect"  Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        <Renderer:Viewer x:Name="Viewer" Width="{Binding ElementName=SizeRect, Path=ActualWidth}"
+                         Height="{Binding ElementName=SizeRect, Path=ActualHeight}"
+                         Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         <Button Grid.Column="0" Click="Button_Click"/>
         <Button Grid.Column="2" Click="Button_Click_1"/>
     </Grid>

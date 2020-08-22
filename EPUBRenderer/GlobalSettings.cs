@@ -14,7 +14,7 @@ namespace EPUBRenderer
             {'）',new SpecialCharacterInfo('︶',0, new Vector(0,0)) },
             {'『',new SpecialCharacterInfo('﹃',0, new Vector(-0,0)) },
             {'』',new SpecialCharacterInfo('﹄',0, new Vector(0,0)) },
-            {'。',new SpecialCharacterInfo('。',0, new Vector(0.35,-0.6)) },
+            {'。',new SpecialCharacterInfo('。',0, new Vector(0.32,-0.6)) },
             {'、',new SpecialCharacterInfo('、',-0.40, new Vector(0,-0.2)) },
             {'？',new SpecialCharacterInfo('?',0, new Vector(0.2,0)) },
             {'!',new SpecialCharacterInfo('!',0, new Vector(0,0)) },

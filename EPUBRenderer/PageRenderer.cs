@@ -20,9 +20,10 @@ namespace EPUBRenderer
 
         public Vector PageSize;
 
-        private List<Writing> TextParts;
-        private List<ImageInText> Images;
+        public List<Writing> TextParts;
+        public List<ImageInText> Images;
         private EpubSettings Settings;
+        private bool Viewing = false;
 
         public PageRenderer(EpubSettings pageSettings, Vector PageSize)
         {
@@ -32,10 +33,25 @@ namespace EPUBRenderer
             Images = new List<ImageInText>();
         }
 
+        public void Load()
+        {
+            Viewing = true;
+            InvalidateVisual();
+        }
+
+        public void Unload()
+        {
+            Viewing = false;
+            InvalidateVisual();
+        }
+
         protected override void OnRender(DrawingContext Context)
         {
             Width = PageSize.X;
             Height = PageSize.Y;
+
+            if (!Viewing)
+                return;
 
             foreach (var TextPart in TextParts)
             {
@@ -48,7 +64,6 @@ namespace EPUBRenderer
             {
                 if (Images.Count == 1 && TextParts.Count == 0)
                 {
-
                     Vector Dimensions = new Vector(Image.Image.Width, Image.Image.Height);
                     double ImageRatio = Dimensions.X / Dimensions.Y;
                     double PageRatio = PageSize.X / PageSize.Y;
@@ -71,7 +86,6 @@ namespace EPUBRenderer
                     Context.DrawImage(Image.Image, Image.Rectangle);
                 }
             }
-
             Context.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(0, 0, Width, Height));
         }
 
@@ -104,8 +118,7 @@ namespace EPUBRenderer
         {
             if (textPart.Type == LinePartTypes.sesame)
             {
-                //change to real thing !!
-                return new string('+', textPart.Text.Length);
+                return new string('﹅', textPart.Text.Length);
             }
             else
             {
@@ -135,7 +148,7 @@ namespace EPUBRenderer
             }
 
             foreach (char c in word)
-            {             
+            {
                 double StartOffset = 0;
                 var NewItem = new Writing();
                 NewItem.FontSize = ChapterPagesCreator.FontSize;
@@ -164,25 +177,34 @@ namespace EPUBRenderer
                 Result.Add(NewItem);
             }
 
+            if (word.Contains("体に掛け"))
+            {
+                ;
+            }
             if (FlowDirectionModifiers.NeedsToWrap(Result.Last().WritingPosition, PageSize))
             {
-               // if (TextParts.Count != 0)
+                Vector StartPos = Result.First().WritingPosition;
+                Vector ReferenceOffset = FlowDirectionModifiers.NewLinePosition(StartPos, PageSize) - StartPos;
+                if (FlowDirectionModifiers.NeedsToWrap(Result.Last().WritingPosition + ReferenceOffset, PageSize))
                 {
-                    Vector StartPos = Result.First().WritingPosition;
-                    Vector ReferenceOffset = FlowDirectionModifiers.NewLinePosition(StartPos, PageSize) - StartPos;
-                    if (FlowDirectionModifiers.NeedsToWrap(Result.Last().WritingPosition + ReferenceOffset, PageSize))
+                    ReferenceOffset = new Vector();
+                    foreach (var item in Result)
                     {
-                        foreach (var item in Result)
+                        var NewPos = item.WritingPosition + ReferenceOffset;
+                        if (FlowDirectionModifiers.NeedsToWrap(NewPos, PageSize))
                         {
-
+                           ReferenceOffset = FlowDirectionModifiers.NewLinePosition(NewPos, PageSize) - item.WritingPosition;
+                            NewPos = item.WritingPosition + ReferenceOffset;
                         }
-                        Result.ForEach(a => FlowDirectionModifiers.WrapIntoPage(a, PageSize));
+                        item.WritingPosition = NewPos;
                     }
-                    else
-                    {
-                        Result.ForEach(a => a.WritingPosition += ReferenceOffset);                     
-                    }
+
                 }
+                else
+                {
+                    Result.ForEach(a => a.WritingPosition += ReferenceOffset);
+                }
+
             }
             return Result;
         }
