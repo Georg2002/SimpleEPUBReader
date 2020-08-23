@@ -35,7 +35,8 @@ namespace EPUBReader
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
-            Viewer.SetToEpub(epub);       
+            Viewer.SetToEpub(epub);
+            Viewer.CurrentPageNumber = 40;
         }
 
         private void ChangeSize(object sender, EventArgs e)

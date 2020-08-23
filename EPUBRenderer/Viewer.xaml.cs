@@ -19,7 +19,6 @@ namespace EPUBRenderer
         public int CurrentPageNumber
         {
             get => _CurrentPage;
-
             set
             {
                 SetPage(value);

@@ -100,7 +100,8 @@ namespace EPUBRenderer
             switch (Direction)
             {
                 case WritingFlow.VRTL:
-                    return new Vector(ChapterPagesCreator.FontSize * ChapterPagesCreator.LineSpace * 0.6,- ChapterPagesCreator.FontSize * 0.05);
+                    return new Vector(ChapterPagesCreator.FontSize * ChapterPagesCreator.RubyOffSet,
+                      ChapterPagesCreator.FontSize * ChapterPagesCreator.RubyFontSize * 0.7);
                 default:
                     throw new NotImplementedException();
             }

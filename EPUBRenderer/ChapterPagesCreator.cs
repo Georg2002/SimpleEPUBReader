@@ -9,9 +9,9 @@ namespace EPUBRenderer
     {
         public static double FontSize = 25;
         //all in times font size
-        public static double LineSpace = 2;
-        public static double RubyFontSize = 0.5;
-        public static double RubyOffSet = 1.5;
+        public static double LineSpace = 1.8;
+        public static double RubyFontSize =0.5;
+        public static double RubyOffSet = 1.1;
 
         public static List<PageRenderer> GetRenderPages(EpubPage Page, Vector PageSize)
         {           
@@ -61,20 +61,22 @@ namespace EPUBRenderer
                         }
                         else
                         {
-                            List<string> Words = new List<string>();
-                            int Index = 0;
+                            List<string> Words = new List<string>();                           
                             int SubstringIndex = 0;
                             int Length = 0;
-                            foreach (var c in TextPart.Text)
+                            for (int i = 0; i < TextPart.Text.Length; i++)
                             {
+                                var c = TextPart.Text[i];       
                                 Length++;
                                 if (GlobalSettings.PossibleLineBreaks.Contains(c))
                                 {
-                                    Words.Add(TextPart.Text.Substring(SubstringIndex, Length));
-                                    Length = 0;
-                                    SubstringIndex = Index + 1;
-                                }
-                                Index++;                                
+                                    if (i == TextPart.Text.Length - 1 || !GlobalSettings.PossibleLineBreaks.Contains(TextPart.Text[i+1]))
+                                    {
+                                        Words.Add(TextPart.Text.Substring(SubstringIndex, Length));
+                                        Length = 0;
+                                        SubstringIndex = i + 1;
+                                    }                                    
+                                }                                                            
                             }
                             Words.Add(TextPart.Text.Substring(SubstringIndex, Length));
                             foreach (var Word in Words)

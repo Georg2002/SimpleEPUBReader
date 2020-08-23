@@ -132,7 +132,7 @@ namespace EPUBRenderer
         }
 
         internal List<Writing> GetMainTextWritings(string word)
-        {
+        {    
             Vector WritingPosCopy = CurrentWritePos;
             List<Writing> Result = new List<Writing>();
             bool HadFix = false;
@@ -176,11 +176,6 @@ namespace EPUBRenderer
                 WritingPosCopy = NewItem.WritingPosition;
                 Result.Add(NewItem);
             }
-
-            if (word.Contains("体に掛け"))
-            {
-                ;
-            }
             if (FlowDirectionModifiers.NeedsToWrap(Result.Last().WritingPosition, PageSize))
             {
                 Vector StartPos = Result.First().WritingPosition;
@@ -193,7 +188,7 @@ namespace EPUBRenderer
                         var NewPos = item.WritingPosition + ReferenceOffset;
                         if (FlowDirectionModifiers.NeedsToWrap(NewPos, PageSize))
                         {
-                           ReferenceOffset = FlowDirectionModifiers.NewLinePosition(NewPos, PageSize) - item.WritingPosition;
+                            ReferenceOffset = FlowDirectionModifiers.NewLinePosition(NewPos, PageSize) - item.WritingPosition;
                             NewPos = item.WritingPosition + ReferenceOffset;
                         }
                         item.WritingPosition = NewPos;
@@ -209,21 +204,18 @@ namespace EPUBRenderer
             return Result;
         }
 
-        internal List<Writing> GetRubyWritings(string ruby, List<Writing> mainTextWritings)
+        public List<Writing> GetRubyWritings(string ruby, List<Writing> mainTextWritings)
         {
             List<Writing> Result = new List<Writing>();
             Vector StartPosition = mainTextWritings.First().WritingPosition;
+            Vector FirstWritingLength = FlowDirectionModifiers.GetAfterWritingPosition(new Vector(), mainTextWritings.First());
+            StartPosition -= FirstWritingLength;
             Vector EndPosition = mainTextWritings.Last().WritingPosition;
             Vector Length = EndPosition - StartPosition;
-            Length = FlowDirectionModifiers.GetAfterWritingPosition(Length, mainTextWritings.First());
-            Vector Offset = Length / ruby.Length;
-            Offset = FlowDirectionModifiers.RubyMinimumDistance(Offset);
-            Vector RubyLength = Offset * ruby.Length;
-            Vector FirstLetterLength = FlowDirectionModifiers.GetAfterWritingPosition(RubyLength,
-                new Writing() { Text = ruby[0], FontSize = ChapterPagesCreator.FontSize * ChapterPagesCreator.RubyFontSize }) - RubyLength;
-            RubyLength = FirstLetterLength + RubyLength;
-            Vector Middle = EndPosition - (Length) / 2;
-            Vector RubyWritePosition = Middle - RubyLength / 2 + 2 * FirstLetterLength + FlowDirectionModifiers.GetRubyStartOffset();
+            Vector Offset = Length / ruby.Length;      
+            Offset = FlowDirectionModifiers.RubyMinimumDistance(Offset);           
+            Vector Middle = (StartPosition + EndPosition) / 2;
+            Vector RubyWritePosition = Middle - Offset * (ruby.Length - 1) / 2+FlowDirectionModifiers.GetRubyStartOffset();
             foreach (char c in ruby)
             {
                 char Text;
