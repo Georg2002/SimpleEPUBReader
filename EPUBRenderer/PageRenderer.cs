@@ -22,6 +22,7 @@ namespace EPUBRenderer
 
         public List<Writing> TextParts;
         public List<ImageInText> Images;
+        public List<Marking> Markings;
         private EpubSettings Settings;
         private bool Viewing = false;
 
@@ -31,6 +32,7 @@ namespace EPUBRenderer
             this.Settings = pageSettings;
             TextParts = new List<Writing>();
             Images = new List<ImageInText>();
+            Markings = new List<Marking>();
         }
 
         public void Load()
@@ -87,6 +89,29 @@ namespace EPUBRenderer
                 }
             }
             Context.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(0, 0, Width, Height));
+
+            foreach (var Marking in Markings)
+            {
+                if (Marking.CharEndIndex >= TextParts.Count)
+                {
+                    Marking.CharEndIndex = TextParts.Count - 1;
+                }
+                if (Marking.CharStartIndex < 0)
+                {
+                    Marking.CharStartIndex = 0;
+                }
+                var WritingsBetween = TextParts.GetRange(Marking.CharStartIndex, 1 + Marking.CharEndIndex - Marking.CharStartIndex);
+                foreach (var Writing in WritingsBetween)
+                {
+                    Vector Size = FlowDirectionModifiers.GetMarkingSize();
+                    var FirstPoint = new Point(Writing.WritingPosition.X, Writing.RenderPosition.Y );
+                    Vector MarkingOffset = FlowDirectionModifiers.GetMarkingOffset();
+                    FirstPoint.Offset(MarkingOffset.X, MarkingOffset.Y);
+                    var SecondPoint = FirstPoint;
+                    SecondPoint.Offset(Size.X, Size.Y);
+                    Context.DrawRectangle(Marking.Color, null, new Rect(FirstPoint, SecondPoint));                   
+                }
+            }            
         }
 
         private FormattedText GetText(Writing textPart)
@@ -132,7 +157,7 @@ namespace EPUBRenderer
         }
 
         internal List<Writing> GetMainTextWritings(string word)
-        {    
+        {
             Vector WritingPosCopy = CurrentWritePos;
             List<Writing> Result = new List<Writing>();
             bool HadFix = false;
@@ -212,10 +237,10 @@ namespace EPUBRenderer
             StartPosition -= FirstWritingLength;
             Vector EndPosition = mainTextWritings.Last().WritingPosition;
             Vector Length = EndPosition - StartPosition;
-            Vector Offset = Length / ruby.Length;      
-            Offset = FlowDirectionModifiers.RubyMinimumDistance(Offset);           
+            Vector Offset = Length / ruby.Length;
+            Offset = FlowDirectionModifiers.RubyMinimumDistance(Offset);
             Vector Middle = (StartPosition + EndPosition) / 2;
-            Vector RubyWritePosition = Middle - Offset * (ruby.Length - 1) / 2+FlowDirectionModifiers.GetRubyStartOffset();
+            Vector RubyWritePosition = Middle - Offset * (ruby.Length - 1) / 2 + FlowDirectionModifiers.GetRubyStartOffset();
             foreach (char c in ruby)
             {
                 char Text;
@@ -265,6 +290,21 @@ namespace EPUBRenderer
     {
         public ImageSource Image;
         public Rect Rectangle;
+    }
+
+    public class Marking
+    {
+        public Marking() { }
+        public Marking(int CharStartIndex, int CharEndIndex, Brush Color)
+        {
+            this.CharStartIndex = CharStartIndex;
+            this.CharEndIndex = CharEndIndex;
+            this.Color = Color;
+        }
+
+        public Brush Color;
+        public int CharStartIndex;
+        public int CharEndIndex;
     }
 
     public class Writing

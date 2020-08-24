@@ -15,7 +15,6 @@ namespace EPUBRenderer
             {
                 case WritingFlow.VRTL:
                     AfterImagePos.X -= dimensions.X;
-
                     break;
                 default:
                     throw new NotImplementedException();
@@ -119,6 +118,28 @@ namespace EPUBRenderer
                         Offset = Info.RenderOffset * Writing.FontSize;
                     }
                     return Offset + new Vector(Writing.FontSize / 2 + Writing.WritingPosition.X, Writing.WritingPosition.Y - Writing.FontSize);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector GetMarkingOffset()
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    return new Vector(0, ChapterPagesCreator.FontSize * 0.2);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector GetMarkingSize()
+        {
+            switch (Direction)
+            {
+                case WritingFlow.VRTL:
+                    return new Vector(ChapterPagesCreator.FontSize, ChapterPagesCreator.FontSize);
                 default:
                     throw new NotImplementedException();
             }

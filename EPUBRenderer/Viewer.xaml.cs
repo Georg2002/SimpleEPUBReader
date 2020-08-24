@@ -1,8 +1,10 @@
 ﻿using EPUBParser;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace EPUBRenderer
 {
@@ -28,6 +30,8 @@ namespace EPUBRenderer
         public int PageCount { get => Pages.Count; }
 
         public List<PageRenderer> Pages;
+
+        public List<Marking> Markings;
 
         private void SetPage(int PageNumber)
         {
@@ -91,7 +95,7 @@ namespace EPUBRenderer
 
             var CurrentPage = Pages[CurrentPageNumber - 1];
             ImageSum = ImageSum + 1;
-            CharSum = CharSum  + 1;
+            CharSum = CharSum + 1;
             if (CurrentPage.TextParts.Count == 0)
             {
                 PageImgIndex = ImageSum - 1;
@@ -128,18 +132,20 @@ namespace EPUBRenderer
         {
             InitializeComponent();
             Pages = new List<PageRenderer>();
+            Markings = new List<Marking>();
         }
 
         public void RefreshSize()
         {
-            SetToEpub(epub);
+            SetToEpub(epub, Markings);
             SetPageByIndex(PageCharIndex, PageImgIndex);
         }
 
-        public void SetToEpub(Epub epub)
+        public void SetToEpub(Epub epub, List<Marking> Markings)
         {
             Pages.Clear();
             this.epub = epub;
+            this.Markings = Markings;
             if (Width == 0 || Height == 0)
             {
                 return;
@@ -147,6 +153,20 @@ namespace EPUBRenderer
             foreach (var Page in epub.Pages)
             {
                 Pages.AddRange(ChapterPagesCreator.GetRenderPages(Page, new Vector(Width - 30, Height - 30)));
+            }
+            int CharSum = 0;
+            int CharSumLast = 0;
+            foreach (var Page in Pages)
+            {
+                CharSum += Page.TextParts.Count;
+                var MarkingsInPage = Markings.Where(a =>
+                (a.CharEndIndex < CharSum && a.CharEndIndex >= CharSumLast) ||
+                (a.CharStartIndex >= CharSumLast && a.CharStartIndex < CharSum));
+                foreach (var Marking in MarkingsInPage)
+                {
+                    Page.Markings.Add(new Marking(Marking.CharStartIndex - CharSumLast, Marking.CharEndIndex - CharSumLast, Marking.Color));
+                }
+                CharSumLast = CharSum;
             }
         }
     }

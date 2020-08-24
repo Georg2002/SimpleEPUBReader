@@ -3,6 +3,8 @@ using EPUBRenderer;
 using System.Windows.Threading;
 using System.Windows;
 using System;
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace EPUBReader
 {
@@ -35,8 +37,9 @@ namespace EPUBReader
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
-            Viewer.SetToEpub(epub);
-            Viewer.CurrentPageNumber = 40;
+            var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
+            Viewer.SetToEpub(epub, new List<Marking>() { new Marking(3, 5, Red) , new Marking(10, 10, Red), new Marking(12, 113, Red) }) ;
+            Viewer.CurrentPageNumber = 0;
         }
 
         private void ChangeSize(object sender, EventArgs e)
