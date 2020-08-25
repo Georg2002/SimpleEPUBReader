@@ -92,8 +92,8 @@ namespace EPUBRenderer
             }
 
             var CurrentPage = Pages[CurrentPageNumber - 1];
-            ImageSum = ImageSum + 1;
-            CharSum = CharSum + 1;
+            ImageSum += 1;
+            CharSum += 1;
             if (CurrentPage.TextParts.Count == 0)
             {
                 PageImgIndex = ImageSum - 1;

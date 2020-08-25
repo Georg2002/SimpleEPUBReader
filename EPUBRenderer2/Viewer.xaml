@@ -6,7 +6,5 @@
              xmlns:local="clr-namespace:EPUBRenderer2"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    <local:PageRenderer  x:Name="Renderer" Margin="10"/>
 </UserControl>

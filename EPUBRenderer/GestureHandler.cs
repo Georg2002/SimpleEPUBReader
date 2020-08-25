@@ -70,8 +70,7 @@ namespace EPUBRenderer
             }
             MouseLeftDown = Mouse.LeftButton == MouseButtonState.Pressed;
             DateTime Now = DateTime.Now;
-            var Delta = MousePos - LastMousePos;
-            Delta = Delta / Now.Subtract(LastMove).TotalSeconds;
+            var Delta = (MousePos - LastMousePos) / Now.Subtract(LastMove).TotalSeconds;        
 
             foreach (var Gesture in Gestures)
             {

@@ -7,12 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Drawing;
 
 namespace EPUBRenderer2
 {
-    public class Chapter
+    public class RenderPage
     {
-        public List<TextElement> TextElements;
+        public List<List<TextElement>> TextElements;
+        public int CurrentPage;
+        public double Offset;
         public double PageJumpSize;
     }
 
@@ -32,14 +35,13 @@ namespace EPUBRenderer2
                 return new FormattedText(Text.ToString(), CultureInfo.InvariantCulture,
                     GlobalSettings.NormalFlowDirection, GlobalSettings.NormalTypeface,
                     FontSize, GlobalSettings.NormalFontColor, 1)
-                { LineHeight = FontSize };
+                { LineHeight = FontSize, TextAlignment = TextAlignment.Center };
             }
         }
         public override void SetSize()
-        {
-            var SizeTemplate = FormattedText;
-            Size.X = SizeTemplate.Width;
-            Size.Y = SizeTemplate.Height;
+        {           
+            Size.X = FontSize;
+            Size.Y = FontSize;
         }
         public Letter(char Letter, double FontSize)
         {
@@ -47,31 +49,52 @@ namespace EPUBRenderer2
             this.FontSize = FontSize;
             this.Text = Letter;
         }
+        public override string ToString()
+        {
+            return Text.ToString();
+        }
     }
 
     public class RubyElement : Letter
     {
         //a ruby word always belongs to the normal word in front of it
-        public RubyElement(char Letter, double FontSize) : base (Letter, FontSize)
+        public RubyElement(char Letter, double FontSize) : base(Letter, FontSize)
         {
-            ElementType = TextElementType.RubyLetter;         
+            ElementType = TextElementType.RubyLetter;
         }
     }
 
     public class ImageInText : TextElement
     {
-        public ImageSource Image;
+        private ImageSource _Image;
+        public ImageSource Image
+        {
+            get => _Image;
+            set
+            {
+                _Image = value;
+                SetSize();
+            }
+        }
         public override void SetSize()
         {
-            Size.X = Image.Width;
-            Size.Y = Image.Height;
+            if (Image == null)
+            {
+                Size.X = GlobalSettings.ErrorRect.Width;
+                Size.Y = GlobalSettings.ErrorRect.Height;
+            }
+            else
+            {
+                Size.X = Image.Width;
+                Size.Y = Image.Height;
+            }
         }
         public ImageInText(ImageSource Source)
         {
             ElementType = TextElementType.Image;
             Image = Source;
         }
-    }   
+    }
 
     public class BreakElement : TextElement
     {
@@ -95,6 +118,6 @@ namespace EPUBRenderer2
 
     public enum TextElementType
     {
-        Letter,RubyLetter, Image, Break
+        Letter, RubyLetter, Image, Break
     }
 }

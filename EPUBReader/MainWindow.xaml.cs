@@ -14,7 +14,7 @@ namespace EPUBReader
     public partial class MainWindow : Window
     {      
         private Epub epub;
-        private DispatcherTimer ResizeTimer = new DispatcherTimer();
+        private readonly DispatcherTimer ResizeTimer = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -39,7 +39,6 @@ namespace EPUBReader
             epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
             var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
             Viewer.SetToEpub(epub);
-            Viewer.CurrentPageNumber = 0;
         }
 
         private void ChangeSize(object sender, EventArgs e)

@@ -56,6 +56,7 @@
       <DependentUpon>Viewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="WordSplitter.cs" />
+    <Compile Include="WritingDirectionModifiers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Viewer.xaml">

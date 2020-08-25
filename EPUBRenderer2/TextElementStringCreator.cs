@@ -26,6 +26,7 @@ namespace EPUBRenderer2
                     else
                     {
                         var TextPart = (TextLinePart)Part;
+                        if (string.IsNullOrEmpty(TextPart.Text)) continue;                       
                         if (TextPart.Type == LinePartTypes.sesame)
                         {
                             TextPart.Ruby = new string('﹅', TextPart.Text.Length);
@@ -45,9 +46,12 @@ namespace EPUBRenderer2
                         NewWord = new List<TextElement>();
                     }
                 }
-                NewWord.Add(new BreakElement());
-                Result.Add(NewWord);
-                NewWord = new List<TextElement>();
+                if (Line != Lines.Last())
+                {
+                    NewWord.Add(new BreakElement());
+                    Result.Add(NewWord);
+                    NewWord = new List<TextElement>();
+                }               
             }
             return Result;
         }
