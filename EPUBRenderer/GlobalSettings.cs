@@ -14,12 +14,12 @@ namespace EPUBRenderer
             {'）',new SpecialCharacterInfo('︶',0, new Vector(0,0)) },
             {'『',new SpecialCharacterInfo('﹃',0, new Vector(-0,0)) },
             {'』',new SpecialCharacterInfo('﹄',0, new Vector(0,0)) },
-            {'。',new SpecialCharacterInfo('。',0, new Vector(0.32,-0.6)) },
+            {'。',new SpecialCharacterInfo('︒',0, new Vector(0.32,-0.6)) },
             {'、',new SpecialCharacterInfo('、',-0.40, new Vector(0,-0.2)) },
             {'？',new SpecialCharacterInfo('?',0, new Vector(0.2,0)) },
             {'!',new SpecialCharacterInfo('!',0, new Vector(0,0)) },
             {'！',new SpecialCharacterInfo('!',0, new Vector(0.5,0)) },
-            { 'ー',new SpecialCharacterInfo('|',0, new Vector(0,0.2)) },
+            { 'ー',new SpecialCharacterInfo('│',0, new Vector(0,0.2)) },
             { '─',new SpecialCharacterInfo( '|', -0.25, new Vector(0,0)) },
             { '…',new SpecialCharacterInfo( '⋮', -0.41, new Vector(0,0)) }
         };

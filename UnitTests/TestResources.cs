@@ -1,4 +1,4 @@
-﻿using EPUBRenderer;
+﻿using EPUBRenderer2;
 using System;
 using System.Collections.Generic;
 using System.IO;

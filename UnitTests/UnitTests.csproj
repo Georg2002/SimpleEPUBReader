@@ -82,7 +82,8 @@
     <Compile Include="EpubPageTests.cs" />
     <Compile Include="EpubTests.cs" />
     <Compile Include="HTMLTests.cs" />
-    <Compile Include="RendererTests\RubyWritingTests.cs" />
+    <Compile Include="RendererTests\UnitTextElementStringCreatorTests.cs" />
+    <Compile Include="RendererTests\WordSplitterTests.cs" />
     <Compile Include="TestResources.cs" />
     <Compile Include="PackageInfoTest.cs" />
     <Compile Include="ZipTests.cs" />
@@ -97,9 +98,9 @@
       <Project>{8dfc2999-4cf8-497c-bf5c-eb825bacd4d1}</Project>
       <Name>EPUBReader</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EPUBRenderer\EPUBRenderer.csproj">
-      <Project>{4c09b31d-e2e9-4bee-8f15-6f500399ffaf}</Project>
-      <Name>EPUBRenderer</Name>
+    <ProjectReference Include="..\EPUBRenderer2\EPUBRenderer2.csproj">
+      <Project>{c34b6ebb-9928-4c58-aa61-8fef4a8b898f}</Project>
+      <Name>EPUBRenderer2</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
