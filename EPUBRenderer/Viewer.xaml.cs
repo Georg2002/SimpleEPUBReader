@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace EPUBRenderer
@@ -28,10 +29,10 @@ namespace EPUBRenderer
         }
 
         public int PageCount { get => Pages.Count; }
-
         public List<PageRenderer> Pages;
-
-        public List<Marking> Markings;
+                public List<Marking> Markings;
+        private Vector MarkingStartPos;
+        private GestureHandler GestureHandler;
 
         private void SetPage(int PageNumber)
         {
@@ -44,13 +45,10 @@ namespace EPUBRenderer
                 PageNumber = 1;
             }
             _CurrentPage = PageNumber;
-
             PageRenderer Page = null;
-
             if (PageCount != 0)
             {
                 Page = Pages[PageNumber - 1];
-
             }
             LoadNewUnloadOld(Page);
             SetPageIndexes();
@@ -110,18 +108,14 @@ namespace EPUBRenderer
 
         public void SetPageByIndex(int PageCharIndex, int PageImgIndex)
         {
-            int PageNumber = 1;
-            int CharSum = 0;
-            int ImgSum = 0;
+            int PageNumber = 1;         
             for (int i = 0; i < Pages.Count; i++)
             {
-                var Page = Pages[i];
-                CharSum += Page.TextParts.Count;
-                ImgSum += Page.Images.Count;
-                if ((PageCharIndex != -1 && PageCharIndex < CharSum) ||
-                    (PageImgIndex != -1 && PageImgIndex < ImgSum))
+                var Page = Pages[i];               
+                if ((PageCharIndex != -1 && PageCharIndex < Page.CharStartIndex) ||
+                    (PageImgIndex != -1 && PageImgIndex < Page.ImageStartIndex))
                 {
-                    PageNumber = i + 1;
+                    PageNumber = i;
                     break;
                 }
             }
@@ -133,12 +127,33 @@ namespace EPUBRenderer
             InitializeComponent();
             Pages = new List<PageRenderer>();
             Markings = new List<Marking>();
+            GestureHandler = new GestureHandler();
+            GestureHandler.RelativeElement = this;
         }
 
         public void RefreshSize()
         {
             SetToEpub(epub, Markings);
             SetPageByIndex(PageCharIndex, PageImgIndex);
+        }
+
+        public void SwitchRight()
+        {
+            Switch(1);
+        }
+
+        public void SwitchLeft()
+        {
+            Switch(-1);
+        }
+
+        private void Switch(int Direction)
+        {
+            if (epub.Settings.RTL)
+            {
+                Direction *= -1;
+            }
+            CurrentPageNumber += Direction;
         }
 
         public void SetToEpub(Epub epub, List<Marking> Markings)
@@ -155,6 +170,7 @@ namespace EPUBRenderer
                 Pages.AddRange(ChapterPagesCreator.GetRenderPages(Page, new Vector(Width - 30, Height - 30)));
             }
             int CharSum = 0;
+            int ImageSumLast = 0;
             int CharSumLast = 0;
             foreach (var Page in Pages)
             {
@@ -166,7 +182,46 @@ namespace EPUBRenderer
                 {
                     Page.Markings.Add(new Marking(Marking.CharStartIndex - CharSumLast, Marking.CharEndIndex - CharSumLast, Marking.Color));
                 }
+                Page.CharStartIndex = CharSumLast;
+                Page.ImageStartIndex = ImageSumLast;
+                ImageSumLast += Page.Images.Count;
                 CharSumLast = CharSum;
+            }
+        }      
+
+        private void UserControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            GestureHandler.CheckActivation();
+            var MousePosPoint = Mouse.GetPosition(this);
+            var MousePos = new Vector(MousePosPoint.X, MousePosPoint.Y);
+            var Page = (PageRenderer)ContentGrid.Children[0];
+
+            if (GestureHandler.SwipeLeft.Activated )
+            {
+                SwitchLeft();
+            }
+            if (GestureHandler.SwipeRight.Activated)
+            {
+                SwitchRight();
+            }
+            if (GestureHandler.Mark.Activated)
+            {                    
+                if (GestureHandler.Mark.Changed)
+                {
+                    MarkingStartPos = MousePos;
+                }
+                Page.DrawTemporaryMarking(MarkingStartPos, MousePos);
+            }
+            else
+            {
+                if (GestureHandler.Mark.Changed)
+                {
+                    Page.AddMarking(MarkingStartPos, MousePos);
+                    var PageNewMarking = Page.Markings.Last();
+                    var NewMarking = new Marking(Page.CharStartIndex + PageNewMarking.CharStartIndex,
+                        Page.CharStartIndex + PageNewMarking.CharEndIndex, PageNewMarking.Color);
+                    Markings.Add(NewMarking);
+                }
             }
         }
     }

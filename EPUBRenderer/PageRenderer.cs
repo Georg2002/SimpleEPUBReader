@@ -1,4 +1,5 @@
 ﻿using EPUBParser;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -23,6 +24,9 @@ namespace EPUBRenderer
         public List<Writing> TextParts;
         public List<ImageInText> Images;
         public List<Marking> Markings;
+        private Marking TempMarking;
+        public int CharStartIndex;
+        public int ImageStartIndex;
         private EpubSettings Settings;
         private bool Viewing = false;
 
@@ -90,6 +94,11 @@ namespace EPUBRenderer
             }
             Context.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(0, 0, Width, Height));
 
+            if (TempMarking != null)
+            {
+                Markings.Add(TempMarking);
+            }
+
             foreach (var Marking in Markings)
             {
                 if (Marking.CharEndIndex >= TextParts.Count)
@@ -111,7 +120,12 @@ namespace EPUBRenderer
                     SecondPoint.Offset(Size.X, Size.Y);
                     Context.DrawRectangle(Marking.Color, null, new Rect(FirstPoint, SecondPoint));                   
                 }
-            }            
+            }
+
+            if (TempMarking != null)
+            {
+                Markings.RemoveAt(Markings.Count - 1);
+            }
         }
 
         private FormattedText GetText(Writing textPart)
@@ -229,6 +243,26 @@ namespace EPUBRenderer
             return Result;
         }
 
+        internal void AddMarking(Vector markingStartPos, Vector mousePos)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void DrawTemporaryMarking(Vector markingStartPos, Vector mousePos)
+        {
+            int StartIndex = 0;
+            int EndIndex = 0;
+
+            for (int i = 0; i < TextParts.Count; i++)
+            {
+             //   var Part = TextParts[i];
+             //   if (Part.)
+             //   {
+             //
+             //   }
+            }
+        }
+
         public List<Writing> GetRubyWritings(string ruby, List<Writing> mainTextWritings)
         {
             List<Writing> Result = new List<Writing>();
@@ -313,5 +347,9 @@ namespace EPUBRenderer
         public double FontSize;
         public Vector RenderPosition;
         public Vector WritingPosition;
+        //opposite corner of writing position
+        public Vector DiagonalPosition;
+        //writing position + size = diagonal position
+        public Vector Size;
     }
 }

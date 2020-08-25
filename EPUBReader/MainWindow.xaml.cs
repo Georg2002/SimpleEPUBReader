@@ -1,5 +1,5 @@
 ﻿using EPUBParser;
-using EPUBRenderer;
+using EPUBRenderer2;
 using System.Windows.Threading;
 using System.Windows;
 using System;
@@ -26,19 +26,19 @@ namespace EPUBReader
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {           
-             Viewer.CurrentPageNumber++;
+             Viewer.SwitchLeft();
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            Viewer.CurrentPageNumber--;
+            Viewer.SwitchRight();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
             var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
-            Viewer.SetToEpub(epub, new List<Marking>() { new Marking(3, 5, Red) , new Marking(10, 10, Red), new Marking(12, 113, Red) }) ;
+            Viewer.SetToEpub(epub);
             Viewer.CurrentPageNumber = 0;
         }
 

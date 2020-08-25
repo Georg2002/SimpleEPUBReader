@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EPUBReader"
-        xmlns:Renderer="clr-namespace:EPUBRenderer;assembly=EPUBRenderer"
+        xmlns:Renderer="clr-namespace:EPUBRenderer2;assembly=EPUBRenderer2"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" WindowState="Maximized"
         Loaded="Window_Loaded" SizeChanged="Window_SizeChanged">
