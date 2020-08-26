@@ -17,6 +17,7 @@ namespace EPUBRenderer
         public int CurrentPage = 1;
         public Vector SinglePageOffset;
         public int PageCount;
+        public Vector CurrentOffset;
     }
 
     public class Letter : TextElement

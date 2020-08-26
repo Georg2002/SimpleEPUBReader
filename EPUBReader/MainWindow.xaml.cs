@@ -5,6 +5,7 @@ using System.Windows;
 using System;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Runtime.CompilerServices;
 
 namespace EPUBReader
 {
@@ -36,10 +37,9 @@ namespace EPUBReader
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
-            var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
+            epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");           
             Viewer.SetToEpub(epub);
-            Viewer.LoadPage(27);
+            Viewer.LoadPage(1);
         }
 
         private void ChangeSize(object sender, EventArgs e)
@@ -52,6 +52,29 @@ namespace EPUBReader
         {            
             ResizeTimer.Stop();
             ResizeTimer.Start();
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
+            var cmd = new MarkingCommand
+            {
+                Page = Viewer.CurrentRenderPage,
+                Pos1 = new Point(1590, 10),
+                Pos2 = new Point(1590, 40),
+                Color = Red,
+                RenderPageIndex = Viewer.RenderPages.IndexOf(Viewer.CurrentRenderPage)
+            };
+            Marker.MarkTemporarly(cmd);
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            var Marking = Marker.GetMarkingAt(Viewer.CurrentRenderPage, new Point(1590, 10));
+            if (Marking != null)
+            {
+                Marker.DeleteMarking(Marking, Viewer.CurrentRenderPage);
+            }
         }
     }
 }

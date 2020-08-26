@@ -21,13 +21,18 @@ namespace EPUBRenderer
     /// </summary>
     public partial class Viewer : UserControl
     {
-        List<RenderPage> RenderPages;
+        public List<RenderPage> RenderPages;
         public Vector PageSize;
         private Epub epub;
+        public RenderPage CurrentRenderPage
+        {
+            get => Renderer.Page;
+        }
 
         public Viewer()
         {
             InitializeComponent();
+            Marker.Renderer = Renderer;
         }
 
         public int TotalPageCount;
@@ -36,12 +41,12 @@ namespace EPUBRenderer
         public void SetToEpub(Epub epub)
         {
             this.epub = epub;
-            PageSize = new Vector(1013, 700);
+            PageSize = new Vector(1000, 700);
             var PageLines = new List<List<EpubLine>>();
             epub.Pages.ForEach(a => PageLines.Add(WordSplitter.SplitIntoWords(a)));
             RenderPages = new List<RenderPage>();
             PageLines.ForEach(a => RenderPages.Add(new RenderPage() { TextElements = TextElementStringCreator.GetElements(a, epub.Settings.Vertical) }));
-            CurrentPageNumber = 1;         
+            CurrentPageNumber = 1;
             RefreshSize();
         }
 
@@ -49,19 +54,19 @@ namespace EPUBRenderer
         {
             if (epub == null) return;
             TotalPageCount = 0;
-            PageSize = new Vector(ActualWidth - 20, ActualHeight - 20);
+            PageSize = new Vector(ActualWidth, ActualHeight);
             Renderer.PageSize = PageSize;
             int OldInnerPageCount = 0;
             if (Renderer.Page != null)
             {
                 OldInnerPageCount = Renderer.Page.PageCount;
             }
-                RenderPages.ForEach(a =>
-            {
-                TextPositioner.Position(a.TextElements, PageSize, epub.Settings);
-                PageSetter.SetPageDefinitions(a, PageSize);
-                TotalPageCount += a.PageCount;
-            });
+            RenderPages.ForEach(a =>
+        {
+            TextPositioner.Position(a.TextElements, PageSize, epub.Settings);
+            PageSetter.SetPageDefinitions(a, PageSize);
+            TotalPageCount += a.PageCount;
+        });
             if (Renderer.Page != null)
             {
                 int RenderPageIndex = RenderPages.IndexOf(Renderer.Page);
@@ -83,7 +88,7 @@ namespace EPUBRenderer
         {
             Renderer.Page = RenderPages[RenderPageNumber - 1];
             Renderer.Page.CurrentPage = InnerPageNumber;
-            CurrentPageNumber = 0;            
+            CurrentPageNumber = 0;
             for (int i = 0; i < RenderPageNumber - 1; i++)
             {
                 CurrentPageNumber += RenderPages[i].PageCount;

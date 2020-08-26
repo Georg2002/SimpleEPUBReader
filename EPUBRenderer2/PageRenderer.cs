@@ -35,6 +35,7 @@ namespace EPUBRenderer
                     Offset = WritingDirectionModifiers.GetStartPosition(PageSize) - First.StartPos;
                 }
             }
+            Page.CurrentOffset = Offset;
             foreach (var Element in Text)
             {
                 switch (Element.ElementType)
@@ -74,7 +75,6 @@ namespace EPUBRenderer
             }
             Width = PageSize.X;
             Height = PageSize.Y;
-            Context.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(0, 0, Width, Height));
         }
     }
 }

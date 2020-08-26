@@ -33,9 +33,18 @@ namespace EPUBRenderer
                                 char c = Text[i];
                                 if (GlobalSettings.PossibleLineBreaks.Contains(c))
                                 {
-                                    CurrentLine.Parts.Add(new TextLinePart(Text.Substring(StartIndex, Length), ""));
-                                    Length = 0;
-                                    StartIndex = i + 1;
+                                    bool Add = true;
+                                    if (i != Text.Length - 1)
+                                    {
+                                        char n = Text[i + 1];
+                                        Add = !GlobalSettings.PossibleLineBreaks.Contains(n);                                        
+                                    }
+                                    if (Add)
+                                    {
+                                        CurrentLine.Parts.Add(new TextLinePart(Text.Substring(StartIndex, Length), ""));
+                                        Length = 0;
+                                        StartIndex = i + 1;
+                                    }                               
                                 }
                             }
                             if (StartIndex != Text.Length)
