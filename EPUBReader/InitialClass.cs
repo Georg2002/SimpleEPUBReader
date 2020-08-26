@@ -18,7 +18,7 @@ namespace EPUBReader
             Application app = new Application();
 
             //Create Window
-            MainWindow win = new MainWindow();
+            MainWindow2 win = new MainWindow2();
 
             //Launch the app
             app.Run(win);

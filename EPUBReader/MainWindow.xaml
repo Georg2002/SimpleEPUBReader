@@ -10,23 +10,20 @@
         Loaded="Window_Loaded" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40"/>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="12*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="40"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="10*"/>
-            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>      
             <Renderer:Viewer Margin="10" x:Name="Viewer" Grid.Column="1"
                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
                              MouseLeftButtonDown="Viewer_MouseLeftButtonDown"
                              MouseLeftButtonUp="Viewer_MouseLeftButtonUp"
                              MouseRightButtonDown="Viewer_MouseRightButtonDown"
-                             MouseMove="Viewer_MouseMove"
-                             />
-         
-        <Button Grid.Column="0" Click="Button_Click"/>
-        <Button Grid.Column="2" Click="Button_Click_1"/>  
+                             MouseMove="Viewer_MouseMove" MinHeight="200" MinWidth="200" />
+
+        <Button Grid.Column="0" Click="Button_Click" Opacity="0.7"/>
+        <Button Grid.Column="2" Click="Button_Click_1" Opacity="0.7"/>  
     </Grid>
 </Window>
