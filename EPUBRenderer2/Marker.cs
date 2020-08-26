@@ -49,7 +49,7 @@ namespace EPUBRenderer
                 if (Pos.WordIndex >= Words.Count) return null;
                 return Words[Pos.WordIndex][Pos.ElementIndex];
             }
-            var Current = Words[Pos.WordIndex][Pos.WordIndex];
+            var Current = Words[Pos.WordIndex][Pos.ElementIndex];
 
             void SwitchAllMarked(int Direction)
             {
@@ -96,7 +96,7 @@ namespace EPUBRenderer
                 {
                     Start = StartPos.ElementIndex;
                 }
-                else if (WordIndex == EndPos.WordIndex)
+                if (WordIndex == EndPos.WordIndex)
                 {
                     Limit = EndPos.ElementIndex;
                 }
