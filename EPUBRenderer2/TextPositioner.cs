@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace EPUBRenderer2
+namespace EPUBRenderer
 {
     public static class TextPositioner
     {
@@ -37,12 +37,16 @@ namespace EPUBRenderer2
                         break;
                     case TextElementType.RubyLetter:
                         var MainWord = ElementString[WordIndex - 1];
+                        if (MainWord.Count == 2 && CurrentWord.Count == 2)
+                        {
+                            ;
+                        }
                         var StartLetter = MainWord.First();
                         var EndLetter = MainWord.Last();
                         Vector WordLength = WritingDirectionModifiers.GetNextPosition(EndLetter.StartPos, EndLetter) - StartLetter.StartPos;
                         Vector Offset = WordLength / CurrentWord.Count;
                         Offset = WritingDirectionModifiers.GetMinRubyOffset(Offset);
-                        Vector StartWritePos = StartLetter.StartPos + (WordLength - Offset * CurrentWord.Count) / 2 + WritingDirectionModifiers.GetRubyStartOffset();
+                        Vector StartWritePos = StartLetter.StartPos + (WordLength - Offset * (CurrentWord.Count - 1)) / 2 + WritingDirectionModifiers.GetRubyStartOffset();
                         for (int i = 0; i < CurrentWord.Count; i++)
                         {
                             CurrentWord[i].StartPos = StartWritePos;

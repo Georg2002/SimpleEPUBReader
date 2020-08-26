@@ -98,9 +98,9 @@
       <Project>{8dfc2999-4cf8-497c-bf5c-eb825bacd4d1}</Project>
       <Name>EPUBReader</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EPUBRenderer2\EPUBRenderer2.csproj">
+    <ProjectReference Include="..\EPUBRenderer2\EPUBRenderer.csproj">
       <Project>{c34b6ebb-9928-4c58-aa61-8fef4a8b898f}</Project>
-      <Name>EPUBRenderer2</Name>
+      <Name>EPUBRenderer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

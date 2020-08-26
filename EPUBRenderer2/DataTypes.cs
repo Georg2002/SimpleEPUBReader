@@ -9,14 +9,14 @@ using System.Windows;
 using System.Windows.Media;
 using System.Drawing;
 
-namespace EPUBRenderer2
+namespace EPUBRenderer
 {
     public class RenderPage
     {
-        public List<List<TextElement>> TextElements;
-        public int CurrentPage;
-        public double Offset;
-        public double PageJumpSize;
+        public List<List<TextElement>> TextElements;        
+        public int CurrentPage = 1;
+        public Vector SinglePageOffset;
+        public int PageCount;
     }
 
     public class Letter : TextElement

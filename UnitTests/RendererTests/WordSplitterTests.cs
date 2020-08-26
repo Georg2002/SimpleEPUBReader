@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using EPUBParser;
-using EPUBRenderer2;
+using EPUBRenderer  ;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTests.RendererTests

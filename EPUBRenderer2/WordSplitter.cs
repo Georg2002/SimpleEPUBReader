@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace EPUBRenderer2
+namespace EPUBRenderer
 {
    public static class WordSplitter
     {

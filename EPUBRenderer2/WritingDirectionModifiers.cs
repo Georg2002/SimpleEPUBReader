@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace EPUBRenderer2
+namespace EPUBRenderer
 {
     public static class WritingDirectionModifiers
     {
@@ -27,13 +27,108 @@ namespace EPUBRenderer2
             Dir = (Direction)Index;
         }
 
-        internal static List<List<TextElement>> GetWordsInPage(List<List<TextElement>> words, double offset, Vector pageSize)
+        internal static List<TextElement> GetTextInPage(RenderPage page, Vector pageSize)
+        {
+            int StartIndex = 0;
+            int EndIndex = 0;
+            int ExtraStart = 0;
+            int ExtraEnd = 0;
+            // Vector RunningOffset = page.RunningCorrectionOffset;
+            Vector StartPos = pageSize + page.SinglePageOffset * (page.CurrentPage - 1);// + RunningOffset;
+            Vector EndPos = pageSize + page.SinglePageOffset * page.CurrentPage;// + RunningOffset;
+            switch (Dir)
+            {
+                case Direction.VRTL:
+                    StartIndex = page.TextElements.FindIndex(a =>
+                    {
+                        var First = a.First();
+                        return First.ElementType != TextElementType.Break && First.EndPos.X < StartPos.X;
+                    }
+                    );
+                    if (StartIndex != 0)
+                    {
+                        var WordBefore = page.TextElements[StartIndex - 1];
+                        for (int i = 0; i < WordBefore.Count; i++)
+                        {
+                            var Element = WordBefore[i];
+                            if (Element.ElementType != TextElementType.Break && Element.EndPos.X < StartPos.X)
+                            {
+                                ExtraStart = WordBefore.Count - i;
+                                break;
+                            }
+                        }
+                        StartIndex--;
+                    }
+                    else
+                    {
+                        ExtraStart = page.TextElements[StartIndex].Count;
+                    }
+                    EndIndex = page.TextElements.FindLastIndex(a =>
+                    {
+                        var Last = a.Last();
+                        return Last.ElementType != TextElementType.Break && Last.StartPos.X >= EndPos.X;
+                    }
+                    );
+                    if (EndIndex != page.TextElements.Count - 1)
+                    {                        
+                        var WordAfter = page.TextElements[EndIndex + 1];
+                        for (int i = WordAfter.Count -1; i >= 0; i--)
+                        {
+                            var Element = WordAfter[i];
+                            if (Element.ElementType != TextElementType.Break && Element.StartPos.X >= EndPos.X)
+                            {
+                                ExtraEnd = i +1;
+                                break;
+                            }
+                        }
+                        EndIndex++;
+                    }                    
+                    else
+                    {
+                        ExtraEnd = page.TextElements[EndIndex].Count;
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            var Result = new List<TextElement>();
+            for (int i = StartIndex; i <= EndIndex; i++)
+            {
+                var Word = page.TextElements[i];
+                if (i == StartIndex)
+                {
+                    Result.AddRange(Word.GetRange(Word.Count - ExtraStart , ExtraStart));
+                }
+                else if(i == EndIndex)
+                {
+                    Result.AddRange(Word.GetRange(0, ExtraEnd));
+                }
+                else
+                {
+                    Result.AddRange(Word);
+                }
+            }
+            return Result;
+        }
+
+        internal static Vector GetPageOffset(RenderPage page, Vector pageSize)
         {
             switch (Dir)
             {
                 case Direction.VRTL:
-                    double MaxPos = offset + pageSize.X;
-                    return words.Where(a => a.First().StartPos.X >= offset && a.Last().EndPos.X <= MaxPos).ToList();
+                    return new Vector(-pageSize.X + pageSize.X % GlobalSettings.LineHeight, 0);
+                default:
+                    throw new NotImplementedException();
+            }
+        }      
+
+        internal static int GetPageCount(RenderPage page, Vector pageSize)
+        {
+            switch (Dir)
+            {
+                case Direction.VRTL:
+                    var LastElement = page.TextElements.Last().Last();
+                    return (int)Math.Ceiling(1 + LastElement.EndPos.X / page.SinglePageOffset.X);
                 default:
                     throw new NotImplementedException();
             }
@@ -55,7 +150,7 @@ namespace EPUBRenderer2
             switch (Dir)
             {
                 case Direction.VRTL:
-                    return new Point(letter.StartPos.X + letter.FontSize /2, letter.StartPos.Y);
+                    return new Point(letter.StartPos.X + letter.FontSize / 2, letter.StartPos.Y);
                 default:
                     throw new NotImplementedException();
             }
@@ -77,7 +172,7 @@ namespace EPUBRenderer2
             switch (Dir)
             {
                 case Direction.VRTL:
-                    return new Vector(GlobalSettings.RubyOffset,0);
+                    return new Vector(GlobalSettings.RubyOffset, GlobalSettings.RubyFontSize * -0.5 - GlobalSettings.NormalFontSize * 0.05 );
                 default:
                     throw new NotImplementedException();
             }

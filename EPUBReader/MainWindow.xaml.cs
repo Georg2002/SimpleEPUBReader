@@ -1,5 +1,5 @@
 ﻿using EPUBParser;
-using EPUBRenderer2;
+using EPUBRenderer;
 using System.Windows.Threading;
 using System.Windows;
 using System;
@@ -20,7 +20,7 @@ namespace EPUBReader
         {
             InitializeComponent();
             ResizeTimer = new DispatcherTimer();
-            ResizeTimer.Interval = TimeSpan.FromMilliseconds(100);
+            ResizeTimer.Interval = TimeSpan.FromMilliseconds(5);
             ResizeTimer.Tick += ChangeSize;      
         }
 
@@ -39,6 +39,7 @@ namespace EPUBReader
             epub = new Epub(@"D:\Informatik\EPUBReader\TestResources\Index4.epub");
             var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
             Viewer.SetToEpub(epub);
+            Viewer.LoadPage(27);
         }
 
         private void ChangeSize(object sender, EventArgs e)
@@ -48,7 +49,7 @@ namespace EPUBReader
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
+        {            
             ResizeTimer.Stop();
             ResizeTimer.Start();
         }

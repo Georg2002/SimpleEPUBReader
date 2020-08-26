@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPUBRenderer2
+namespace EPUBRenderer
 {
     public static class TextElementStringCreator
     {

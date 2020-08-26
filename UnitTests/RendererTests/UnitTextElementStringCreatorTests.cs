@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Documents;
 using EPUBParser;
-using EPUBRenderer2;
+using EPUBRenderer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTests.RendererTests

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
-namespace EPUBRenderer2
+namespace EPUBRenderer
 {
     public static class GlobalSettings
     {
-        public static double NormalFontSize = 25;
-        public static double RubyFontSize = NormalFontSize * 0.4;
+        public static double NormalFontSize = 20;
+        public static double RubyFontSize = NormalFontSize * 0.6;
         public static double LineHeight = NormalFontSize * 2;
         public static double RubyOffset = NormalFontSize * 1.1;
         public static Brush NormalFontColor = Brushes.Black;
