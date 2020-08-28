@@ -15,7 +15,7 @@ namespace EPUBReader
         public static void Main(string[] args)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-            Application app = new Application();
+            Application app = new App();
 
             //Create Window
             MainWindow2 win = new MainWindow2();

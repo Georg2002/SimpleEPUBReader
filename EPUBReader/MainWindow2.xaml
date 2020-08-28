@@ -5,57 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EPUBReader"
         mc:Ignorable="d"
-        Title="MainWindow2" Height="800" Width="800" MinHeight="400" MinWidth="400">
+        Title="MainWindow2" Height="800" Width="800"
+        MinHeight="400" MinWidth="400"
+        x:Name="Base" MouseMove="Base_MouseMove">
     <Window.Resources>
         <Storyboard x:Key="MoveDown">
-            <DoubleAnimation 
-                                    Storyboard.TargetName="HitTestRect"
-                                    Storyboard.TargetProperty="Height"
-                                   Duration="0:0:0.15" To="100"
-                                    AccelerationRatio="0.6"
-                                    DecelerationRatio="0.2"/>
-            <ThicknessAnimation 
-                                    Storyboard.TargetName="TlBar"
-                                    Storyboard.TargetProperty="Margin"
-                                   Duration="0:0:0.15" To="0,0,0,0"
-                                    AccelerationRatio="0.6"
-                                    DecelerationRatio="0.2"/>
             <ThicknessAnimation
                                     Storyboard.TargetName="ViewerGrid"
                                    Storyboard.TargetProperty="Margin"
-                                    Duration="0:0:0.15" To="0,100,0,0"
+                                    Duration="0:0:0.2" To="0,50,0,0"
                                     AccelerationRatio="0.6"
-                                    DecelerationRatio="0.2"/>
+                                    DecelerationRatio="0.4"/>
+            <ThicknessAnimation 
+                                    Storyboard.TargetName="TlBar"
+                                    Storyboard.TargetProperty="Margin"
+                                   Duration="0:0:0.2" To="0,0,0,0"
+                                    AccelerationRatio="0.6"
+                                    DecelerationRatio="0.4"/>
+
             <ThicknessAnimation
                                     Storyboard.TargetName="ButtonLeft"
                                    Storyboard.TargetProperty="Margin"
-                                    Duration="0:0:0.15" To="0,100,0,0"
+                                    Duration="0:0:0.2" To="0,50,0,0"
                                     AccelerationRatio="0.6"
-                                    DecelerationRatio="0.2"/>
+                                    DecelerationRatio="0.4"/>
             <ThicknessAnimation
                                     Storyboard.TargetName="ButtonRight"
                                    Storyboard.TargetProperty="Margin"
-                                    Duration="0:0:0.15" To="0,100,0,0"
+                                    Duration="0:0:0.2" To="0,50,0,0"
                                     AccelerationRatio="0.6"
-                                    DecelerationRatio="0.2"/>
+                                    DecelerationRatio="0.4"/>    
         </Storyboard>
         <Storyboard x:Key="MoveUp">
             <ThicknessAnimation
                                 Storyboard.TargetName="ViewerGrid"
                                 Storyboard.TargetProperty="Margin"
-                                Duration="0:0:0.25" To="0,50,0,50"
+                                Duration="0:0:0.25" To="0,25,0,50"
                                 AccelerationRatio="0.6"
                                 DecelerationRatio="0.2"/>
-            <DoubleAnimation 
-                                    Storyboard.TargetName="HitTestRect"
-                                    Storyboard.TargetProperty="Height"
-                                   Duration="0:0:0.25" To="50"
-                                    AccelerationRatio="0.6"
-                                    DecelerationRatio="0.2"/>
             <ThicknessAnimation 
                                     Storyboard.TargetName="TlBar"
                                     Storyboard.TargetProperty="Margin"
-                                   Duration="0:0:0.25" To="0,-100,0,0"
+                                   Duration="0:0:0.25" To="0,-50,0,0"
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.2"/>
             <ThicknessAnimation
@@ -71,6 +62,23 @@
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.2"/>
         </Storyboard>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Background"  Value="WhiteSmoke"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="WhiteSmoke"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid Grid.Row="0" Grid.RowSpan="3">
@@ -79,52 +87,19 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="ButtonLeft" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Background="#FFE6E4E4" />
-            <Button x:Name="ButtonRight"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Background="#FFE6E4E4"/>
-        </Grid>
-        <Grid x:Name="ViewerGrid" Grid.Row="0" Grid.RowSpan="3" Margin="0,50,0,50">
+            <Button x:Name="ButtonLeft" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyle}" />
+            <Button x:Name="ButtonRight"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyle}"/>
+        </Grid>    
+        <Grid x:Name="ViewerGrid" Grid.Row="0" Grid.RowSpan="3" Margin="0,25,0,25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="40"/>
-            </Grid.ColumnDefinitions>          
+            </Grid.ColumnDefinitions>
+            <Rectangle Margin="0" Fill="Brown" Grid.Column="1" Grid.Row="1"/>
             <Rectangle Margin="10" Fill="Red" Grid.Column="1" Grid.Row="1"/>
-        </Grid>     
-        <Rectangle x:Name="HitTestRect" IsHitTestVisible="True" Fill="Transparent" Height="50" VerticalAlignment="Top" >
-                <Rectangle.Triggers>
-                    <EventTrigger  RoutedEvent="MouseEnter">
-                        <BeginStoryboard>
-                        <Storyboard>
-                            <StaticResourceExtension ResourceKey="MoveDown"/>
-                        </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                <EventTrigger  RoutedEvent="MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StaticResourceExtension ResourceKey="MoveUp"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Rectangle.Triggers>
-        </Rectangle>
-        <local:ToolBar x:Name="TlBar" VerticalAlignment="Top" Margin="0,-100,0,0">
-            <UserControl.Triggers>
-                <EventTrigger  RoutedEvent="MouseEnter">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StaticResourceExtension ResourceKey="MoveDown"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-                <EventTrigger  RoutedEvent="MouseLeave">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StaticResourceExtension ResourceKey="MoveUp"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </UserControl.Triggers>
-        </local:ToolBar>
+        </Grid>
+        <local:ToolBar x:Name="TlBar" Height="50" VerticalAlignment="Top"
+                     Margin="0,-50,0,0"/>  
     </Grid>
 </Window>

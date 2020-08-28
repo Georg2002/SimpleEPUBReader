@@ -16,18 +16,13 @@ using System.Windows.Shapes;
 namespace EPUBReader
 {
     /// <summary>
-    /// Interaction logic for ToolBar.xaml
+    /// Interaction logic for App.xaml
     /// </summary>
-    public partial class ToolBar : UserControl
+    public partial class App : Application
     {
-        public ToolBar()
+        public App()
         {
             InitializeComponent();
-        }
-
-        private void TestButton_Click(object sender, RoutedEventArgs e)
-        {
-            ;
         }
     }
 }
