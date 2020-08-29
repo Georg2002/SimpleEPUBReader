@@ -124,15 +124,20 @@ namespace EPUBParser
 
         private void AddAppropriatePart(HtmlNode Node, List<ZipEntry> Entries, ZipEntry File)
         {
+            string Text;
             switch (Node.Name)
             {
                 case "#text":
                 case "nav":
-                    Parts.Add(new TextLinePart(Node.InnerText, ""));
+                    Text = Node.InnerText;
+                    if (!string.IsNullOrWhiteSpace(Text))
+                    {
+                        Parts.Add(new TextLinePart(Node.InnerText, ""));
+                    }
                     break;
                 case "ruby":
-                    var Text = Node.ChildNodes[0].InnerHtml;
-                    var Ruby = Node.ChildNodes[1].InnerHtml;
+                    Text = Node.ChildNodes[0].InnerText;
+                    var Ruby = Node.ChildNodes[1].InnerText;
                     Parts.Add(new TextLinePart(Text, Ruby));
                     break;
                 case "hr":
@@ -311,7 +316,7 @@ namespace EPUBParser
             {
                 Logger.Report(string.Format("Image from \"{0}\" not found", Text), LogType.Error);
                 return;
-            }          
+            }
         }
     }
 

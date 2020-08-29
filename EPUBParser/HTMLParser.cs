@@ -13,6 +13,9 @@ namespace EPUBParser
         public static HtmlDocument Parse(ZipEntry File)
         {
             var Doc = new HtmlDocument();
+            Doc.OptionAutoCloseOnEnd = false;
+            Doc.OptionOutputAsXml = true;
+            Doc.OptionFixNestedTags = true;
             if (File == null)
             {
                 Logger.Report("file is null, can't parse HTML", LogType.Error);
@@ -50,7 +53,7 @@ namespace EPUBParser
                     , NodeName), LogType.Error);
                 return null;
             }
-            var Node = ParentNode.Element(NodeName);
+            var Node = ParentNode.Element(NodeName);            
             if (Node == null)
             {
                 Logger.Report(string.Format("Node \"{0}\" couldn't be found"

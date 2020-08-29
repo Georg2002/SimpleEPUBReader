@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace EPUBReader
 {
-    public static class GlobalSettings
+    public static class Loader
     {
-        public static string LastDirectory = @"C:\Users\georg\Desktop\b\Zeug\a\Learning\Books";
+        public static void Load()
+        {
+
+        }
     }
 }

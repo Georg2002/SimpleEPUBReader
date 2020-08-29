@@ -22,7 +22,6 @@
                              MouseLeftButtonUp="Viewer_MouseLeftButtonUp"
                              MouseRightButtonDown="Viewer_MouseRightButtonDown"
                              MouseMove="Viewer_MouseMove" MinHeight="200" MinWidth="200" />
-
         <Button Grid.Column="0" Click="Button_Click" Opacity="0.7"/>
         <Button Grid.Column="2" Click="Button_Click_1" Opacity="0.7"/>  
     </Grid>

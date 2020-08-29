@@ -66,7 +66,7 @@ namespace EPUBRenderer
     }
 
     public class ImageInText : TextElement
-    {
+    {   
         private ImageSource _Image;
         public ImageSource Image
         {

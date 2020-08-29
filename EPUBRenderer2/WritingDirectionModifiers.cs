@@ -32,10 +32,9 @@ namespace EPUBRenderer
             int StartIndex = 0;
             int EndIndex = 0;
             int ExtraStart = 0;
-            int ExtraEnd = 0;
-            // Vector RunningOffset = page.RunningCorrectionOffset;
-            Vector StartPos = pageSize + page.SinglePageOffset * (page.CurrentPage - 1);// + RunningOffset;
-            Vector EndPos = pageSize + page.SinglePageOffset * page.CurrentPage;// + RunningOffset;
+            int ExtraEnd = 0;         
+            Vector StartPos = pageSize + page.SinglePageOffset * (page.CurrentPage - 1);
+            Vector EndPos = pageSize + page.SinglePageOffset * page.CurrentPage;
             switch (Dir)
             {
                 case Direction.VRTL:
@@ -70,19 +69,19 @@ namespace EPUBRenderer
                     }
                     );
                     if (EndIndex != page.TextElements.Count - 1)
-                    {                        
+                    {
                         var WordAfter = page.TextElements[EndIndex + 1];
-                        for (int i = WordAfter.Count -1; i >= 0; i--)
+                        for (int i = WordAfter.Count - 1; i >= 0; i--)
                         {
                             var Element = WordAfter[i];
                             if (Element.ElementType != TextElementType.Break && Element.StartPos.X >= EndPos.X)
                             {
-                                ExtraEnd = i +1;
+                                ExtraEnd = i + 1;
                                 break;
                             }
                         }
                         EndIndex++;
-                    }                    
+                    }
                     else
                     {
                         ExtraEnd = page.TextElements[EndIndex].Count;
@@ -97,9 +96,9 @@ namespace EPUBRenderer
                 var Word = page.TextElements[i];
                 if (i == StartIndex)
                 {
-                    Result.AddRange(Word.GetRange(Word.Count - ExtraStart , ExtraStart));
+                    Result.AddRange(Word.GetRange(Word.Count - ExtraStart, ExtraStart));
                 }
-                else if(i == EndIndex)
+                else if (i == EndIndex)
                 {
                     Result.AddRange(Word.GetRange(0, ExtraEnd));
                 }
@@ -120,7 +119,7 @@ namespace EPUBRenderer
                 default:
                     throw new NotImplementedException();
             }
-        }      
+        }
 
         internal static int GetPageCount(RenderPage page, Vector pageSize)
         {
@@ -161,7 +160,12 @@ namespace EPUBRenderer
             switch (Dir)
             {
                 case Direction.VRTL:
-                    return new Vector(currentWritePosition.X, currentWritePosition.Y + letter.Size.Y);
+                    double YOffset = 0;
+                    if (letter.ElementType == TextElementType.Letter || letter.ElementType == TextElementType.RubyLetter)
+                    {
+                        YOffset = ((Letter)letter).FontSize;
+                    }
+                    return new Vector(currentWritePosition.X - letter.Size.X + YOffset, currentWritePosition.Y + letter.Size.Y);
                 default:
                     throw new NotImplementedException();
             }
@@ -172,7 +176,7 @@ namespace EPUBRenderer
             switch (Dir)
             {
                 case Direction.VRTL:
-                    return new Vector(GlobalSettings.RubyOffset, GlobalSettings.RubyFontSize * -0.5 - GlobalSettings.NormalFontSize * 0.05 );
+                    return new Vector(GlobalSettings.RubyOffset, GlobalSettings.RubyFontSize * -0.5 - GlobalSettings.NormalFontSize * 0.05);
                 default:
                     throw new NotImplementedException();
             }
@@ -213,6 +217,19 @@ namespace EPUBRenderer
             {
                 case Direction.VRTL:
                     return new Vector(currentWritePos.X - GlobalSettings.LineHeight, 0);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector GetAfterImagePos(Vector currentWritePos, Vector pageSize, ImageInText Image)
+        {
+            switch (Dir)
+            {
+                case Direction.VRTL:
+                    double X = Image.EndPos.X; 
+                    X -= Math.Ceiling(Image.Size.X / GlobalSettings.LineHeight + 1) * GlobalSettings.LineHeight;                 
+                    return new Vector(X, 0);
                 default:
                     throw new NotImplementedException();
             }

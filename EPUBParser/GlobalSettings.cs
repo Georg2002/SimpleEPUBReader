@@ -22,7 +22,7 @@ namespace EPUBParser
             return RtLLanguages.Contains(Language);
         }
 
-        public static string[] PackageFileNames = new string[] { "package.opf", "content.opf" };
+        public static string[] PackageFileNames = new string[] { "package.opf", "content.opf", "standard.opf" };
 
         public static string[] PossibleImageSourceNames = new string[] { "src", "href", "xlink:href" };
 

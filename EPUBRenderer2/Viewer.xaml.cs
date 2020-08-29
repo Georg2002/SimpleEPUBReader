@@ -63,6 +63,7 @@ namespace EPUBRenderer
             }
             RenderPages.ForEach(a =>
         {
+            if (a.TextElements.Count == 0) return;            
             TextPositioner.Position(a.TextElements, PageSize, epub.Settings);
             PageSetter.SetPageDefinitions(a, PageSize);
             TotalPageCount += a.PageCount;
@@ -137,12 +138,17 @@ namespace EPUBRenderer
 
         private void SwitchPage(int Direction)
         {
-
+            if (epub == null) return;
             if (epub.Settings.RTL)
             {
                 Direction *= -1;
             }
             LoadPage(CurrentPageNumber + Direction);
+        }
+
+        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            RefreshSize();
         }
     }
 }

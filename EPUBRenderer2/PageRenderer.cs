@@ -50,12 +50,19 @@ namespace EPUBRenderer
                     case TextElementType.Image:
                         var Image = (ImageInText)Element;
                         Point StartPoint = new Point(Element.StartPos.X, Element.StartPos.Y);
-                        StartPoint.Offset(Offset.X, Offset.Y);
+                        StartPoint.Offset(Offset.X, Offset.Y);                           
+                        if (Text.Count == 1)
+                        {
+                            StartPoint.X = (PageSize.X - Image.Size.X) / 2;
+                        }
                         Point EndPoint = new Point(Element.EndPos.X, Element.EndPos.Y);
                         EndPoint.Offset(Offset.X, Offset.Y);
-                        var Rect = new Rect(StartPoint, EndPoint);
+                        Rect Rect = new Rect(StartPoint, EndPoint);
+
                         if (Image.Image == null)
                         {
+                            Rect.Width = GlobalSettings.ErrorRect.Width;
+                            Rect.Height = GlobalSettings.ErrorRect.Height;
                             Context.DrawRectangle(Brushes.Red, null, Rect);
                         }
                         else

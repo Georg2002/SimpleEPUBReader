@@ -36,11 +36,7 @@ namespace EPUBRenderer
                         WrapIntoPage(CurrentWord);
                         break;
                     case TextElementType.RubyLetter:
-                        var MainWord = ElementString[WordIndex - 1];
-                        if (MainWord.Count == 2 && CurrentWord.Count == 2)
-                        {
-                            ;
-                        }
+                        var MainWord = ElementString[WordIndex - 1];                      
                         var StartLetter = MainWord.First();
                         var EndLetter = MainWord.Last();
                         Vector WordLength = WritingDirectionModifiers.GetNextPosition(EndLetter.StartPos, EndLetter) - StartLetter.StartPos;
@@ -55,19 +51,21 @@ namespace EPUBRenderer
                         break;
                     case TextElementType.Image:
                         ImageInText Image = (ImageInText)First;
-                        if (ElementString.Count > 1 && Image.Size.X < PageSize.X && Image.Size.Y < PageSize.Y)
-                        {
-                            CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
-                            First.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);
-                            CurrentWritePos = WritingDirectionModifiers.GetNextPosition(CurrentWritePos, First);
-                            CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
-                        }
-                        else
+                        if (Image.Size.X > PageSize.X || Image.Size.Y > PageSize.Y || ElementString.Count == 1)
                         {
                             double WidthRatio = Image.Size.X / PageSize.X;
                             double HeightRatio = Image.Size.Y / PageSize.Y;
                             double EffectiveRatio = Math.Max(WidthRatio, HeightRatio);
                             Image.Size /= EffectiveRatio;
+                        }
+                        if (ElementString.Count > 1 )
+                        {
+                            CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
+                            Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);
+                            CurrentWritePos = WritingDirectionModifiers.GetAfterImagePos(CurrentWritePos, PageSize, Image);
+                        }
+                        else
+                        {                           
                             Image.StartPos = (PageSize - Image.Size) / 2;
                             CurrentWritePos = WritingDirectionModifiers.GetNextPosition(CurrentWritePos, First);
                             CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);

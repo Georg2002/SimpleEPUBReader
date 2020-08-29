@@ -29,6 +29,7 @@ namespace EPUBReader
             InitializeComponent();
             MoveUp = (Storyboard)this.FindResource("MoveUp");
             MoveDown = (Storyboard)this.FindResource("MoveDown");
+            ViewerInteracter.Viewer = Viewer;
         }
 
         private void Base_MouseMove(object sender, MouseEventArgs e)
@@ -54,8 +55,19 @@ namespace EPUBReader
             }
         }
 
-        //check mouse coordinates and activate animation when below 50
-        //increase check area to 100 as soon as it starts moving, decrease only when the tool bar is fully pulled in!!
-        //!!!!!!!!!!!     
+        private void ButtonLeft_Click(object sender, RoutedEventArgs e)
+        {
+            ViewerInteracter.SwitchLeft();
+        }
+
+        private void ButtonRight_Click(object sender, RoutedEventArgs e)
+        {
+            ViewerInteracter.SwitchRight();
+        }
+
+        private void Base_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Saver.Save();
+        }
     }
 }
