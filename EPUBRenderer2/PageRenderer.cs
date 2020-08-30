@@ -78,6 +78,13 @@ namespace EPUBRenderer
                     StartPoint.Offset(Offset.X, Offset.Y);
                     Point EndPoint = new Point(Element.EndPos.X, Element.EndPos.Y);
                     EndPoint.Offset(Offset.X, Offset.Y);
+                    if (Element.ElementType == TextElementType.Letter ||
+                        Element.ElementType == TextElementType.RubyLetter)
+                    {
+                        double FontOffset = ((Letter)Element).FontSize * -0.1;
+                        StartPoint.Offset(0, FontOffset);
+                        EndPoint.Offset(0, FontOffset);
+                    }
                     Context.DrawRectangle(Element.MarkingColor, null, new Rect(StartPoint, EndPoint));
                 }
             }

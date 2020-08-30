@@ -1,5 +1,8 @@
 ﻿using EPUBRenderer;
 using EPUBParser;
+using System.Windows;
+using System;
+using System.Windows.Media;
 
 namespace EPUBReader
 {
@@ -34,6 +37,40 @@ namespace EPUBReader
         public static void SwitchRight()
         {
             Viewer.SwitchRight();
+        }
+
+        internal static void DeleteMarking(Point Pos)
+        {
+            var Marking = Marker.GetMarkingAt(Viewer.CurrentRenderPage, Pos);
+            if (Marking != null)
+            {
+                Marker.DeleteMarking(Marking, Viewer.CurrentRenderPage);
+            }
+        }
+
+        internal static void DragMark(Point Start, Point End, Brush Color)
+        {
+            if (Viewer.CurrentRenderPage == null) return;
+            Marker.RemoveTempMarking();
+            var Cmd = new MarkingCommand()
+            {
+                Color = Color,
+                Page = Viewer.CurrentRenderPage,
+                Pos1 = Start,
+                Pos2 = End
+            };
+            Marker.MarkTemporarly(Cmd);
+        }
+
+        internal static void FinishDragMarking()
+        {
+            Marker.ApplyTempMarking();
+        }
+
+        internal static void SetNightmode(bool nightmode)
+        {
+            EPUBRenderer.GlobalSettings.SetNightmode(nightmode);          
+            Viewer.LoadPage();
         }
     }
 }

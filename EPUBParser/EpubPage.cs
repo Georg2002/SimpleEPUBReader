@@ -136,9 +136,16 @@ namespace EPUBParser
                     }
                     break;
                 case "ruby":
-                    Text = Node.ChildNodes[0].InnerText;
-                    var Ruby = Node.ChildNodes[1].InnerText;
-                    Parts.Add(new TextLinePart(Text, Ruby));
+                    if (Node.ChildNodes.Count >= 2)
+                    {
+                        Text = Node.ChildNodes[0].InnerText;
+                        var Ruby = Node.ChildNodes[1].InnerText;
+                        Parts.Add(new TextLinePart(Text, Ruby));
+                    }
+                    else
+                    {
+                        Logger.Report("Broken ruby found, ignoring", LogType.Error);
+                    }
                     break;
                 case "hr":
                 case "br":

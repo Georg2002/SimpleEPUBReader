@@ -33,6 +33,7 @@ namespace EPUBRenderer
         {
             InitializeComponent();
             Marker.Renderer = Renderer;
+            RenderPages = new List<RenderPage>();
         }
 
         public int TotalPageCount;
@@ -41,11 +42,12 @@ namespace EPUBRenderer
         public void SetToEpub(Epub epub)
         {
             this.epub = epub;
+            Renderer.Page = null;
             WritingDirectionModifiers.SetDirection(epub.Settings);
             PageSize = new Vector(1000, 700);
             var PageLines = new List<List<EpubLine>>();
             epub.Pages.ForEach(a => PageLines.Add(WordSplitter.SplitIntoWords(a)));
-            RenderPages = new List<RenderPage>();
+            RenderPages.Clear();
             PageLines.ForEach(a => RenderPages.Add(new RenderPage() { TextElements = TextElementStringCreator.GetElements(a, epub.Settings.Vertical) }));
             CurrentPageNumber = 1;
             RefreshSize();
@@ -86,7 +88,7 @@ namespace EPUBRenderer
                 LoadPage(1);
             }
         }
-
+    
         private void LoadPage(int RenderPageNumber, int InnerPageNumber)
         {
             Renderer.Page = RenderPages[RenderPageNumber - 1];

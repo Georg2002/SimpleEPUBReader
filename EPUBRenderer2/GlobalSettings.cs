@@ -16,37 +16,34 @@ namespace EPUBRenderer
         public static double RubyOffset = NormalFontSize * 1.05;
         public static Brush NormalFontColor = Brushes.Black;
         public static FlowDirection NormalFlowDirection = FlowDirection.RightToLeft;
-        public static Typeface NormalTypeface = new Typeface(new FontFamily("Hiragino Sans GB W6"), FontStyles.Normal,
+        public static Typeface NormalTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
             FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
         public static Rect ErrorRect = new Rect(0, 0, 500, 500);
 
         public static Dictionary<char, char> VerticalVisualFixes = new Dictionary<char, char>()
             {
-            {'」','﹂'},
-            {'「','﹁'},
-            {'（','︵'},
-            {'）','︶'},
-            {'『','﹃'},
-            {'』','﹄'},
-            {'。','︒'},
-            {'、','︑'},
-            {'？','?'},
-            {'!','!'},
-            {'！','!'},
-            { 'ー','│'},
-            { '─', '|'},
-            { '…', '︙'},
-            {'〈','︿' },
-            {'〉','﹀' },
-            {'【','︻' },
-            {'】','︼' },
-            {'≪','︽' },
-            {'≫','︾' },
-            {'《','︽' },
-            {'》','︾' },
-            {'(','︵' },
-            {')','︶' }
+            {'」','﹂'},{'「','﹁'},{'（','︵'},
+            {'）','︶'},{'『','﹃'},{'』','﹄'},
+            {'。','︒'},{'、','︑'},{'？','?'},
+            {'!','!'},{'！','!'},{ 'ー','│'},
+            { '─', '|'},{ '…', '︙'},{'〈','︿' },
+            {'〉','﹀' },{'【','︻' },{'】','︼' },
+            {'≪','︽' },{'≫','︾' },{'《','︽' },
+            {'》','︾' },{'(','︵' },{')','︶' }
         };
         public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）):\n\r　\t".ToCharArray();
+
+        public static void SetNightmode(bool nightmode)
+        {
+            if (nightmode)
+            {
+                NormalFontColor = new SolidColorBrush(Colors.White);
+                NormalFontColor.Opacity = 0.6;
+            }
+            else
+            {
+                NormalFontColor = Brushes.Black;
+            }
+        }
     }
 }

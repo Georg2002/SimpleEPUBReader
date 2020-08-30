@@ -22,9 +22,12 @@ namespace EPUBReader
     /// </summary>
     public partial class ToolBar : UserControl
     {
+        public MainWindow2 MainWindow;
+
         public ToolBar()
         {
             InitializeComponent();
+            Panel.Background = CloseButton.Background;
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
@@ -46,8 +49,52 @@ namespace EPUBReader
         }
 
         private void CloseProgram(object sender, RoutedEventArgs e)
-        {          
+        {
             Application.Current.Shutdown();
+        }
+
+        private void ToggleFullscreen(object sender, RoutedEventArgs e)
+        {
+            if (MainWindow.WindowState == WindowState.Maximized)
+            {
+                MainWindow.WindowState = WindowState.Normal;
+                MainWindow.WindowStyle = WindowStyle.SingleBorderWindow;
+            }
+            else
+            {
+                MainWindow.WindowStyle = WindowStyle.None;
+                MainWindow.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void ToggleDayNight(object sender, RoutedEventArgs e)
+        {
+            GlobalSettings.Nightmode = !GlobalSettings.Nightmode;
+            ViewerInteracter.SetNightmode(GlobalSettings.Nightmode);
+            MainWindow.SetNightmode(GlobalSettings.Nightmode);
+            SetNightmode(GlobalSettings.Nightmode);
+        }
+
+        private void SetNightmode(bool nightmode)
+        {
+            Style ButtonStyle;
+            NightmodeButton.IsChecked = nightmode;
+            if (nightmode)
+            {
+                ButtonStyle = (Style)Resources["ButtonStyleNight"];
+            }
+            else
+            {
+                ButtonStyle = (Style)Resources["ButtonStyleDay"];
+            }
+            OpenButton.Style = ButtonStyle;
+            LibraryButton.Style = ButtonStyle;
+            RTLButton.Style = ButtonStyle;
+            VerticalButton.Style = ButtonStyle;
+            NightmodeButton.Style = ButtonStyle;
+            FullscreenButton.Style = ButtonStyle;
+            CloseButton.Style = ButtonStyle;
+            Panel.Background = CloseButton.Background;
         }
     }
 }

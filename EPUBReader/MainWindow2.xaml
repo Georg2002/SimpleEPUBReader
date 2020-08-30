@@ -6,10 +6,13 @@
         xmlns:local="clr-namespace:EPUBReader"
         xmlns:Renderer="clr-namespace:EPUBRenderer;assembly=EPUBRenderer"
         mc:Ignorable="d"
-        Title="MainWindow2" Height="800" Width="800"
+        Height="800" Width="800"
         MinHeight="400" MinWidth="400"
         x:Name="Base" MouseMove="Base_MouseMove"
-        Closing="Base_Closing">
+        Closing="Base_Closing" MouseLeftButtonDown="Base_MouseLeftDown"
+        MouseLeftButtonUp="Base_MouseLeftButtonUp"
+        MouseRightButtonDown="Base_MouseRightButtonDown"
+        Loaded="Base_Loaded">
     <Window.Resources>
         <Storyboard x:Key="MoveDown">
             <ThicknessAnimation
@@ -64,7 +67,7 @@
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.2"/>
         </Storyboard>
-        <Style x:Key="ButtonStyle" TargetType="Button">
+        <Style x:Key="ButtonStyleDay" TargetType="Button">
             <Setter Property="Background"  Value="WhiteSmoke"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -81,6 +84,23 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="ButtonStyleNight" TargetType="Button">
+            <Setter Property="Background"  Value="Black"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid Grid.Row="0" Grid.RowSpan="3">
@@ -89,9 +109,10 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="ButtonLeft" Click="ButtonLeft_Click" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyle}" />
-            <Button x:Name="ButtonRight" Click="ButtonRight_Click"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyle}"/>
-            <Renderer:Viewer Background="Blue" Margin="10,35,10,35" x:Name="Viewer" Grid.Column="1" Grid.ColumnSpan="1"/>
+            <Button x:Name="ButtonLeft" Click="ButtonLeft_Click" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyleDay}" />
+            <Button x:Name="ButtonRight" Click="ButtonRight_Click"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyleDay}"/>
+            <Renderer:Viewer Margin="10,35,10,35" x:Name="Viewer"
+             Grid.Column="1" Grid.ColumnSpan="1"/>
         </Grid>
         <local:ToolBar x:Name="TlBar" Height="50" VerticalAlignment="Top"
                      Margin="0,-50,0,0"/>

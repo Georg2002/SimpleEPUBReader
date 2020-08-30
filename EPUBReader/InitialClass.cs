@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.Win32;
 using EPUBRenderer;
 
 namespace EPUBReader
@@ -18,7 +19,7 @@ namespace EPUBReader
             Application app = new App();
 
             //Create Window
-            MainWindow2 win = new MainWindow2();
+            MainWindow2 win = new MainWindow2(args);
 
             //Launch the app
             app.Run(win);
