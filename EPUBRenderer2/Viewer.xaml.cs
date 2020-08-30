@@ -41,6 +41,7 @@ namespace EPUBRenderer
         public void SetToEpub(Epub epub)
         {
             this.epub = epub;
+            WritingDirectionModifiers.SetDirection(epub.Settings);
             PageSize = new Vector(1000, 700);
             var PageLines = new List<List<EpubLine>>();
             epub.Pages.ForEach(a => PageLines.Add(WordSplitter.SplitIntoWords(a)));
@@ -63,9 +64,10 @@ namespace EPUBRenderer
             }
             RenderPages.ForEach(a =>
         {
-            if (a.TextElements.Count == 0) return;            
-            TextPositioner.Position(a.TextElements, PageSize, epub.Settings);
-            PageSetter.SetPageDefinitions(a, PageSize);
+            if (a.TextElements.Count == 0) return;
+            a.SinglePageOffset = WritingDirectionModifiers.GetPageOffset(PageSize);
+            TextPositioner.Position(a.TextElements, PageSize);
+            a.PageCount = WritingDirectionModifiers.GetPageCount(a, PageSize);
             TotalPageCount += a.PageCount;
         });
             if (Renderer.Page != null)

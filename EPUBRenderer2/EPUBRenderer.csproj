@@ -49,7 +49,6 @@
     <Compile Include="DataTypes.cs" />
     <Compile Include="GlobalSettings.cs" />
     <Compile Include="Marker.cs" />
-    <Compile Include="PageSetter.cs" />
     <Compile Include="PageRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextElementStringCreator.cs" />

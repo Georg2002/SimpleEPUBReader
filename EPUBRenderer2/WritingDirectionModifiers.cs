@@ -32,7 +32,7 @@ namespace EPUBRenderer
             int StartIndex = 0;
             int EndIndex = 0;
             int ExtraStart = 0;
-            int ExtraEnd = 0;         
+            int ExtraEnd = 0;
             Vector StartPos = pageSize + page.SinglePageOffset * (page.CurrentPage - 1);
             Vector EndPos = pageSize + page.SinglePageOffset * page.CurrentPage;
             switch (Dir)
@@ -42,8 +42,12 @@ namespace EPUBRenderer
                     {
                         var First = a.First();
                         return First.ElementType != TextElementType.Break && First.EndPos.X < StartPos.X;
-                    }
-                    );
+                    });
+                    EndIndex = page.TextElements.FindLastIndex(a =>
+                    {
+                        var Last = a.Last();
+                        return Last.ElementType != TextElementType.Break && Last.StartPos.X >= EndPos.X;
+                    });                 
                     if (StartIndex != 0)
                     {
                         var WordBefore = page.TextElements[StartIndex - 1];
@@ -62,12 +66,6 @@ namespace EPUBRenderer
                     {
                         ExtraStart = page.TextElements[StartIndex].Count;
                     }
-                    EndIndex = page.TextElements.FindLastIndex(a =>
-                    {
-                        var Last = a.Last();
-                        return Last.ElementType != TextElementType.Break && Last.StartPos.X >= EndPos.X;
-                    }
-                    );
                     if (EndIndex != page.TextElements.Count - 1)
                     {
                         var WordAfter = page.TextElements[EndIndex + 1];
@@ -86,6 +84,7 @@ namespace EPUBRenderer
                     {
                         ExtraEnd = page.TextElements[EndIndex].Count;
                     }
+
                     break;
                 default:
                     throw new NotImplementedException();
@@ -110,7 +109,32 @@ namespace EPUBRenderer
             return Result;
         }
 
-        internal static Vector GetPageOffset(RenderPage page, Vector pageSize)
+        internal static Vector GetNewPagePos(Vector pageSize, int endPagePos)
+        {
+            var Offset = GetPageOffset(pageSize);
+            switch (Dir)
+            {
+                case Direction.VRTL:
+                    var X = GetStartPosition(pageSize).X + Offset.X * endPagePos;
+                    return new Vector(X,0);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static int GetPagePosition(Vector startPos, Vector pageSize)
+        {
+            var Offset = GetPageOffset(pageSize);
+            switch (Dir)
+            {
+                case Direction.VRTL:
+                    return (int)((startPos.X - pageSize.X) / Offset.X + 1);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector GetPageOffset(Vector pageSize)
         {
             switch (Dir)
             {
@@ -227,8 +251,8 @@ namespace EPUBRenderer
             switch (Dir)
             {
                 case Direction.VRTL:
-                    double X = Image.EndPos.X; 
-                    X -= Math.Ceiling(Image.Size.X / GlobalSettings.LineHeight + 1) * GlobalSettings.LineHeight;                 
+                    double X = Image.EndPos.X;
+                    X -= Math.Ceiling(Image.Size.X / GlobalSettings.LineHeight + 1) * GlobalSettings.LineHeight;
                     return new Vector(X, 0);
                 default:
                     throw new NotImplementedException();

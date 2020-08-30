@@ -14,9 +14,9 @@ namespace EPUBRenderer
         private static Vector PageSize;
         private static Vector CurrentWritePos;
 
-        public static void Position(List<List<TextElement>> ElementString, Vector PageSize, EpubSettings PageSettings)
+        public static void Position(List<List<TextElement>> ElementString, Vector PageSize)
         {
-            WritingDirectionModifiers.SetDirection(PageSettings);
+
             TextPositioner.PageSize = PageSize;
             CurrentWritePos = WritingDirectionModifiers.GetStartPosition(PageSize);
 
@@ -36,13 +36,14 @@ namespace EPUBRenderer
                         WrapIntoPage(CurrentWord);
                         break;
                     case TextElementType.RubyLetter:
-                        var MainWord = ElementString[WordIndex - 1];                      
+                        var MainWord = ElementString[WordIndex - 1];
                         var StartLetter = MainWord.First();
                         var EndLetter = MainWord.Last();
                         Vector WordLength = WritingDirectionModifiers.GetNextPosition(EndLetter.StartPos, EndLetter) - StartLetter.StartPos;
                         Vector Offset = WordLength / CurrentWord.Count;
                         Offset = WritingDirectionModifiers.GetMinRubyOffset(Offset);
-                        Vector StartWritePos = StartLetter.StartPos + (WordLength - Offset * (CurrentWord.Count - 1)) / 2 + WritingDirectionModifiers.GetRubyStartOffset();
+                        Vector StartWritePos = StartLetter.StartPos + (WordLength - Offset * (CurrentWord.Count - 1)) / 2;
+                        StartWritePos += WritingDirectionModifiers.GetRubyStartOffset();
                         for (int i = 0; i < CurrentWord.Count; i++)
                         {
                             CurrentWord[i].StartPos = StartWritePos;
@@ -58,18 +59,17 @@ namespace EPUBRenderer
                             double EffectiveRatio = Math.Max(WidthRatio, HeightRatio);
                             Image.Size /= EffectiveRatio;
                         }
-                        if (ElementString.Count > 1 )
+                        CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
+                        Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);
+                        int StartPagePos = WritingDirectionModifiers.GetPagePosition(Image.StartPos, PageSize);
+                        int EndPagePos = WritingDirectionModifiers.GetPagePosition(Image.EndPos, PageSize);
+                        if (StartPagePos != EndPagePos)
                         {
-                            CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
-                            Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);
-                            CurrentWritePos = WritingDirectionModifiers.GetAfterImagePos(CurrentWritePos, PageSize, Image);
+                            var NewPagePos = Math.Min(StartPagePos, EndPagePos);
+                            CurrentWritePos = WritingDirectionModifiers.GetNewPagePos(PageSize, NewPagePos);
+                            Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);                       
                         }
-                        else
-                        {                           
-                            Image.StartPos = (PageSize - Image.Size) / 2;
-                            CurrentWritePos = WritingDirectionModifiers.GetNextPosition(CurrentWritePos, First);
-                            CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
-                        }
+                        CurrentWritePos = WritingDirectionModifiers.GetAfterImagePos(CurrentWritePos, PageSize, Image);
                         break;
                     case TextElementType.Break:
                         CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
