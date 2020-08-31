@@ -26,19 +26,19 @@ namespace EPUBReader
                 IsVertical = CurrentEpub.Settings.Vertical = true;
 
                 Viewer.SetToEpub(CurrentEpub);
-            }        
+            }
+            LibraryManager.TryAddBook(CurrentEpub);
+        }
+        
+        internal static int GetCurrentPage()
+        {
+            return Viewer.CurrentPageNumber;
         }
 
-        //might not be needed
-    //    public static int GetPageCount()
-    //    {
-    //        return Viewer.TotalPageCount;
-    //    }
-    //
-    //    public static int GetCurrentPage()
-    //    {
-    //        return Viewer.CurrentPageNumber; ;
-    //    }
+        internal static int GetTotalPages()
+        {
+            return Viewer.TotalPageCount;
+        }
 
         internal static double GetCurrentRenderPageRatio()
         {
@@ -52,7 +52,14 @@ namespace EPUBReader
 
         internal static string GetCurrentPath()
         {
-            return CurrentEpub.FilePath;
+            if (CurrentEpub == null)
+            {
+                return "";
+            }
+            else
+            {
+                return CurrentEpub.FilePath;
+            }
         }
 
         internal static List<MarkingDefinition> GetAllMarkings()
@@ -68,6 +75,11 @@ namespace EPUBReader
         public static void SwitchRight()
         {
             Viewer.SwitchRight();
+        }
+
+        internal static void SetPage(int newPage)
+        {
+            Viewer.LoadPage(newPage);
         }
 
         internal static void DeleteMarking(Point Pos)
@@ -106,11 +118,19 @@ namespace EPUBReader
 
         internal static void LoadSave(SaveObject Save)
         {
-            if (File.Exists(Save.LastOpen))
+            if (Save.LastBook != null)
+            {               
+                LoadBookDefinition(Save.LastBook);
+            }        
+        }
+
+        internal static void LoadBookDefinition(BookDefinition Book)
+        {
+            if (File.Exists(Book.FilePath))
             {
-                Open(Save.LastOpen);
-                Viewer.LoadPageByRatio(Save.LastRenderPageIndex, Save.RenderPageRatio);
-                Marker.ApplyAllMarkings(Save.Markings, Viewer.RenderPages);
+                Open(Book.FilePath);
+                Viewer.LoadPageByRatio(Book.LastRenderPageIndex, Book.RenderPageRatio);
+                Marker.ApplyAllMarkings(Book.Markings, Viewer.RenderPages);
             }
         }
     }

@@ -13,12 +13,7 @@ namespace EPUBReader
         public static void Report(string Message, LogType type)
         {
             Message = type.ToString() + ": " + Message;
-            Log.Add(Message);
-            Console.WriteLine(Message);
-            if (Log.Count > 3000)
-            {
-                Log = Log.Take(50).ToList();
-            }
+            Log.Add(Message);          
         }
 
         public static void Report (Exception exception)

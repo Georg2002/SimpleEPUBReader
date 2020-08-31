@@ -66,6 +66,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LibraryDisplayer.xaml.cs">
+      <DependentUpon>LibraryDisplayer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LibraryManager.cs" />
+    <Compile Include="PagePicker.xaml.cs">
+      <DependentUpon>PagePicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GlobalSettings.cs" />
     <Compile Include="InitialClass.cs" />
     <Compile Include="Loader.cs" />
@@ -75,11 +82,6 @@
     </Compile>
     <Compile Include="MainWindow2.xaml.cs">
       <DependentUpon>MainWindow2.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Resource1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resource1.resx</DependentUpon>
     </Compile>
     <Compile Include="SaveObject.cs" />
     <Compile Include="Saver.cs" />
@@ -116,6 +118,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="LibraryDisplayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PagePicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -129,14 +139,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resource1.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

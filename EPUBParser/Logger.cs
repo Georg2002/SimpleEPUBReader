@@ -14,12 +14,7 @@ namespace EPUBParser
         internal static void Report(string Message, LogType type)
         {
             Message = type.ToString() + ": " + Message;
-            Log.Add(Message);
-            Console.WriteLine(Message);
-            if (Log.Count > 3000)
-            {
-                Log = Log.Take(50).ToList();
-            }
+            Log.Add(Message);            
         }
     
 

@@ -7,41 +7,45 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Height="50">
     <UserControl.Resources>
-        <Style x:Key="ButtonStyle" TargetType="{x:Type ButtonBase}">
-             <Setter Property="Width" Value="100"/> 
-        </Style>
-        <Style x:Key="ButtonStyleNight" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource ButtonStyle}">
-            <Setter Property="Background" Value="#404040"/>
-            <Setter Property="Foreground" Value="#20FFFFFF"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ButtonBase}">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#808080"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="ButtonStyleDay" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource ButtonStyle}">         
-        </Style>        
+       
     </UserControl.Resources>
-    <StackPanel Orientation="Horizontal" x:Name="Panel">      
-        <Button x:Name="OpenButton" Content="Öffnen" Style="{StaticResource ButtonStyleDay}" Click="Open_Click"/>
-        <Button x:Name="LibraryButton" Content="Bibliothek" Style="{StaticResource ButtonStyleDay}"/>
-        <ToggleButton x:Name="RTLButton" Content="Rechts nach Links" Style="{StaticResource ButtonStyleDay}"/>
-        <ToggleButton x:Name="VerticalButton" Content="Vertical" Style="{StaticResource ButtonStyleDay}"/>
-        <ToggleButton x:Name="NightmodeButton" Content="Nachtmodus" Style="{StaticResource ButtonStyleDay}" Click="ToggleDayNightClicked"/>
-        <Button x:Name="FullscreenButton" Style="{StaticResource ButtonStyleDay}" Click="ToggleFullscreen">
-            <Button.Content>
-                <TextBlock Text="Vollbild umschalten" TextWrapping="Wrap" TextAlignment="Center"/>
-            </Button.Content>
-        </Button>
-        <Button x:Name="CloseButton" Content="Schließen" Style="{StaticResource ButtonStyleDay}" Click="CloseProgram"/>
-    </StackPanel>
+    <Grid>
+        <StackPanel Orientation="Horizontal" x:Name="Panel" >
+            <Button x:Name="OpenButton" Content="Öffnen"
+                Style="{StaticResource ButtonStyleDay}" Click="Open_Click"/>
+            <Button x:Name="LibraryButton" Content="Bibliothek"
+                Style="{StaticResource ButtonStyleDay}" Click="OpenLibrary"/>
+            <ToggleButton x:Name="RTLButton" Style="{StaticResource ButtonStyleDay}">
+                <ToggleButton.Content>
+                    <TextBlock Text="Rechts&#10;nach&#10;Links"
+                           TextWrapping="Wrap" TextAlignment="Center"/>
+                </ToggleButton.Content>
+            </ToggleButton>
+            <ToggleButton x:Name="VerticalButton" Content="Vertical"
+                      Style="{StaticResource ButtonStyleDay}"/>
+            <ToggleButton x:Name="NightmodeButton"
+                      Style="{StaticResource ButtonStyleDay}"
+                      Click="ToggleDayNightClicked">
+                <ToggleButton.Content>
+                    <TextBlock Text="Nacht-&#10;modus" TextWrapping="Wrap"
+                           TextAlignment="Center"/>
+                </ToggleButton.Content>
+            </ToggleButton>
+            <Button x:Name="FullscreenButton" Style="{StaticResource ButtonStyleDay}"
+                Click="ToggleFullscreen">
+                <Button.Content>
+                    <TextBlock Text="Vollbild&#10;umschalten" TextWrapping="Wrap"
+                           TextAlignment="Center"/>
+                </Button.Content>
+            </Button>
+            <Button x:Name="ChapterButton" Content="Kapitel"
+                Style="{StaticResource ButtonStyleDay}" Click="SelectChapter"/>
+            <Button x:Name="JumpButton" Content="Seiten"
+                Style="{StaticResource ButtonStyleDay}" Click="SelectPage"/>         
+            <Button x:Name="CloseButton" Content="Schließen"
+                Style="{StaticResource ButtonStyleDay}" Click="CloseProgram"/>
+        </StackPanel>
+        <local:PagePicker x:Name="PagePicker" Visibility="Hidden"/>
+        <local:LibraryDisplayer x:Name="LibDisp" Visibility="Hidden"/>
+    </Grid>
 </UserControl>

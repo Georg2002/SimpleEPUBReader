@@ -27,14 +27,19 @@ namespace EPUBReader
         public ToolBar()
         {
             InitializeComponent();
+            PagePicker.Background = CloseButton.Background;
             Panel.Background = CloseButton.Background;
+            LibDisp.Background = CloseButton.Background;
+            LibraryManager.LibDisp = LibDisp;
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
-            var Dialog = new OpenFileDialog();
-            Dialog.Filter = "Epub files(.epub)|*.epub";
-            Dialog.Multiselect = false;
+            var Dialog = new OpenFileDialog
+            {
+                Filter = "Epub files(.epub)|*.epub",
+                Multiselect = false
+            };
             if (Dialog.ShowDialog() == true)
             {
                 ViewerInteracter.Open(Dialog.FileName);
@@ -70,23 +75,28 @@ namespace EPUBReader
         public void SetDayNight(bool Nightmode)
         {
             GlobalSettings.Nightmode = Nightmode;
-            ViewerInteracter.SetNightmode(GlobalSettings.Nightmode);
-            MainWindow.SetNightmode(GlobalSettings.Nightmode);
-            SetNightmode(GlobalSettings.Nightmode);
+            Style ButtonStyle;
+            var Res = Application.Current.Resources;
+            if (Nightmode)
+            {
+                ButtonStyle = (Style)Res["ButtonStyleNight"];
+            }
+            else
+            {
+                ButtonStyle = (Style)Res["ButtonStyleDay"];
+            }
+            GlobalSettings.CurrentButtonStyle = ButtonStyle;
+            ViewerInteracter.SetNightmode(Nightmode);
+            MainWindow.SetNightmode(Nightmode);
+            PagePicker.SetNightmode(Nightmode);
+            LibDisp.SetNightmode(Nightmode);
+            SetNightmode(Nightmode);
         }
 
         private void SetNightmode(bool nightmode)
         {
-            Style ButtonStyle;
             NightmodeButton.IsChecked = nightmode;
-            if (nightmode)
-            {
-                ButtonStyle = (Style)Resources["ButtonStyleNight"];
-            }
-            else
-            {
-                ButtonStyle = (Style)Resources["ButtonStyleDay"];
-            }
+            var ButtonStyle = GlobalSettings.CurrentButtonStyle;
             OpenButton.Style = ButtonStyle;
             LibraryButton.Style = ButtonStyle;
             RTLButton.Style = ButtonStyle;
@@ -94,7 +104,26 @@ namespace EPUBReader
             NightmodeButton.Style = ButtonStyle;
             FullscreenButton.Style = ButtonStyle;
             CloseButton.Style = ButtonStyle;
+            ChapterButton.Style = ButtonStyle;
+            JumpButton.Style = ButtonStyle;
+            PagePicker.Background = CloseButton.Background;
             Panel.Background = CloseButton.Background;
+            LibDisp.Background = CloseButton.Background;
+        }
+
+        private void SelectChapter(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SelectPage(object sender, RoutedEventArgs e)
+        {
+            PagePicker.Visibility = Visibility.Visible;
+        }
+
+        private void OpenLibrary(object sender, RoutedEventArgs e)
+        {
+            LibDisp.Visibility = Visibility.Visible;
         }
     }
 }

@@ -7,13 +7,19 @@ using System.Threading.Tasks;
 
 namespace EPUBReader
 {
-    public struct SaveObject
+    public class SaveObject
+    {       
+        public BookDefinition LastBook;
+        public bool Nightmode;
+        public List<BookDefinition> LibraryBooks;       
+    }
+
+    public class BookDefinition
     {
-        public string LastOpen;
+        public List<MarkingDefinition> Markings;
         public int LastRenderPageIndex;
         public double RenderPageRatio;
-        public bool Nightmode;
-        public List<string> LibraryPaths;
-        public List<MarkingDefinition> Markings;
+        public string FilePath;
+        public string Title { get; set; }
     }
 }

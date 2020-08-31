@@ -15,10 +15,17 @@ namespace EPUBReader
         {
             var Save = new SaveObject();
             Save.Nightmode = GlobalSettings.Nightmode;
-            Save.Markings = ViewerInteracter.GetAllMarkings();
-            Save.LastOpen = ViewerInteracter.GetCurrentPath();
-            Save.LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage();
-            Save.RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio();
+            if (!string.IsNullOrEmpty(ViewerInteracter.GetCurrentPath()))
+            {
+                var CurrentBook = new BookDefinition();
+                CurrentBook.Markings = ViewerInteracter.GetAllMarkings();
+                CurrentBook.FilePath = ViewerInteracter.GetCurrentPath();
+                CurrentBook.LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage();
+                CurrentBook.RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio();
+                Save.LastBook = CurrentBook;
+                Save.LibraryBooks = LibraryManager.Books;
+            }
+            LibraryManager.UpdateCurrentBook();
 
             string SaveFolder = GlobalSettings.GetSaveFolderPath();
             if (!Directory.Exists(SaveFolder))
@@ -30,7 +37,11 @@ namespace EPUBReader
             using (var Writer = new StreamWriter(SaveFile))
             {
                 serializer.Serialize(Writer, Save);
-            }   
+            }
+            string LogPath = Path.Combine(SaveFolder, "parselog.txt");
+            File.WriteAllLines(LogPath, EPUBParser.Logger.Log); 
+            LogPath = Path.Combine(SaveFolder, "readerlog.txt");
+            File.WriteAllLines(LogPath, EPUBReader.Logger.Log);
         }
     }
 }

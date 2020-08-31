@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace EPUBReader
 {
     public static class GlobalSettings
     {    
         public static bool Nightmode;
+        public static Style CurrentButtonStyle;
 
         public static  string GetSaveFolderPath()
         {

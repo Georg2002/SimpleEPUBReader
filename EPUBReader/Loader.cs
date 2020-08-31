@@ -10,7 +10,7 @@ namespace EPUBReader
 {
     public static class Loader
     {
-        public static SaveObject? Load()
+        public static SaveObject Load()
         {
             var SaveFolder = GlobalSettings.GetSaveFolderPath();
             var SaveFile = Path.Combine(SaveFolder, GlobalSettings.SaveFileName);

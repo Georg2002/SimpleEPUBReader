@@ -31,7 +31,7 @@ namespace EPUBRenderer
             {'≪','︽' },{'≫','︾' },{'《','︽' },
             {'》','︾' },{'(','︵' },{')','︶' }
         };
-        public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）):\n\r　\t".ToCharArray();
+        public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
 
         public static void SetNightmode(bool nightmode)
         {

@@ -22,12 +22,12 @@ namespace EPUBReader
     public partial class MainWindow2 : Window
     {
         private bool IsGoingDown = false;
-        private Storyboard MoveUp;
-        private Storyboard MoveDown;
+        private readonly Storyboard MoveUp;
+        private readonly Storyboard MoveDown;
         private Point MouseTouchdownPos;
         string StartupFile;
         private DateTime LastAnimate;
-        private SaveObject? Save;
+        private SaveObject Save;
 
         public MainWindow2(string[] args)
         {
@@ -37,7 +37,20 @@ namespace EPUBReader
             MoveDown = (Storyboard)this.FindResource("MoveDown");
             ViewerInteracter.Viewer = Viewer;
             Save = Loader.Load();
-
+            if (Save == null)
+            {
+                Logger.Report("save not found, falling back to standards", LogType.Error);
+                return;
+            }
+            if (Save.LibraryBooks != null)
+            {
+                LibraryManager.Books = Save.LibraryBooks;
+                LibraryManager.CheckBookList();
+            }
+            else
+            {
+                LibraryManager.Books = new List<BookDefinition>();
+            }
             if (args.Length > 0)
             {
                 string Path = args[0];
@@ -68,12 +81,11 @@ namespace EPUBReader
                     MoveUp.Stop();
                     MoveDown.Begin();
                 }
-                else if (Pos.Y > CheckHeight && IsGoingDown)
+                else if (Pos.Y > CheckHeight && IsGoingDown && !LibraryManager.InUse)
                 {
                     MoveDown.Stop();
                     MoveUp.Begin();
                     IsGoingDown = false;
-
                 }
             }
             if (Mouse.LeftButton == MouseButtonState.Pressed)
@@ -119,18 +131,17 @@ namespace EPUBReader
             {
                 ViewerInteracter.Open(StartupFile);
             }
-           
-            if (Save.HasValue)
+
+            if (Save != null)
             {
-                var Val = Save.Value;
-                if (Val.Nightmode)
+                if (Save.Nightmode)
                 {
-                    TlBar.SetDayNight(Val.Nightmode);
+                    TlBar.SetDayNight(Save.Nightmode);
                 }
                 if (string.IsNullOrEmpty(StartupFile))
                 {
-                    ViewerInteracter.LoadSave(Val);                 
-                }               
+                    ViewerInteracter.LoadSave(Save);
+                }
             }
         }
 
