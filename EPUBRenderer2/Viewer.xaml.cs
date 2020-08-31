@@ -59,10 +59,10 @@ namespace EPUBRenderer
             TotalPageCount = 0;
             PageSize = new Vector(ActualWidth, ActualHeight);
             Renderer.PageSize = PageSize;
-            int OldInnerPageCount = 0;
+            double Ratio = 0;
             if (Renderer.Page != null)
             {
-                OldInnerPageCount = Renderer.Page.PageCount;
+                Ratio = GetRenderPageRatio();
             }
             RenderPages.ForEach(a =>
         {
@@ -75,20 +75,36 @@ namespace EPUBRenderer
             if (Renderer.Page != null)
             {
                 int RenderPageIndex = RenderPages.IndexOf(Renderer.Page);
-                double Ratio = (double)(Renderer.Page.CurrentPage - 1) / (double)OldInnerPageCount;
-                int NewInnerPageNumber = (int)Math.Round(Renderer.Page.PageCount * Ratio) + 1;
-                if (NewInnerPageNumber > Renderer.Page.PageCount)
-                {
-                    NewInnerPageNumber = Renderer.Page.PageCount;
-                }
-                LoadPage(RenderPageIndex + 1, NewInnerPageNumber);
+                LoadPageByRatio(RenderPageIndex, Ratio);
             }
             else
             {
                 LoadPage(1);
             }
         }
-    
+
+        public void LoadPageByRatio(int RenderPage, double Ratio)
+        {
+            int NewInnerPageNumber = (int)Math.Round(Renderer.Page.PageCount * Ratio) + 1;
+            if (NewInnerPageNumber > Renderer.Page.PageCount)
+            {
+                NewInnerPageNumber = Renderer.Page.PageCount;
+            }
+            LoadPage(RenderPage + 1, NewInnerPageNumber);
+        }
+
+        public double GetRenderPageRatio()
+        {
+            if (Renderer.Page != null)
+            {
+                return (double)(Renderer.Page.CurrentPage - 1) / (double)Renderer.Page.PageCount;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         private void LoadPage(int RenderPageNumber, int InnerPageNumber)
         {
             Renderer.Page = RenderPages[RenderPageNumber - 1];

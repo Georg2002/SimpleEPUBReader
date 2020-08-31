@@ -24,7 +24,7 @@ namespace EPUBRenderer
                 Position = PosDef,
                 Element = Element,
                 RenderPageIndex = -1,
-                Color = (SolidColorBrush)Element.MarkingColor
+                Color = ((SolidColorBrush)Element.MarkingColor).Color
             };
         }
 
@@ -159,12 +159,50 @@ namespace EPUBRenderer
 
         public static List<MarkingDefinition> GetAllMarkings(List<RenderPage> Pages)
         {
-            return null;
+            List<MarkingDefinition> Result = new List<MarkingDefinition>();
+            for (int p = 0; p < Pages.Count; p++)
+            {
+                var Page = Pages[p];
+                for (int w = 0; w < Page.TextElements.Count; w++)
+                {
+                    var Word = Page.TextElements[w];
+                    for (int e = 0; e < Word.Count; e++)
+                    {
+                        var Element = Word[e];
+                        if (Element.MarkingColor != null)
+                        {
+                            var NewMarking = new MarkingDefinition
+                            {
+                                Color = ((SolidColorBrush)Element.MarkingColor).Color,
+                                Position = new PositionDefinition(e, w),
+                                RenderPageIndex = p
+                            };
+                            Result.Add(NewMarking);
+                        }
+                    }
+                }
+            }
+            return Result;
         }
 
-        public static void ApplyAllMarkings(List<MarkingDefinition> Markings)
+        public static void ApplyAllMarkings(List<MarkingDefinition> Markings, List<RenderPage> Pages)
         {
-
+            foreach (var Marking in Markings)
+            {
+                if (Marking.RenderPageIndex < Pages.Count)
+                {
+                    var Page = Pages[Marking.RenderPageIndex];
+                    if (Marking.Position.WordIndex < Page.TextElements.Count)
+                    {
+                        var Word = Page.TextElements[Marking.Position.WordIndex];
+                        if (Marking.Position.ElementIndex < Word.Count)
+                        {
+                            var Element = Word[Marking.Position.ElementIndex];
+                            Element.MarkingColor = new SolidColorBrush(Marking.Color);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -182,13 +220,14 @@ namespace EPUBRenderer
         public int RenderPageIndex;
         public PositionDefinition Position;
         public TextElement Element;
-        public SolidColorBrush Color;
+        public Color Color;
     }
 
     public class PositionDefinition
     {
         public int ElementIndex;
         public int WordIndex;
+        public PositionDefinition() { }
         public PositionDefinition(int ElementIndex, int WordIndex)
         {
             this.ElementIndex = ElementIndex;

@@ -35,16 +35,11 @@ namespace EPUBReader
             var Dialog = new OpenFileDialog();
             Dialog.Filter = "Epub files(.epub)|*.epub";
             Dialog.Multiselect = false;
-            if (Directory.Exists(GlobalSettings.LastDirectory))
-            {
-                Dialog.InitialDirectory = GlobalSettings.LastDirectory;
-            }
             if (Dialog.ShowDialog() == true)
             {
                 ViewerInteracter.Open(Dialog.FileName);
                 VerticalButton.IsChecked = ViewerInteracter.IsVertical;
                 RTLButton.IsChecked = ViewerInteracter.RTL;
-                GlobalSettings.LastDirectory = Directory.GetParent(Dialog.FileName).FullName;
             }
         }
 
@@ -67,9 +62,14 @@ namespace EPUBReader
             }
         }
 
-        private void ToggleDayNight(object sender, RoutedEventArgs e)
+        private void ToggleDayNightClicked(object sender, RoutedEventArgs e)
         {
-            GlobalSettings.Nightmode = !GlobalSettings.Nightmode;
+            SetDayNight(!GlobalSettings.Nightmode);
+        }
+
+        public void SetDayNight(bool Nightmode)
+        {
+            GlobalSettings.Nightmode = Nightmode;
             ViewerInteracter.SetNightmode(GlobalSettings.Nightmode);
             MainWindow.SetNightmode(GlobalSettings.Nightmode);
             SetNightmode(GlobalSettings.Nightmode);

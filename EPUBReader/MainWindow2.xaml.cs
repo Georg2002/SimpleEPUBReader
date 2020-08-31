@@ -21,12 +21,13 @@ namespace EPUBReader
     /// </summary>
     public partial class MainWindow2 : Window
     {
-        bool IsGoingDown = false;
-        Storyboard MoveUp;
-        Storyboard MoveDown;
-        Point MouseTouchdownPos;
+        private bool IsGoingDown = false;
+        private Storyboard MoveUp;
+        private Storyboard MoveDown;
+        private Point MouseTouchdownPos;
         string StartupFile;
         private DateTime LastAnimate;
+        private SaveObject? Save;
 
         public MainWindow2(string[] args)
         {
@@ -35,7 +36,8 @@ namespace EPUBReader
             MoveUp = (Storyboard)this.FindResource("MoveUp");
             MoveDown = (Storyboard)this.FindResource("MoveDown");
             ViewerInteracter.Viewer = Viewer;
-            Loader.Load();
+            Save = Loader.Load();
+
             if (args.Length > 0)
             {
                 string Path = args[0];
@@ -113,8 +115,23 @@ namespace EPUBReader
 
         private void Base_Loaded(object sender, RoutedEventArgs e)
         {
-            if (StartupFile == "") return;
-            ViewerInteracter.Open(StartupFile);
+            if (!string.IsNullOrEmpty(StartupFile))
+            {
+                ViewerInteracter.Open(StartupFile);
+            }
+           
+            if (Save.HasValue)
+            {
+                var Val = Save.Value;
+                if (Val.Nightmode)
+                {
+                    TlBar.SetDayNight(Val.Nightmode);
+                }
+                if (string.IsNullOrEmpty(StartupFile))
+                {
+                    ViewerInteracter.LoadSave(Val);                 
+                }               
+            }
         }
 
         public void SetNightmode(bool Nightmode)

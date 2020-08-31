@@ -36,7 +36,7 @@
         <Button x:Name="LibraryButton" Content="Bibliothek" Style="{StaticResource ButtonStyleDay}"/>
         <ToggleButton x:Name="RTLButton" Content="Rechts nach Links" Style="{StaticResource ButtonStyleDay}"/>
         <ToggleButton x:Name="VerticalButton" Content="Vertical" Style="{StaticResource ButtonStyleDay}"/>
-        <ToggleButton x:Name="NightmodeButton" Content="Nachtmodus" Style="{StaticResource ButtonStyleDay}" Click="ToggleDayNight"/>
+        <ToggleButton x:Name="NightmodeButton" Content="Nachtmodus" Style="{StaticResource ButtonStyleDay}" Click="ToggleDayNightClicked"/>
         <Button x:Name="FullscreenButton" Style="{StaticResource ButtonStyleDay}" Click="ToggleFullscreen">
             <Button.Content>
                 <TextBlock Text="Vollbild umschalten" TextWrapping="Wrap" TextAlignment="Center"/>
