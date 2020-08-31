@@ -59,6 +59,9 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>iconTransparent.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
@@ -93,6 +96,9 @@
   <ItemGroup>
     <Content Include="Entwicklungsverlauf.txt" />
     <Content Include="FeatureList.txt" />
+    <Resource Include="iconTransparent.ico" />
+    <Resource Include="icon.ico" />
+    <Resource Include="TextTemplate.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj">

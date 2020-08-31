@@ -60,6 +60,7 @@ namespace EPUBReader
                     Book.Markings = ViewerInteracter.GetAllMarkings();
                     Book.LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage();
                     Book.RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio();
+                    break;
                 }
             }
         }

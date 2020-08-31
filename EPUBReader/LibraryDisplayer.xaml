@@ -15,6 +15,11 @@
         <Button x:Name="ButtonBack" Content="zurück" Grid.Column="0" Click="Back_Click" Style="{StaticResource ButtonStyleDay}"/>
         <Button x:Name="ButtonOk" Content="OK" Grid.Column="2" Click="Select_Click" Style="{StaticResource ButtonStyleDay}"/>
         <ListBox x:Name="List" Grid.Column="1"  Background="Transparent" BorderBrush="Transparent">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Löschen" Click="DeleteItem"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>

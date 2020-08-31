@@ -22,10 +22,10 @@ namespace EPUBReader
                 CurrentBook.FilePath = ViewerInteracter.GetCurrentPath();
                 CurrentBook.LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage();
                 CurrentBook.RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio();
+                LibraryManager.UpdateCurrentBook();
                 Save.LastBook = CurrentBook;
                 Save.LibraryBooks = LibraryManager.Books;
-            }
-            LibraryManager.UpdateCurrentBook();
+            }         
 
             string SaveFolder = GlobalSettings.GetSaveFolderPath();
             if (!Directory.Exists(SaveFolder))

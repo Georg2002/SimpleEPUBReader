@@ -56,5 +56,14 @@ namespace EPUBReader
                 List.ItemsSource = null;
             }
         }
+
+        private void DeleteItem(object sender, RoutedEventArgs e)
+        {
+            if (List.SelectedItem != null)
+            {
+                LibraryManager.Books.Remove((BookDefinition)List.SelectedItem);
+                List.Items.Refresh();
+            }
+        }
     }
 }

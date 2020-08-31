@@ -7,6 +7,7 @@ using System.Windows;
 using Microsoft.Win32;
 using EPUBRenderer;
 using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace EPUBReader
 {
@@ -18,6 +19,7 @@ namespace EPUBReader
 #pragma warning restore IDE0060 // Remove unused parameter
         {
             KeepAlive();
+            MakeFileExtensionEntry();
             Application app = new App();
 
             //Create Window
@@ -25,6 +27,11 @@ namespace EPUBReader
 
             //Launch the app
             app.Run(win);
+        }
+
+        private static void MakeFileExtensionEntry()
+        {
+            //????????????How??!!
         }
 
         [Flags]
