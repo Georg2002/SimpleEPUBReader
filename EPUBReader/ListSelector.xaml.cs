@@ -16,11 +16,16 @@ using System.Windows.Shapes;
 namespace EPUBReader
 {
     /// <summary>
-    /// Interaction logic for LibraryDisplayer.xaml
+    /// Interaction logic for ListSelector.xaml
     /// </summary>
-    public partial class LibraryDisplayer : UserControl
+    public partial class ListSelector : UserControl
     {
-        public LibraryDisplayer()
+       public int SelectedIndex;
+        public List<string> ShownList;
+        public event EventHandler ItemSelected;
+        public event EventHandler ItemDeleted;
+
+        public ListSelector()
         {
             InitializeComponent();
         }
@@ -33,8 +38,8 @@ namespace EPUBReader
 
         private void Select_Click(object sender, RoutedEventArgs e)
         {
-            LibraryManager.SelectedItem = (BookDefinition)List.SelectedItem;
-            LibraryManager.LoadSelectedBook();
+            SelectedIndex = List.SelectedIndex;
+            ItemSelected.Invoke(this, null);
             Visibility = Visibility.Hidden;
         }
 
@@ -45,14 +50,14 @@ namespace EPUBReader
 
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            LibraryManager.InUse = IsVisible;
+            GlobalSettings.LeaveMenuDown = IsVisible;
             if (IsVisible)
             {
-               LibraryManager. UpdateCurrentBook();
-                List.ItemsSource = LibraryManager.Books;             
+                List.ItemsSource = ShownList;
+                List.Items.Refresh();
             }
             else
-            {
+            {       
                 List.ItemsSource = null;
             }
         }
@@ -61,7 +66,8 @@ namespace EPUBReader
         {
             if (List.SelectedItem != null)
             {
-                LibraryManager.Books.Remove((BookDefinition)List.SelectedItem);
+                SelectedIndex = List.SelectedIndex;
+                ItemDeleted.Invoke(this, null);        
                 List.Items.Refresh();
             }
         }

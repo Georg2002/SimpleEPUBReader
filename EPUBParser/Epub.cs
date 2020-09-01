@@ -37,7 +37,7 @@ namespace EPUBParser
             {
                 Logger.Report("Package file could not be found", LogType.Error);
                 Package = new PackageInfo(null);
-                toc = new TocInfo(null);
+                toc = new TocInfo(null, Files);
             }
 
             Package = new PackageInfo(PackageFile);
@@ -58,7 +58,7 @@ namespace EPUBParser
                             Pages.Add(new EpubPage(File, Settings, Files));
                             break;
                         case MediaType.toc:                            
-                            toc = new TocInfo(File);
+                            toc = new TocInfo(File, Files);
                             break;
                         case MediaType.css:
                             break;

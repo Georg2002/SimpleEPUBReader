@@ -11,9 +11,15 @@ namespace EPUBReader
     public static class ViewerInteracter
     {
         public static Viewer Viewer;
-        private static Epub CurrentEpub;
+        public static Epub CurrentEpub;
         public static bool IsVertical;
         public static bool RTL;
+        public static event EventHandler PageChanged;
+
+        private static void InvokePageChanged()
+        {
+            PageChanged.Invoke(null,null );
+        }
 
         public static void Open(string Path)
         {
@@ -28,6 +34,7 @@ namespace EPUBReader
                 Viewer.SetToEpub(CurrentEpub);
             }
             LibraryManager.TryAddBook(CurrentEpub);
+            InvokePageChanged();
         }
         
         internal static int GetCurrentPage()
@@ -70,16 +77,19 @@ namespace EPUBReader
         public static void SwitchLeft()
         {
             Viewer.SwitchLeft();
+            InvokePageChanged();
         }
 
         public static void SwitchRight()
         {
             Viewer.SwitchRight();
+            InvokePageChanged();
         }
 
         internal static void SetPage(int newPage)
         {
             Viewer.LoadPage(newPage);
+            InvokePageChanged();
         }
 
         internal static void DeleteMarking(Point Pos)
@@ -121,7 +131,8 @@ namespace EPUBReader
             if (Save.LastBook != null)
             {               
                 LoadBookDefinition(Save.LastBook);
-            }        
+            }
+            InvokePageChanged();
         }
 
         internal static void LoadBookDefinition(BookDefinition Book)
@@ -132,6 +143,21 @@ namespace EPUBReader
                 Viewer.LoadPageByRatio(Book.LastRenderPageIndex, Book.RenderPageRatio);
                 Marker.ApplyAllMarkings(Book.Markings, Viewer.RenderPages);
             }
+            InvokePageChanged();
+        }
+
+        internal static void LoadChapter(ChapterDefinition chapter)
+        {           
+            string Source = chapter.Source;
+            int n = CurrentEpub.Pages.FindIndex(a => a.FullName == Source);
+            if (n == -1)
+            {
+                Logger.Report(string.Format("Chapter \"{0}\" not found",
+                    Source), LogType.Error);
+                return;
+            }
+            Viewer.LoadPage(n + 1, 1);
+            InvokePageChanged();
         }
     }
 }

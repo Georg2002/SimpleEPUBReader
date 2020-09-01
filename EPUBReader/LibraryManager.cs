@@ -6,22 +6,22 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace EPUBReader
 {
     public static class LibraryManager
     {
-        public static LibraryDisplayer LibDisp;
-        public static bool InUse;
-        internal static BookDefinition SelectedItem;
+        public static ListSelector Selector;
         public static List<BookDefinition> Books = new List<BookDefinition>();
 
-        internal static void LoadSelectedBook()
+        internal static void LoadSelectedBook(object sender, EventArgs e)
         {
-            if (SelectedItem != null)
+            int i = Selector.SelectedIndex;
+            if (i >= 0 && i < Books.Count)
             {
-                ViewerInteracter.LoadBookDefinition(SelectedItem);
-            }
+                ViewerInteracter.LoadBookDefinition(Books[i]);
+            }          
         }
 
         internal static void TryAddBook(Epub Epub)
@@ -49,6 +49,16 @@ namespace EPUBReader
             }
         }
 
+        private static List<string> GetTitleList()
+        {
+            List<string> Titles = new List<string>();
+            foreach (var Book in Books)
+            {
+                Titles.Add(Book.Title);
+            }
+            return Titles;
+        }
+
         internal static void UpdateCurrentBook()
         {
             string FilePath = ViewerInteracter.GetCurrentPath();
@@ -74,6 +84,34 @@ namespace EPUBReader
                     Books.Remove(Book);
                 }
             }
+        }
+
+        internal static void SetSelector()
+        {
+            UpdateCurrentBook();
+            Selector.DeleteMenu.Visibility = Visibility.Visible;
+            Selector.ItemSelected += LoadSelectedBook;
+            Selector.ItemDeleted += DeleteBook;
+            var Titles = GetTitleList();
+            Selector.ShownList = Titles;
+        }
+
+        internal static void DeleteBook(object sender, EventArgs e)
+        {
+            int i = Selector.SelectedIndex;
+            if (i >= 0 && i < Books.Count)
+            {
+                Books.RemoveAt(i);
+                Selector.List.ItemsSource = GetTitleList();
+                Selector.List.Items.Refresh();
+            }
+        }
+
+        public static void ResetSelector()
+        {
+            Selector.DeleteMenu.Visibility = Visibility.Hidden;
+            Selector.ItemSelected -= LoadSelectedBook;
+            Selector.ItemDeleted -= DeleteBook;
         }
     }
 }

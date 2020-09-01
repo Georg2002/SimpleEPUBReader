@@ -1,6 +1,7 @@
 ﻿using EPUBParser;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO.Pipes;
 using System.Linq;
 
@@ -9,11 +10,11 @@ namespace EPUBParser
     public class TocInfo
     {
         public string Title;
-        public List<string> Chapters;
+        public List<ChapterDefinition> Chapters;
 
-        public TocInfo(ZipEntry file)
+        public TocInfo(ZipEntry file, List<ZipEntry> files)
         {
-            Chapters = new List<string>();
+            Chapters = new List<ChapterDefinition>();
 
             if (file == null)
             {
@@ -61,20 +62,45 @@ namespace EPUBParser
             }
             foreach (var navPointNode in NavPointNodes)
             {
+                var NewChapter = new ChapterDefinition();
                 var TextNode = navPointNode.Descendants("text").FirstOrDefault();
                 if (TextNode == null)
                 {
                     Logger.Report("text node not found, can't set chapter", LogType.Error);
                     continue;
                 }
-                var ChapterTitle = TextNode.InnerText;
+                NewChapter.Title = TextNode.InnerText;
+
+                var SourceNode = navPointNode.Descendants("content").FirstOrDefault();
+                if (SourceNode == null)
+                {
+                    Logger.Report(string.Format("chapter source of chapter +" +
+                        "\"{0}\" missing, skipping", NewChapter.Title), LogType.Error);
+                    continue;
+                }
+
+                string Source = HTMLParser.SafeAttributeGet(SourceNode, "src");
+                Source = Source.Split('#')[0];
+                string FullSource = "";
+                ZipEntry Page = ZipEntry.GetEntryByPath(files, Source, file);
+                if (Page != null)
+                {
+                    FullSource = ZipEntry.GetEntryByPath(files, Source, file).FullName;
+                }               
+                if (FullSource == "")
+                {
+                    Logger.Report(string.Format("chapter source of chapter +" +
+                      "\"{0}\" is empty, skipping", NewChapter.Title), LogType.Error);
+                    continue;
+                }
+                NewChapter.Source = FullSource;
 
                 var OrderAttribute = navPointNode.Attributes.FirstOrDefault(a => a.Name == "playorder");
                 if (OrderAttribute == null)
                 {
                     Logger.Report(string.Format("can't determine order of chapter \"{0}\", " +
-                        "appending at the end of current list", ChapterTitle), LogType.Error);
-                    Chapters.Add(ChapterTitle);
+                        "appending at the end of current list", NewChapter.Title), LogType.Error);
+                    Chapters.Add(NewChapter);
                     continue;
                 }
                 UInt32 Index;
@@ -86,12 +112,12 @@ namespace EPUBParser
                 {
                     Logger.Report(string.Format("can't convert {0} to uint, appending chapter at the end of current list"
                         , OrderAttribute.Value), LogType.Error);
-                    Chapters.Add(ChapterTitle);
+                    Chapters.Add(NewChapter);
                     continue;
                 }
                 if (Chapters.Count >= Index)
                 {
-                    Chapters.Insert((int)Index, ChapterTitle);
+                    Chapters.Insert((int)Index, NewChapter);
                 }
                 else
                 {
@@ -99,10 +125,16 @@ namespace EPUBParser
                     {
                         Chapters.Add(null);
                     }
-                    Chapters.Insert((int)Index, ChapterTitle);
+                    Chapters.Insert((int)Index, NewChapter);
                 }
-                Chapters.RemoveAll(a => a == null);
             }
+            Chapters.RemoveAll(a => a == null);
         }
+    }
+
+    public class ChapterDefinition
+    {
+        public string Source;
+        public string Title;
     }
 }

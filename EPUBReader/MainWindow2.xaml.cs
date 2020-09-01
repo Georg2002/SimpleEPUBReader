@@ -81,7 +81,7 @@ namespace EPUBReader
                     MoveUp.Stop();
                     MoveDown.Begin();
                 }
-                else if (Pos.Y > CheckHeight && IsGoingDown && !LibraryManager.InUse)
+                else if (Pos.Y > CheckHeight && IsGoingDown && !GlobalSettings.LeaveMenuDown)
                 {
                     MoveDown.Stop();
                     MoveUp.Begin();

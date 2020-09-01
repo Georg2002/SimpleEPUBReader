@@ -19,10 +19,14 @@ namespace EPUBReader
     /// Interaction logic for ChapterPicker.xaml
     /// </summary>
     public partial class PagePicker : UserControl
-    {
+    {   
         public PagePicker()
         {
             InitializeComponent();
+            ViewerInteracter.PageChanged += RefreshIndicator;
+            var Window = Application.Current.MainWindow;
+            Window.SizeChanged += RefreshIndicator;
+            Window.StateChanged += RefreshIndicator;
         }
 
         internal void SetNightmode(bool nightmode)
@@ -33,7 +37,7 @@ namespace EPUBReader
             }
         }
 
-        private void RefreshIndicator()
+        private void RefreshIndicator(object sender, EventArgs args)
         {
             string CurrentPage = ViewerInteracter.GetCurrentPage().ToString();
             string TotalPages = ViewerInteracter.GetTotalPages().ToString();
@@ -43,12 +47,7 @@ namespace EPUBReader
         private void PageIndicator_Click(object sender, RoutedEventArgs e)
         {
             Visibility = Visibility.Hidden;
-        }
-
-        private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            RefreshIndicator();
-        }
+        }      
 
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -67,8 +66,7 @@ namespace EPUBReader
                 }
 
             }
-
-            RefreshIndicator();
+            GlobalSettings.LeaveMenuDown = IsVisible;          
         }
 
         private void SwitchButton_Click(object sender, RoutedEventArgs e)
@@ -83,7 +81,6 @@ namespace EPUBReader
             }
             int NewPage = ViewerInteracter.GetCurrentPage() + Change;
             ViewerInteracter.SetPage(NewPage);
-            RefreshIndicator();
         }
     }
 }

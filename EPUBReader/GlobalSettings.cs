@@ -11,6 +11,7 @@ namespace EPUBReader
     public static class GlobalSettings
     {    
         public static bool Nightmode;
+        public static bool LeaveMenuDown;
         public static Style CurrentButtonStyle;
 
         public static  string GetSaveFolderPath()

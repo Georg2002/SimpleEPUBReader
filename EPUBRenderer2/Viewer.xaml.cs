@@ -24,6 +24,9 @@ namespace EPUBRenderer
         public List<RenderPage> RenderPages;
         public Vector PageSize;
         private Epub epub;
+        private bool ResizeRunning;
+        private double ResizePageRatio;
+
         public RenderPage CurrentRenderPage
         {
             get => Renderer.Page;
@@ -50,6 +53,7 @@ namespace EPUBRenderer
             RenderPages.Clear();
             PageLines.ForEach(a => RenderPages.Add(new RenderPage() { TextElements = TextElementStringCreator.GetElements(a, epub.Settings.Vertical) }));
             CurrentPageNumber = 1;
+            ResizeRunning = false;
             RefreshSize();
         }
 
@@ -58,11 +62,11 @@ namespace EPUBRenderer
             if (epub == null) return;
             TotalPageCount = 0;
             PageSize = new Vector(ActualWidth, ActualHeight);
-            Renderer.PageSize = PageSize;
-            double Ratio = 0;
-            if (Renderer.Page != null)
+            Renderer.PageSize = PageSize;          
+            if (Renderer.Page != null && !ResizeRunning)
             {
-                Ratio = GetRenderPageRatio();
+                ResizePageRatio = GetRenderPageRatio();
+                ResizeRunning = true;
             }
             RenderPages.ForEach(a =>
         {
@@ -75,7 +79,7 @@ namespace EPUBRenderer
             if (Renderer.Page != null)
             {
                 int RenderPageIndex = RenderPages.IndexOf(Renderer.Page);
-                LoadPageByRatio(RenderPageIndex, Ratio);
+                LoadPageByRatio(RenderPageIndex, ResizePageRatio);
             }
             else
             {
@@ -84,9 +88,9 @@ namespace EPUBRenderer
         }
 
         public void LoadPageByRatio(int RenderPage, double Ratio)
-        {
+        {          
             RenderPage Page = RenderPages[RenderPage];
-            int NewInnerPageNumber = (int)Math.Round(Page.PageCount * Ratio) + 1;
+            int NewInnerPageNumber = (int)Math.Floor(Page.PageCount * Ratio) + 1;
             if (NewInnerPageNumber > Page.PageCount)
             {
                 NewInnerPageNumber = Page.PageCount;
@@ -106,7 +110,7 @@ namespace EPUBRenderer
             }
         }
 
-        private void LoadPage(int RenderPageNumber, int InnerPageNumber)
+        public void LoadPage(int RenderPageNumber, int InnerPageNumber)
         {
             Renderer.Page = RenderPages[RenderPageNumber - 1];
             Renderer.Page.CurrentPage = InnerPageNumber;
@@ -115,7 +119,7 @@ namespace EPUBRenderer
             {
                 CurrentPageNumber += RenderPages[i].PageCount;
             }
-            CurrentPageNumber += Renderer.Page.CurrentPage;
+            CurrentPageNumber += Renderer.Page.CurrentPage;        
             LoadPage();
         }
 
@@ -144,6 +148,7 @@ namespace EPUBRenderer
                 }
                 LastSum = Sum;
             }
+            ResizeRunning = false;
             LoadPage();
         }
 

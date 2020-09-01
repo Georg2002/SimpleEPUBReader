@@ -29,8 +29,10 @@ namespace EPUBReader
             InitializeComponent();
             PagePicker.Background = CloseButton.Background;
             Panel.Background = CloseButton.Background;
-            LibDisp.Background = CloseButton.Background;
-            LibraryManager.LibDisp = LibDisp;
+            Selector.Background = CloseButton.Background;
+            LibraryManager.Selector = Selector;
+            ChapterManager.Selector = Selector;
+            Selector.DeleteMenuItem.Click += LibraryManager.DeleteBook;
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
@@ -89,7 +91,7 @@ namespace EPUBReader
             ViewerInteracter.SetNightmode(Nightmode);
             MainWindow.SetNightmode(Nightmode);
             PagePicker.SetNightmode(Nightmode);
-            LibDisp.SetNightmode(Nightmode);
+            Selector.SetNightmode(Nightmode);
             SetNightmode(Nightmode);
         }
 
@@ -108,12 +110,15 @@ namespace EPUBReader
             JumpButton.Style = ButtonStyle;
             PagePicker.Background = CloseButton.Background;
             Panel.Background = CloseButton.Background;
-            LibDisp.Background = CloseButton.Background;
+            Selector.Background = CloseButton.Background;
         }
 
         private void SelectChapter(object sender, RoutedEventArgs e)
         {
-
+            ChapterManager.ResetSelector();
+            LibraryManager.ResetSelector();
+            ChapterManager.SetSelector();
+            Selector.Visibility = Visibility.Visible;
         }
 
         private void SelectPage(object sender, RoutedEventArgs e)
@@ -123,7 +128,10 @@ namespace EPUBReader
 
         private void OpenLibrary(object sender, RoutedEventArgs e)
         {
-            LibDisp.Visibility = Visibility.Visible;
+            ChapterManager.ResetSelector();
+            LibraryManager.ResetSelector();
+            LibraryManager.SetSelector();  
+            Selector.Visibility = Visibility.Visible;
         }
     }
 }

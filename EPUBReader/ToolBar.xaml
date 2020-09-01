@@ -46,6 +46,6 @@
                 Style="{StaticResource ButtonStyleDay}" Click="CloseProgram"/>
         </StackPanel>
         <local:PagePicker x:Name="PagePicker" Visibility="Hidden"/>
-        <local:LibraryDisplayer x:Name="LibDisp" Visibility="Hidden"/>
+        <local:ListSelector x:Name="Selector" Visibility="Hidden"/>
     </Grid>
 </UserControl>

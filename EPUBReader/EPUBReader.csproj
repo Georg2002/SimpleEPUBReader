@@ -62,6 +62,7 @@
   <PropertyGroup>
     <ApplicationIcon>iconTransparent.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
@@ -69,8 +70,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LibraryDisplayer.xaml.cs">
-      <DependentUpon>LibraryDisplayer.xaml</DependentUpon>
+    <Compile Include="ChapterManager.cs" />
+    <Compile Include="ListSelector.xaml.cs">
+      <DependentUpon>ListSelector.xaml</DependentUpon>
     </Compile>
     <Compile Include="LibraryManager.cs" />
     <Compile Include="PagePicker.xaml.cs">
@@ -124,7 +126,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LibraryDisplayer.xaml">
+    <Page Include="ListSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
