@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace EPUBReader
 {
@@ -11,7 +12,9 @@ namespace EPUBReader
     {       
         public BookDefinition LastBook;
         public bool Nightmode;
-        public List<BookDefinition> LibraryBooks;       
+        public Color MarkingColor;
+        public List<BookDefinition> LibraryBooks;
+        public bool Fullscreen;
     }
 
     public class BookDefinition

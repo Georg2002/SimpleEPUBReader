@@ -29,7 +29,8 @@ namespace EPUBRenderer
             { '─', '|'},{ '…', '︙'},{'〈','︿' },
             {'〉','﹀' },{'【','︻' },{'】','︼' },
             {'≪','︽' },{'≫','︾' },{'《','︽' },
-            {'》','︾' },{'(','︵' },{')','︶' }
+            {'》','︾' },{'(','︵' },{')','︶' },
+            {'=','∥' }, {'→','↓'}, {'：','‥'}           
         };
         public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
 
@@ -37,8 +38,10 @@ namespace EPUBRenderer
         {
             if (nightmode)
             {
-                NormalFontColor = new SolidColorBrush(Colors.White);
-                NormalFontColor.Opacity = 0.6;
+                NormalFontColor = new SolidColorBrush(Colors.White)
+                {
+                    Opacity = 0.6
+                };
             }
             else
             {

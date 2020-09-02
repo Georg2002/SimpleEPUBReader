@@ -100,14 +100,6 @@ namespace EPUBReader
             NightmodeButton.IsChecked = nightmode;
             var ButtonStyle = GlobalSettings.CurrentButtonStyle;
             OpenButton.Style = ButtonStyle;
-            LibraryButton.Style = ButtonStyle;
-            RTLButton.Style = ButtonStyle;
-            VerticalButton.Style = ButtonStyle;
-            NightmodeButton.Style = ButtonStyle;
-            FullscreenButton.Style = ButtonStyle;
-            CloseButton.Style = ButtonStyle;
-            ChapterButton.Style = ButtonStyle;
-            JumpButton.Style = ButtonStyle;
             PagePicker.Background = CloseButton.Background;
             Panel.Background = CloseButton.Background;
             Selector.Background = CloseButton.Background;
@@ -130,8 +122,22 @@ namespace EPUBReader
         {
             ChapterManager.ResetSelector();
             LibraryManager.ResetSelector();
-            LibraryManager.SetSelector();  
+            LibraryManager.SetSelector();
             Selector.Visibility = Visibility.Visible;
+        }
+
+        private void ChangeColor(object sender, RoutedEventArgs e)
+        {
+            int i = Array.IndexOf(GlobalSettings.MarkingColors, ViewerInteracter.MarkingColor);
+            i++;
+            if (i >= GlobalSettings.MarkingColors.Length) i = 0;
+            ViewerInteracter.MarkingColor = GlobalSettings.MarkingColors[i];
+            ColorButton.Background = new SolidColorBrush(ViewerInteracter.MarkingColor);
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            ColorButton.Background = new SolidColorBrush(ViewerInteracter.MarkingColor);
         }
     }
 }

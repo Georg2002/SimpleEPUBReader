@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Serialization;
 
 namespace EPUBReader
@@ -13,18 +14,24 @@ namespace EPUBReader
     {
         public static void Save()
         {
-            var Save = new SaveObject();
-            Save.Nightmode = GlobalSettings.Nightmode;
+            var Save = new SaveObject
+            {
+                Nightmode = GlobalSettings.Nightmode,
+                Fullscreen = Application.Current.MainWindow.WindowState == WindowState.Maximized
+            };
             if (!string.IsNullOrEmpty(ViewerInteracter.GetCurrentPath()))
             {
-                var CurrentBook = new BookDefinition();
-                CurrentBook.Markings = ViewerInteracter.GetAllMarkings();
-                CurrentBook.FilePath = ViewerInteracter.GetCurrentPath();
-                CurrentBook.LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage();
-                CurrentBook.RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio();
+                var CurrentBook = new BookDefinition
+                {
+                    Markings = ViewerInteracter.GetAllMarkings(),
+                    FilePath = ViewerInteracter.GetCurrentPath(),
+                    LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage(),
+                    RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio()
+                };
                 LibraryManager.UpdateCurrentBook();
                 Save.LastBook = CurrentBook;
                 Save.LibraryBooks = LibraryManager.Books;
+                Save.MarkingColor = ViewerInteracter.MarkingColor;
             }         
 
             string SaveFolder = GlobalSettings.GetSaveFolderPath();

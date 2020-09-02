@@ -90,7 +90,7 @@ namespace EPUBRenderer
         public void LoadPageByRatio(int RenderPage, double Ratio)
         {          
             RenderPage Page = RenderPages[RenderPage];
-            int NewInnerPageNumber = (int)Math.Floor(Page.PageCount * Ratio) + 1;
+            int NewInnerPageNumber = (int)Math.Round((Page.PageCount)* Ratio, MidpointRounding.AwayFromZero);
             if (NewInnerPageNumber > Page.PageCount)
             {
                 NewInnerPageNumber = Page.PageCount;
@@ -102,7 +102,7 @@ namespace EPUBRenderer
         {
             if (Renderer.Page != null)
             {
-                return (double)(Renderer.Page.CurrentPage - 1) / (double)Renderer.Page.PageCount;
+                return (double)(Renderer.Page.CurrentPage) / (double)(Renderer.Page.PageCount);
             }
             else
             {

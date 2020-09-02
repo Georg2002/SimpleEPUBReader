@@ -23,13 +23,12 @@ namespace EPUBReader
         public PagePicker()
         {
             InitializeComponent();
-            ViewerInteracter.PageChanged += RefreshIndicator;
-            var Window = Application.Current.MainWindow;
-            Window.SizeChanged += RefreshIndicator;
-            Window.StateChanged += RefreshIndicator;
+            ViewerInteracter.PageChanged += RefreshIndicator;         
         }
 
+#pragma warning disable IDE0060 // Remove unused parameter
         internal void SetNightmode(bool nightmode)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
             foreach (Button Child in MainGrid.Children)
             {
@@ -81,6 +80,12 @@ namespace EPUBReader
             }
             int NewPage = ViewerInteracter.GetCurrentPage() + Change;
             ViewerInteracter.SetPage(NewPage);
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            var Window = Application.Current.MainWindow;
+            ViewerInteracter.Viewer.SizeChanged += RefreshIndicator ;
         }
     }
 }

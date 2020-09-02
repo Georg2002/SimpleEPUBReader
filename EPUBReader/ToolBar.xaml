@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EPUBReader"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Height="50">
+             d:DesignHeight="450" d:DesignWidth="800" Height="50"
+             Loaded="UserControl_Loaded">
     <UserControl.Resources>
        
     </UserControl.Resources>
@@ -14,24 +15,24 @@
             <Button x:Name="OpenButton" Content="Öffnen"
                 Style="{StaticResource ButtonStyleDay}" Click="Open_Click"/>
             <Button x:Name="LibraryButton" Content="Bibliothek"
-                Style="{StaticResource ButtonStyleDay}" Click="OpenLibrary"/>
-            <ToggleButton x:Name="RTLButton" Style="{StaticResource ButtonStyleDay}">
+                Style="{Binding ElementName=OpenButton, Path=Style}" Click="OpenLibrary"/>
+            <ToggleButton x:Name="RTLButton" Style="{Binding ElementName=OpenButton, Path=Style}">
                 <ToggleButton.Content>
                     <TextBlock Text="Rechts&#10;nach&#10;Links"
                            TextWrapping="Wrap" TextAlignment="Center"/>
                 </ToggleButton.Content>
             </ToggleButton>
             <ToggleButton x:Name="VerticalButton" Content="Vertical"
-                      Style="{StaticResource ButtonStyleDay}"/>
+                      Style="{Binding ElementName=OpenButton, Path=Style}"/>
             <ToggleButton x:Name="NightmodeButton"
-                      Style="{StaticResource ButtonStyleDay}"
+                      Style="{Binding ElementName=OpenButton, Path=Style}"
                       Click="ToggleDayNightClicked">
                 <ToggleButton.Content>
                     <TextBlock Text="Nacht-&#10;modus" TextWrapping="Wrap"
                            TextAlignment="Center"/>
                 </ToggleButton.Content>
             </ToggleButton>
-            <Button x:Name="FullscreenButton" Style="{StaticResource ButtonStyleDay}"
+            <Button x:Name="FullscreenButton" Style="{Binding ElementName=OpenButton, Path=Style}"
                 Click="ToggleFullscreen">
                 <Button.Content>
                     <TextBlock Text="Vollbild&#10;umschalten" TextWrapping="Wrap"
@@ -39,11 +40,18 @@
                 </Button.Content>
             </Button>
             <Button x:Name="ChapterButton" Content="Kapitel"
-                Style="{StaticResource ButtonStyleDay}" Click="SelectChapter"/>
+                Style="{Binding ElementName=OpenButton, Path=Style}" Click="SelectChapter"/>
             <Button x:Name="JumpButton" Content="Seiten"
-                Style="{StaticResource ButtonStyleDay}" Click="SelectPage"/>         
+                Style="{Binding ElementName=OpenButton, Path=Style}" Click="SelectPage"/>
+            <Button x:Name="ColorButton" Style="{Binding ElementName=OpenButton, Path=Style}"
+                    Click="ChangeColor">
+                <Button.Content>
+                    <TextBlock   Text="Farbe&#10;wechseln"
+                                TextWrapping="Wrap" TextAlignment="Center"/>
+                </Button.Content>
+            </Button>
             <Button x:Name="CloseButton" Content="Schließen"
-                Style="{StaticResource ButtonStyleDay}" Click="CloseProgram"/>
+                Style="{Binding ElementName=OpenButton, Path=Style}" Click="CloseProgram"/>
         </StackPanel>
         <local:PagePicker x:Name="PagePicker" Visibility="Hidden"/>
         <local:ListSelector x:Name="Selector" Visibility="Hidden"/>

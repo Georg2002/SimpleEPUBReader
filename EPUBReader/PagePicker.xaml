@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:EPUBReader"
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="800"  Background="White"             
-             IsVisibleChanged="UserControl_IsVisibleChanged">
+             IsVisibleChanged="UserControl_IsVisibleChanged"
+             Loaded="UserControl_Loaded">
     <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>

@@ -24,10 +24,14 @@ namespace EPUBReader
         private bool IsGoingDown = false;
         private readonly Storyboard MoveUp;
         private readonly Storyboard MoveDown;
-        private Point MouseTouchdownPos;
         string StartupFile;
         private DateTime LastAnimate;
         private SaveObject Save;
+        private Point MouseTouchdownPos;
+        private DateTime MouseTouchdown;
+        private DateTime LastMouseMove;
+        private Point LastMousePos;
+        private bool GestureSwitched;
 
         public MainWindow2(string[] args)
         {
@@ -51,6 +55,19 @@ namespace EPUBReader
             {
                 LibraryManager.Books = new List<BookDefinition>();
             }
+            if (Save.Fullscreen)
+            {
+                WindowState = WindowState.Maximized;
+                WindowStyle = WindowStyle.None;
+            }
+            if (Save.MarkingColor.Equals(new Color()))
+            {
+                ViewerInteracter.MarkingColor = GlobalSettings.MarkingColors[0];
+            }
+            else
+            {
+                ViewerInteracter.MarkingColor = Save.MarkingColor;
+            }
             if (args.Length > 0)
             {
                 string Path = args[0];
@@ -66,6 +83,7 @@ namespace EPUBReader
 
         private void Base_MouseMove(object sender, MouseEventArgs e)
         {
+            Point MousePos = e.GetPosition(Viewer);
             if (DateTime.Now.Subtract(LastAnimate).TotalMilliseconds > 50)
             {
                 LastAnimate = DateTime.Now;
@@ -88,11 +106,31 @@ namespace EPUBReader
                     IsGoingDown = false;
                 }
             }
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            DateTime Now = DateTime.Now;
+            double Delta = LastMouseMove.Subtract(Now).TotalSeconds;
+            double SinceTouchdown = Now.Subtract(MouseTouchdown).TotalSeconds;
+            double Speed = (MousePos.X - LastMousePos.X) / Delta;
+            if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched)
             {
-                var Red = new SolidColorBrush(new Color() { R = 255, A = 50 });
-                ViewerInteracter.DragMark(e.GetPosition(Viewer), MouseTouchdownPos, Red);
+                if (Math.Abs(Speed) > 2000 && SinceTouchdown > 0.01 && SinceTouchdown < 0.1)
+                {
+                    GestureSwitched = true;
+                    if (Speed > 0)
+                    {
+                        ViewerInteracter.SwitchRight();
+                    }
+                    else
+                    {
+                        ViewerInteracter.SwitchLeft();
+                    }
+                }
+                else if (SinceTouchdown > 0.1)
+                {
+                    ViewerInteracter.DragMark(MousePos, MouseTouchdownPos);
+                }
             }
+            LastMousePos = MousePos;
+            LastMouseMove = Now;
         }
 
         private void ButtonLeft_Click(object sender, RoutedEventArgs e)
@@ -113,6 +151,8 @@ namespace EPUBReader
         private void Base_MouseLeftDown(object sender, MouseButtonEventArgs e)
         {
             MouseTouchdownPos = e.GetPosition(Viewer);
+            MouseTouchdown = DateTime.Now;
+            GestureSwitched = false;
         }
 
         private void Base_MouseRightButtonDown(object sender, MouseButtonEventArgs e)

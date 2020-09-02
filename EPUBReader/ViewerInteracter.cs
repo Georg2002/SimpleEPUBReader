@@ -15,10 +15,11 @@ namespace EPUBReader
         public static bool IsVertical;
         public static bool RTL;
         public static event EventHandler PageChanged;
+        public static Color MarkingColor;
 
         private static void InvokePageChanged()
         {
-            PageChanged.Invoke(null,null );
+            PageChanged.Invoke(null, null);
         }
 
         public static void Open(string Path)
@@ -36,7 +37,7 @@ namespace EPUBReader
             LibraryManager.TryAddBook(CurrentEpub);
             InvokePageChanged();
         }
-        
+
         internal static int GetCurrentPage()
         {
             return Viewer.CurrentPageNumber;
@@ -101,13 +102,13 @@ namespace EPUBReader
             }
         }
 
-        internal static void DragMark(Point Start, Point End, Brush Color)
+        internal static void DragMark(Point Start, Point End)
         {
             if (Viewer.CurrentRenderPage == null) return;
             Marker.RemoveTempMarking();
             var Cmd = new MarkingCommand()
             {
-                Color = Color,
+                Color = new SolidColorBrush(MarkingColor),
                 Page = Viewer.CurrentRenderPage,
                 Pos1 = Start,
                 Pos2 = End
@@ -122,14 +123,14 @@ namespace EPUBReader
 
         internal static void SetNightmode(bool nightmode)
         {
-            EPUBRenderer.GlobalSettings.SetNightmode(nightmode);          
+            EPUBRenderer.GlobalSettings.SetNightmode(nightmode);
             Viewer.LoadPage();
         }
 
         internal static void LoadSave(SaveObject Save)
         {
             if (Save.LastBook != null)
-            {               
+            {
                 LoadBookDefinition(Save.LastBook);
             }
             InvokePageChanged();
@@ -147,7 +148,7 @@ namespace EPUBReader
         }
 
         internal static void LoadChapter(ChapterDefinition chapter)
-        {           
+        {
             string Source = chapter.Source;
             int n = CurrentEpub.Pages.FindIndex(a => a.FullName == Source);
             if (n == -1)
