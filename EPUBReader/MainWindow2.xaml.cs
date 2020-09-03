@@ -31,6 +31,7 @@ namespace EPUBReader
         private DateTime MouseTouchdown;
         private DateTime LastMouseMove;
         private Point LastMousePos;
+        private Point MouseSpeed;
         private bool GestureSwitched;
 
         public MainWindow2(string[] args)
@@ -109,13 +110,17 @@ namespace EPUBReader
             DateTime Now = DateTime.Now;
             double Delta = LastMouseMove.Subtract(Now).TotalSeconds;
             double SinceTouchdown = Now.Subtract(MouseTouchdown).TotalSeconds;
-            double Speed = (MousePos.X - LastMousePos.X) / Delta;
-            if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched)
+            const int SmoothCount = 5;
+            if (Delta == 0) return;
+            MouseSpeed.X = ((MousePos.X - LastMousePos.X) / Delta + (SmoothCount - 1) * MouseSpeed.X) / SmoothCount;
+            MouseSpeed.Y = ((MousePos.Y - LastMousePos.Y) / Delta + (SmoothCount - 1) * MouseSpeed.Y) / SmoothCount;
+            double VertSpeed = Math.Abs(MouseSpeed.Y);
+            if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched && VertSpeed < 100)
             {
-                if (Math.Abs(Speed) > 2000 && SinceTouchdown > 0.01 && SinceTouchdown < 0.1)
+                if (Math.Abs(MouseSpeed.X) > 2000 && SinceTouchdown > 0.01 && SinceTouchdown < 0.1)
                 {
                     GestureSwitched = true;
-                    if (Speed > 0)
+                    if (MouseSpeed.X > 0)
                     {
                         ViewerInteracter.SwitchRight();
                     }

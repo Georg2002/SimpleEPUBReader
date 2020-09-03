@@ -12,7 +12,7 @@ namespace EPUBRenderer
     {
         public static double NormalFontSize = 20;
         public static double RubyFontSize = NormalFontSize * 0.6;
-        public static double LineHeight = NormalFontSize * 2;
+        public static double LineHeight = NormalFontSize * 1.7;
         public static double RubyOffset = NormalFontSize * 1.05;
         public static Brush NormalFontColor = Brushes.Black;
         public static FlowDirection NormalFlowDirection = FlowDirection.RightToLeft;
@@ -30,7 +30,8 @@ namespace EPUBRenderer
             {'〉','﹀' },{'【','︻' },{'】','︼' },
             {'≪','︽' },{'≫','︾' },{'《','︽' },
             {'》','︾' },{'(','︵' },{')','︶' },
-            {'=','∥' }, {'→','↓'}, {'：','‥'}           
+            {'=','∥' } ,{'＝','∥' }, {'→','↓'},
+            {'：','‥'}
         };
         public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
 
