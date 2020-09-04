@@ -44,6 +44,7 @@ namespace EPUBReader
             Save = Loader.Load();
             if (Save == null)
             {
+                ViewerInteracter.MarkingColor = GlobalSettings.MarkingColors[0];
                 Logger.Report("save not found, falling back to standards", LogType.Error);
                 return;
             }
@@ -114,10 +115,10 @@ namespace EPUBReader
             if (Delta == 0) return;
             MouseSpeed.X = ((MousePos.X - LastMousePos.X) / Delta + (SmoothCount - 1) * MouseSpeed.X) / SmoothCount;
             MouseSpeed.Y = ((MousePos.Y - LastMousePos.Y) / Delta + (SmoothCount - 1) * MouseSpeed.Y) / SmoothCount;
-            double VertSpeed = Math.Abs(MouseSpeed.Y);
-            if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched && VertSpeed < 100)
+            double Ratio = Math.Abs(MouseSpeed.X / MouseSpeed.Y);
+            if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched)
             {
-                if (Math.Abs(MouseSpeed.X) > 2000 && SinceTouchdown > 0.01 && SinceTouchdown < 0.1)
+                if (Math.Abs(MouseSpeed.X) > 600 && SinceTouchdown > 0.01 && SinceTouchdown < 0.1 && Ratio > 4)
                 {
                     GestureSwitched = true;
                     if (MouseSpeed.X > 0)

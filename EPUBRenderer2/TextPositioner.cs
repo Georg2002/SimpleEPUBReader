@@ -73,6 +73,8 @@ namespace EPUBRenderer
                         break;
                     case TextElementType.Break:
                         CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
+                        First.StartPos = CurrentWritePos;
+                        First.Size = WritingDirectionModifiers.GetBreakSize();
                         break;
                 }
             }

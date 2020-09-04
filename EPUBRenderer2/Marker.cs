@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace EPUBRenderer
 {
@@ -189,6 +190,7 @@ namespace EPUBRenderer
         {
             foreach (var Marking in Markings)
             {
+                if (Marking.Color.Equals(new Color())) continue;
                 if (Marking.RenderPageIndex < Pages.Count)
                 {
                     var Page = Pages[Marking.RenderPageIndex];
@@ -217,10 +219,44 @@ namespace EPUBRenderer
 
     public class MarkingDefinition
     {
+        [XmlIgnore]
         public int RenderPageIndex;
+        [XmlIgnore]
         public PositionDefinition Position;
+        [XmlIgnore]
         public TextElement Element;
+        [XmlIgnore]
         public Color Color;
+        [XmlText]
+        public string ShortDef
+        {
+            get
+            {
+                return RenderPageIndex.ToString() + ';' +
+                    Position.WordIndex.ToString() + ';' +
+                    Position.ElementIndex.ToString() + ';' +
+                    Color.ToString();
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value)) return;
+                string[] vals = value.Split(';');
+                if (vals.Length != 4) return;
+                try
+                {
+                    RenderPageIndex = Convert.ToInt32(vals[0]);
+                    Position.WordIndex = Convert.ToInt32(vals[1]);
+                    Position.ElementIndex = Convert.ToInt32(vals[2]);
+                    Color = (Color)ColorConverter.ConvertFromString(vals[3]);
+                }
+                catch (Exception) { }
+            }
+        }
+
+        public MarkingDefinition()
+        {
+            Position = new PositionDefinition();
+        }
     }
 
     public class PositionDefinition

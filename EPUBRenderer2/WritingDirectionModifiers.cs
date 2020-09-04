@@ -41,20 +41,20 @@ namespace EPUBRenderer
                     StartIndex = page.TextElements.FindIndex(a =>
                     {
                         var First = a.First();
-                        return First.ElementType != TextElementType.Break && First.EndPos.X < StartPos.X;
+                        return  First.EndPos.X < StartPos.X;
                     });
                     EndIndex = page.TextElements.FindLastIndex(a =>
                     {
                         var Last = a.Last();
-                        return Last.ElementType != TextElementType.Break && Last.StartPos.X >= EndPos.X;
-                    });                 
+                        return Last.StartPos.X >= EndPos.X;
+                    });
                     if (StartIndex != 0)
                     {
                         var WordBefore = page.TextElements[StartIndex - 1];
                         for (int i = 0; i < WordBefore.Count; i++)
                         {
                             var Element = WordBefore[i];
-                            if (Element.ElementType != TextElementType.Break && Element.EndPos.X < StartPos.X)
+                            if (Element.EndPos.X < StartPos.X)
                             {
                                 ExtraStart = WordBefore.Count - i;
                                 break;
@@ -72,7 +72,7 @@ namespace EPUBRenderer
                         for (int i = WordAfter.Count - 1; i >= 0; i--)
                         {
                             var Element = WordAfter[i];
-                            if (Element.ElementType != TextElementType.Break && Element.StartPos.X >= EndPos.X)
+                            if (Element.StartPos.X >= EndPos.X)
                             {
                                 ExtraEnd = i + 1;
                                 break;
@@ -116,7 +116,18 @@ namespace EPUBRenderer
             {
                 case Direction.VRTL:
                     var X = GetStartPosition(pageSize).X + Offset.X * endPagePos;
-                    return new Vector(X,0);
+                    return new Vector(X, 0);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static Vector GetBreakSize()
+        {
+            switch (Dir)
+            {
+                case Direction.VRTL:
+                    return new Vector(0, GlobalSettings.NormalFontSize);
                 default:
                     throw new NotImplementedException();
             }

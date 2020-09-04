@@ -76,14 +76,15 @@ namespace EPUBReader
         }
 
         internal static void CheckBookList()
-        {
-            foreach (var Book in Books)
+        {          
+            for (int i = 0; i < Books.Count; i++)
             {
+                var Book = Books[i];
                 if (!File.Exists(Book.FilePath))
                 {
                     Books.Remove(Book);
                 }
-            }
+            }          
         }
 
         internal static void SetSelector()

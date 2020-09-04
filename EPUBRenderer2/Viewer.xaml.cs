@@ -95,6 +95,7 @@ namespace EPUBRenderer
             {
                 NewInnerPageNumber = Page.PageCount;
             }
+            if (NewInnerPageNumber == 0) NewInnerPageNumber = 1;
             LoadPage(RenderPage + 1, NewInnerPageNumber);
         }
 
