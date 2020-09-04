@@ -31,8 +31,7 @@ namespace EPUBReader
             Panel.Background = CloseButton.Background;
             Selector.Background = CloseButton.Background;
             LibraryManager.Selector = Selector;
-            ChapterManager.Selector = Selector;
-            Selector.DeleteMenuItem.Click += LibraryManager.DeleteBook;
+            ChapterManager.Selector = Selector;     
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)

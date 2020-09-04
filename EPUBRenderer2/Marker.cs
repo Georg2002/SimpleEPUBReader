@@ -219,7 +219,7 @@ namespace EPUBRenderer
 
     public class MarkingDefinition
     {
-        [XmlIgnore]
+       [XmlIgnore]
         public int RenderPageIndex;
         [XmlIgnore]
         public PositionDefinition Position;

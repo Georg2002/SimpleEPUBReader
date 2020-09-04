@@ -63,7 +63,7 @@ namespace EPUBReader
         }
 
         private void DeleteItem(object sender, RoutedEventArgs e)
-        {
+        {               
             if (List.SelectedItem != null)
             {
                 SelectedIndex = List.SelectedIndex;
