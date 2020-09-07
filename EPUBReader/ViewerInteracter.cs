@@ -121,6 +121,11 @@ namespace EPUBReader
             Marker.ApplyTempMarking();
         }
 
+        internal static bool MarkingOngoing()
+        {
+            return Marker.TempMarkOngoing();
+        }
+
         internal static void SetNightmode(bool nightmode)
         {
             EPUBRenderer.GlobalSettings.SetNightmode(nightmode);

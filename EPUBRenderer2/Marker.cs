@@ -119,6 +119,11 @@ namespace EPUBRenderer
             return Result;
         }
 
+        public static bool TempMarkOngoing()
+        {
+            return TempMarking != null;
+        }
+
         public static void ApplyTempMarking()
         {
             TempMarking = null;

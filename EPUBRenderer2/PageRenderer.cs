@@ -81,7 +81,7 @@ namespace EPUBRenderer
                     if (Element.ElementType == TextElementType.Letter ||
                         Element.ElementType == TextElementType.RubyLetter)
                     {
-                        double FontOffset = ((Letter)Element).FontSize * -0.1;
+                        double FontOffset = ((Letter)Element).FontSize * -0.15;
                         StartPoint.Offset(0, FontOffset);
                         EndPoint.Offset(0, FontOffset);
                     }

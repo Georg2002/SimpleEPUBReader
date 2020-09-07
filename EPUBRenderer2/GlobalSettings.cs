@@ -10,7 +10,7 @@ namespace EPUBRenderer
 {
     public static class GlobalSettings
     {
-        public static double NormalFontSize = 20;
+        public static double NormalFontSize = 21.3;
         public static double RubyFontSize = NormalFontSize * 0.6;
         public static double LineHeight = NormalFontSize * 1.7;
         public static double RubyOffset = NormalFontSize * 1.05;

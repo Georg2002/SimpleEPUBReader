@@ -97,9 +97,12 @@ namespace EPUBReader
                 }
                 if (Pos.Y < CheckHeight && !IsGoingDown)
                 {
-                    IsGoingDown = true;
-                    MoveUp.Stop();
-                    MoveDown.Begin();
+                    if (!ViewerInteracter.MarkingOngoing())
+                    {
+                        IsGoingDown = true;
+                        MoveUp.Stop();
+                        MoveDown.Begin();
+                    }                   
                 }
                 else if (Pos.Y > CheckHeight && IsGoingDown && !GlobalSettings.LeaveMenuDown)
                 {

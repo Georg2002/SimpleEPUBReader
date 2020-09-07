@@ -46,8 +46,9 @@ namespace EPUBRenderer
                     EndIndex = page.TextElements.FindLastIndex(a =>
                     {
                         var Last = a.Last();
-                        return Last.StartPos.X >= EndPos.X;
-                    });
+                        return Last.StartPos.X + 0.001>= EndPos.X && Last.ElementType 
+                        != TextElementType.RubyLetter;
+                    });                    
                     if (StartIndex != 0)
                     {
                         var WordBefore = page.TextElements[StartIndex - 1];
@@ -127,7 +128,7 @@ namespace EPUBRenderer
             switch (Dir)
             {
                 case Direction.VRTL:
-                    return new Vector(0, GlobalSettings.NormalFontSize);
+                    return new Vector(GlobalSettings.NormalFontSize,0 );
                 default:
                     throw new NotImplementedException();
             }
@@ -150,7 +151,7 @@ namespace EPUBRenderer
             switch (Dir)
             {
                 case Direction.VRTL:
-                    return new Vector(-pageSize.X + pageSize.X % GlobalSettings.LineHeight, 0);
+                    return new Vector( -pageSize.X + pageSize.X % GlobalSettings.LineHeight, 0);
                 default:
                     throw new NotImplementedException();
             }
