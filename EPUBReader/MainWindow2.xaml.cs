@@ -121,7 +121,7 @@ namespace EPUBReader
             double Ratio = Math.Abs(MouseSpeed.X / MouseSpeed.Y);
             if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched)
             {
-                if (Math.Abs(MouseSpeed.X) > 600 && SinceTouchdown > 0.01 && SinceTouchdown < 0.1 && Ratio > 4)
+                if (Math.Abs(MouseSpeed.X) > 400 && SinceTouchdown > 0.07 && SinceTouchdown < 0.1 && Ratio > 4)
                 {
                     GestureSwitched = true;
                     if (MouseSpeed.X > 0)

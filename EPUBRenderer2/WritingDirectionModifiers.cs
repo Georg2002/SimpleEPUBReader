@@ -73,7 +73,8 @@ namespace EPUBRenderer
                         for (int i = WordAfter.Count - 1; i >= 0; i--)
                         {
                             var Element = WordAfter[i];
-                            if (Element.StartPos.X >= EndPos.X)
+                            if (Element.StartPos.X + 0.001 >= EndPos.X && Element.ElementType
+                        != TextElementType.RubyLetter)
                             {
                                 ExtraEnd = i + 1;
                                 break;
