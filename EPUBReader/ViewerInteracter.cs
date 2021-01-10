@@ -149,6 +149,10 @@ namespace EPUBReader
                 Viewer.LoadPageByRatio(Book.LastRenderPageIndex, Book.RenderPageRatio);
                 Marker.ApplyAllMarkings(Book.Markings, Viewer.RenderPages);
             }
+            else
+            {
+                MessageBox.Show("Book not found: \n" + Book.FilePath,"Book Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             InvokePageChanged();
         }
 

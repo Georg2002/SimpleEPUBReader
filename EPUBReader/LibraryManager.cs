@@ -21,7 +21,7 @@ namespace EPUBReader
             if (i >= 0 && i < Books.Count)
             {
                 ViewerInteracter.LoadBookDefinition(Books[i]);
-            }          
+            }
         }
 
         internal static void TryAddBook(Epub Epub)
@@ -76,15 +76,24 @@ namespace EPUBReader
         }
 
         internal static void CheckBookList()
-        {          
+        {
+            bool Removed = false;
+            string RemovedTitles = "";
             for (int i = 0; i < Books.Count; i++)
             {
                 var Book = Books[i];
                 if (!File.Exists(Book.FilePath))
                 {
+                    if (Removed) RemovedTitles += ", ";
+                    RemovedTitles += Book.Title;
                     Books.Remove(Book);
                 }
-            }          
+            }
+            if (Removed)
+            {
+                MessageBox.Show("Following books were not found and thus removed from the library: \n" +
+                    RemovedTitles, "Books Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         internal static void SetSelector()

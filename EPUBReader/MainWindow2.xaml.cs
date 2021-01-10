@@ -32,6 +32,7 @@ namespace EPUBReader
         private DateTime LastMouseMove;
         private Point LastMousePos;
         private Point MouseSpeed;
+        private bool MouseWasTooFast = false;
         private bool GestureSwitched;
 
         public MainWindow2(string[] args)
@@ -102,7 +103,7 @@ namespace EPUBReader
                         IsGoingDown = true;
                         MoveUp.Stop();
                         MoveDown.Begin();
-                    }                   
+                    }
                 }
                 else if (Pos.Y > CheckHeight && IsGoingDown && !GlobalSettings.LeaveMenuDown)
                 {
@@ -114,14 +115,20 @@ namespace EPUBReader
             DateTime Now = DateTime.Now;
             double Delta = LastMouseMove.Subtract(Now).TotalSeconds;
             double SinceTouchdown = Now.Subtract(MouseTouchdown).TotalSeconds;
-            const int SmoothCount = 5;
+            const int SmoothCount = 10;
+            const double MaxSpeed = 1000;
             if (Delta == 0) return;
-            MouseSpeed.X = ((MousePos.X - LastMousePos.X) / Delta + (SmoothCount - 1) * MouseSpeed.X) / SmoothCount;
-            MouseSpeed.Y = ((MousePos.Y - LastMousePos.Y) / Delta + (SmoothCount - 1) * MouseSpeed.Y) / SmoothCount;
+            double SpeedX = (MousePos.X - LastMousePos.X) / Delta;
+            SpeedX = Limit(SpeedX, MaxSpeed);
+            double SpeedY = (MousePos.Y - LastMousePos.Y) / Delta;
+            SpeedY = Limit(SpeedY, MaxSpeed);
+            MouseSpeed.X = (SpeedX + (SmoothCount - 1) * MouseSpeed.X) / SmoothCount;
+            MouseSpeed.Y = (SpeedY + (SmoothCount - 1) * MouseSpeed.Y) / SmoothCount;
+            if (Math.Abs(MouseSpeed.X) > 100) MouseWasTooFast = true;         
             double Ratio = Math.Abs(MouseSpeed.X / MouseSpeed.Y);
             if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched)
             {
-                if (Math.Abs(MouseSpeed.X) > 400 && SinceTouchdown > 0.07 && SinceTouchdown < 0.1 && Ratio > 4)
+                if (Math.Abs(MouseSpeed.X) > 200 && SinceTouchdown > 0.02 && SinceTouchdown < 0.1 && Ratio > 1.5)
                 {
                     GestureSwitched = true;
                     if (MouseSpeed.X > 0)
@@ -133,13 +140,18 @@ namespace EPUBReader
                         ViewerInteracter.SwitchLeft();
                     }
                 }
-                else if (SinceTouchdown > 0.1)
+                else if (SinceTouchdown > 0.1 && !MouseWasTooFast)
                 {
                     ViewerInteracter.DragMark(MousePos, MouseTouchdownPos);
                 }
             }
             LastMousePos = MousePos;
             LastMouseMove = Now;
+        }
+
+        private double Limit(double Value, double Limit)
+        {
+            return Math.Min(Math.Max(Value, -Limit), Limit);
         }
 
         private void ButtonLeft_Click(object sender, RoutedEventArgs e)
@@ -162,6 +174,8 @@ namespace EPUBReader
             MouseTouchdownPos = e.GetPosition(Viewer);
             MouseTouchdown = DateTime.Now;
             GestureSwitched = false;
+            MouseWasTooFast = false;
+            MouseSpeed = new Point();
         }
 
         private void Base_MouseRightButtonDown(object sender, MouseButtonEventArgs e)

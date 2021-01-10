@@ -28,11 +28,13 @@ namespace EPUBReader
                     LastRenderPageIndex = ViewerInteracter.GetCurrentRenderPage(),
                     RenderPageRatio = ViewerInteracter.GetCurrentRenderPageRatio()
                 };
-                LibraryManager.UpdateCurrentBook();
                 Save.LastBook = CurrentBook;
-                Save.LibraryBooks = LibraryManager.Books;
-                Save.MarkingColor = ViewerInteracter.MarkingColor;
-            }         
+
+            }
+
+            LibraryManager.UpdateCurrentBook();
+            Save.LibraryBooks = LibraryManager.Books;
+            Save.MarkingColor = ViewerInteracter.MarkingColor;
 
             string SaveFolder = GlobalSettings.GetSaveFolderPath();
             if (!Directory.Exists(SaveFolder))

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EPUBReader"
         xmlns:Renderer="clr-namespace:EPUBRenderer;assembly=EPUBRenderer"
         mc:Ignorable="d"
-        Height="800" Width="800"
+        Height="750" Width="1180"
         MinHeight="400" MinWidth="400"
         x:Name="Base" MouseMove="Base_MouseMove"
         Closing="Base_Closing" MouseLeftButtonDown="Base_MouseLeftDown"

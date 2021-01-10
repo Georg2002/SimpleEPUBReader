@@ -15,8 +15,9 @@ namespace EPUBRenderer
             var NewWord = new List<TextElement>();
             foreach (var Line in Lines)
             {
-                foreach (var Part in Line.Parts)
+                for (int i = 0; i < Line.Parts.Count; i++)
                 {
+                    var Part = Line.Parts[i];
                     if (Part.Type == LinePartTypes.image)
                     {
                         NewWord.Add(new ImageInText(((ImageLinePart)Part).GetImage()));
@@ -26,14 +27,53 @@ namespace EPUBRenderer
                     else
                     {
                         var TextPart = (TextLinePart)Part;
-                        if (string.IsNullOrEmpty(TextPart.Text)) continue;                       
+                        if (!string.IsNullOrEmpty(TextPart.Ruby) && i != Line.Parts.Count - 1)
+                        {
+                            var NextPart = Line.Parts[i + 1];
+                            if (NextPart.Type != LinePartTypes.image)
+                            {
+                                int k = i + 1;
+                                bool OneMissed = false;
+                                while (k != Line.Parts.Count - 1)
+                                {
+                                    if (NextPart.Type != LinePartTypes.image)
+                                    {
+                                        var NextTextPart = (TextLinePart)NextPart;
+                                        if (!string.IsNullOrEmpty(NextTextPart.Ruby))
+                                        {
+                                            TextPart.Text += NextTextPart.Text;
+                                            TextPart.Ruby += NextTextPart.Ruby;
+                                            NextTextPart.Text = "";
+                                            NextTextPart.Ruby = "";
+                                            k++;
+                                            NextPart = Line.Parts[k];
+                                        }
+                                        else if (!OneMissed)
+                                        {
+                                            OneMissed = true;
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+
+                        }
+
+                        if (string.IsNullOrEmpty(TextPart.Text)) continue;
                         if (TextPart.Type == LinePartTypes.sesame)
                         {
                             TextPart.Ruby = new string('﹅', TextPart.Text.Length);
                         }
                         foreach (char c in TextPart.Text)
                         {
-                            NewWord.Add(new Letter(GetCorrectedChar(c,Vertical), GlobalSettings.NormalFontSize));
+                            NewWord.Add(new Letter(GetCorrectedChar(c, Vertical), GlobalSettings.NormalFontSize));
                         }
                         Result.Add(NewWord);
                         NewWord = new List<TextElement>();
@@ -51,7 +91,7 @@ namespace EPUBRenderer
                     NewWord.Add(new BreakElement());
                     Result.Add(NewWord);
                     NewWord = new List<TextElement>();
-                }               
+                }
             }
             return Result;
         }
