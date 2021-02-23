@@ -94,7 +94,7 @@ namespace EPUBReader
                 Point Pos = e.GetPosition(Base);
                 if (IsGoingDown)
                 {
-                    CheckHeight = 50;
+                    CheckHeight = 80;
                 }
                 if (Pos.Y < CheckHeight && !IsGoingDown)
                 {
@@ -123,8 +123,7 @@ namespace EPUBReader
             double SpeedY = (MousePos.Y - LastMousePos.Y) / Delta;
             SpeedY = Limit(SpeedY, MaxSpeed);
             MouseSpeed.X = (SpeedX + (SmoothCount - 1) * MouseSpeed.X) / SmoothCount;
-            MouseSpeed.Y = (SpeedY + (SmoothCount - 1) * MouseSpeed.Y) / SmoothCount;
-            if (Math.Abs(MouseSpeed.X) > 100) MouseWasTooFast = true;         
+            MouseSpeed.Y = (SpeedY + (SmoothCount - 1) * MouseSpeed.Y) / SmoothCount;               
             double Ratio = Math.Abs(MouseSpeed.X / MouseSpeed.Y);
             if (Mouse.LeftButton == MouseButtonState.Pressed && !GestureSwitched)
             {
@@ -140,7 +139,7 @@ namespace EPUBReader
                         ViewerInteracter.SwitchLeft();
                     }
                 }
-                else if (SinceTouchdown > 0.1 && !MouseWasTooFast)
+                else if (SinceTouchdown > 0.1 && !MouseWasTooFast && !GestureSwitched)
                 {
                     ViewerInteracter.DragMark(MousePos, MouseTouchdownPos);
                 }

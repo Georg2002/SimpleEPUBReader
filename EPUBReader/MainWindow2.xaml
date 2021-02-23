@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EPUBReader"
         xmlns:Renderer="clr-namespace:EPUBRenderer;assembly=EPUBRenderer"
         mc:Ignorable="d"
-        Height="750" Width="1180"
+        Height="800" Width="1190"
         MinHeight="400" MinWidth="400"
         x:Name="Base" MouseMove="Base_MouseMove"
         Closing="Base_Closing" MouseLeftButtonDown="Base_MouseLeftDown"
@@ -18,7 +18,7 @@
             <ThicknessAnimation
                                     Storyboard.TargetName="Viewer"
                                    Storyboard.TargetProperty="Margin"
-                                    Duration="0:0:0.2" To="10,60,10,10"
+                                    Duration="0:0:0.2" To="10,90,10,10"
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.4"/>
             <ThicknessAnimation 
@@ -31,13 +31,13 @@
             <ThicknessAnimation
                                     Storyboard.TargetName="ButtonLeft"
                                    Storyboard.TargetProperty="Margin"
-                                    Duration="0:0:0.2" To="0,50,0,0"
+                                    Duration="0:0:0.2" To="0,80,0,0"
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.4"/>
             <ThicknessAnimation
                                     Storyboard.TargetName="ButtonRight"
                                    Storyboard.TargetProperty="Margin"
-                                    Duration="0:0:0.2" To="0,50,0,0"
+                                    Duration="0:0:0.2" To="0,80,0,0"
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.4"/>
         </Storyboard>
@@ -45,13 +45,13 @@
             <ThicknessAnimation
                                 Storyboard.TargetName="Viewer"
                                 Storyboard.TargetProperty="Margin"
-                                Duration="0:0:0.25" To="10,35,10,35"
+                                Duration="0:0:0.25" To="10,50,10,50"
                                 AccelerationRatio="0.6"
                                 DecelerationRatio="0.2"/>
             <ThicknessAnimation 
                                     Storyboard.TargetName="TlBar"
                                     Storyboard.TargetProperty="Margin"
-                                   Duration="0:0:0.25" To="0,-50,0,0"
+                                   Duration="0:0:0.25" To="0,-80,0,0"
                                     AccelerationRatio="0.6"
                                     DecelerationRatio="0.2"/>
             <ThicknessAnimation
@@ -111,10 +111,10 @@
             </Grid.ColumnDefinitions>
             <Button x:Name="ButtonLeft" Click="ButtonLeft_Click" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyleDay}" />
             <Button x:Name="ButtonRight" Click="ButtonRight_Click"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource ButtonStyleDay}"/>
-            <Renderer:Viewer Margin="10,35,10,35" x:Name="Viewer"
+            <Renderer:Viewer Margin="10,50,10,50" x:Name="Viewer"
              Grid.Column="1" Grid.ColumnSpan="1"/>
         </Grid>
-        <local:ToolBar x:Name="TlBar" Height="50" VerticalAlignment="Top"
-                     Margin="0,-50,0,0"/>
+        <local:ToolBar x:Name="TlBar" Height="80" VerticalAlignment="Top"
+                     Margin="0,-80,0,0"/>
     </Grid>
 </Window>

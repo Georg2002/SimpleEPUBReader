@@ -18,80 +18,89 @@ namespace EPUBRenderer
                 for (int i = 0; i < Line.Parts.Count; i++)
                 {
                     var Part = Line.Parts[i];
-                    if (Part.Type == LinePartTypes.image)
+                    switch (Part.Type)
                     {
-                        NewWord.Add(new ImageInText(((ImageLinePart)Part).GetImage()));
-                        Result.Add(NewWord);
-                        NewWord = new List<TextElement>();
-                    }
-                    else
-                    {
-                        var TextPart = (TextLinePart)Part;
-                        if (!string.IsNullOrEmpty(TextPart.Ruby) && i != Line.Parts.Count - 1)
-                        {
-                            var NextPart = Line.Parts[i + 1];
-                            if (NextPart.Type != LinePartTypes.image)
+                        case LinePartTypes.image:
+                            NewWord.Add(new ImageInText(((ImageLinePart)Part).GetImage()));
+                            Result.Add(NewWord);
+                            NewWord = new List<TextElement>();                            
+                            break;
+                        case LinePartTypes.normal:
+                        case LinePartTypes.sesame:
+                            var TextPart = (TextLinePart)Part;
+                            if (!string.IsNullOrEmpty(TextPart.Ruby) && i != Line.Parts.Count - 1)
                             {
-                                int k = i + 1;
-                                bool OneMissed = false;
-                                while (k != Line.Parts.Count - 1)
+                                var NextPart = Line.Parts[i + 1];
+                                if (NextPart.Type != LinePartTypes.image)
                                 {
-                                    if (NextPart.Type != LinePartTypes.image)
+                                    int k = i + 1;
+                                    bool OneMissed = false;
+                                    while (k != Line.Parts.Count - 1)
                                     {
-                                        var NextTextPart = (TextLinePart)NextPart;
-                                        if (!string.IsNullOrEmpty(NextTextPart.Ruby))
+                                        if (NextPart.Type == LinePartTypes.normal ||
+                                            NextPart.Type == LinePartTypes.sesame)
                                         {
-                                            TextPart.Text += NextTextPart.Text;
-                                            TextPart.Ruby += NextTextPart.Ruby;
-                                            NextTextPart.Text = "";
-                                            NextTextPart.Ruby = "";
-                                            k++;
-                                            NextPart = Line.Parts[k];
-                                        }
-                                        else if (!OneMissed)
-                                        {
-                                            OneMissed = true;
+                                            var NextTextPart = (TextLinePart)NextPart;
+                                            if (!string.IsNullOrEmpty(NextTextPart.Ruby))
+                                            {
+                                                TextPart.Text += NextTextPart.Text;
+                                                TextPart.Ruby += NextTextPart.Ruby;
+                                                NextTextPart.Text = "";
+                                                NextTextPart.Ruby = "";
+                                                k++;
+                                                NextPart = Line.Parts[k];
+                                            }
+                                            else if (!OneMissed)
+                                            {
+                                                OneMissed = true;
+                                            }
+                                            else
+                                            {
+                                                break;
+                                            }
                                         }
                                         else
                                         {
                                             break;
                                         }
                                     }
-                                    else
-                                    {
-                                        break;
-                                    }
                                 }
+
                             }
 
-                        }
+                            if (string.IsNullOrEmpty(TextPart.Text)) continue;
+                            if (TextPart.Type == LinePartTypes.sesame)
+                            {
+                                TextPart.Ruby = new string('﹅', TextPart.Text.Length);
+                            }
+                            foreach (char c in TextPart.Text)
+                            {
+                                NewWord.Add(new Letter(GetCorrectedChar(c, Vertical), GlobalSettings.NormalFontSize));
+                            }
+                            Result.Add(NewWord);
+                            NewWord = new List<TextElement>();
+                            if (string.IsNullOrEmpty(TextPart.Ruby)) continue;
+                            foreach (char c in TextPart.Ruby)
+                            {
+                                NewWord.Add(new RubyElement(GetCorrectedChar(c, Vertical), GlobalSettings.RubyFontSize));
+                            }
+                            Result.Add(NewWord);
+                            NewWord = new List<TextElement>();
+                            break;
 
-                        if (string.IsNullOrEmpty(TextPart.Text)) continue;
-                        if (TextPart.Type == LinePartTypes.sesame)
-                        {
-                            TextPart.Ruby = new string('﹅', TextPart.Text.Length);
-                        }
-                        foreach (char c in TextPart.Text)
-                        {
-                            NewWord.Add(new Letter(GetCorrectedChar(c, Vertical), GlobalSettings.NormalFontSize));
-                        }
-                        Result.Add(NewWord);
-                        NewWord = new List<TextElement>();
-                        if (string.IsNullOrEmpty(TextPart.Ruby)) continue;
-                        foreach (char c in TextPart.Ruby)
-                        {
-                            NewWord.Add(new RubyElement(GetCorrectedChar(c, Vertical), GlobalSettings.RubyFontSize));
-                        }
-                        Result.Add(NewWord);
-                        NewWord = new List<TextElement>();
+                        case LinePartTypes.paragraph:
+                            NewWord.Add(new BreakElement());
+                            Result.Add(NewWord);
+                            NewWord = new List<TextElement>();
+                            break;
                     }
                 }
-                if (Line != Lines.Last())
-                {
-                    NewWord.Add(new BreakElement());
-                    Result.Add(NewWord);
-                    NewWord = new List<TextElement>();
-                }
+             //   if (Line != Lines.Last())
+             //   {
+             //       NewWord.Add(new BreakElement());
+             //       Result.Add(NewWord);
+             //       NewWord = new List<TextElement>();
+             //   }
             }
             return Result;
         }

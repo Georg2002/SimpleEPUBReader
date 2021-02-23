@@ -61,6 +61,8 @@ namespace EPUBRenderer
         {
             if (epub == null) return;
             TotalPageCount = 0;
+            if (PageSize.X == Math.Round( ActualWidth,0) && 
+                PageSize.Y == Math.Round(ActualHeight)) return;
             PageSize = new Vector(ActualWidth, ActualHeight);
             Renderer.PageSize = PageSize;          
             if (Renderer.Page != null && !ResizeRunning)

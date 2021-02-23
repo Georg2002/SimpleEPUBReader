@@ -124,22 +124,37 @@ namespace EPUBParser
 
         private void AddAppropriatePart(HtmlNode Node, List<ZipEntry> Entries, ZipEntry File)
         {
-            string Text;
+            string Text = "";
             switch (Node.Name)
             {
                 case "#text":
-                case "nav":
+                case "nav":                    
                     Text = Node.InnerText;
-                    if (!string.IsNullOrWhiteSpace(Text))
-                    {
-                        Parts.Add(new TextLinePart(Node.InnerText, ""));
-                    }
+                   if (!string.IsNullOrWhiteSpace(Text))
+                    {                  
+                        Parts.Add(new TextLinePart(Text, ""));
+                    }                  
                     break;
                 case "ruby":
                     if (Node.ChildNodes.Count >= 2)
                     {
-                        Text = Node.ChildNodes[0].InnerText;
-                        var Ruby = Node.ChildNodes[1].InnerText;
+                        string Ruby = "";
+                        foreach (var Child in Node.ChildNodes)
+                        {
+                            if (Child.Name == "rt")
+                            {
+                                Ruby += Child.InnerText;
+                            }
+                            else if (Child.Name=="#text")
+                            {
+                                Text += Child.InnerText;
+                            }
+                            else
+                            {
+                                Logger.Report("Broken ruby found, ignoring", LogType.Error);
+                                break;
+                            }
+                        }                       
                         Parts.Add(new TextLinePart(Text, Ruby));
                     }
                     else
@@ -149,19 +164,25 @@ namespace EPUBParser
                     break;
                 case "hr":
                 case "br":
-                    Parts.Add(new TextLinePart("", ""));
+                    Parts.Add(new BreakLinePart());
                     break;
                 case "span":
                     AddSpanElement(Node, Entries, File);
                     break;
                 case "a":
-                case "p":
                 case "svg":
                 case "div":
                     foreach (var ChildNode in Node.ChildNodes)
                     {
                         AddAppropriatePart(ChildNode, Entries, File);
+                    }            
+                    break;
+                case "p":
+                    foreach (var ChildNode in Node.ChildNodes)
+                    {
+                        AddAppropriatePart(ChildNode, Entries, File);
                     }
+                    Parts.Add(new BreakLinePart());
                     break;
                 case "image":
                 case "img":
@@ -179,7 +200,7 @@ namespace EPUBParser
                     }
                     var Image = new ImageLinePart(Link);
                     //Set later to allow parallelization
-                    Parts.Add(Image);
+                    Parts.Add(Image);              
                     break;
                 default:
                     Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\""
@@ -327,6 +348,13 @@ namespace EPUBParser
         }
     }
 
+    public class BreakLinePart : LinePart
+    {
+        public BreakLinePart()
+        {
+            Type = LinePartTypes.paragraph;
+        }
+    }
 
     public class LinePart
     {
@@ -341,6 +369,6 @@ namespace EPUBParser
 
     public enum LinePartTypes
     {
-        normal, sesame, image
+        normal, sesame, image, paragraph
     }
 }

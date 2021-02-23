@@ -13,11 +13,37 @@ namespace EPUBRenderer
 {
     public class RenderPage
     {
-        public List<List<TextElement>> TextElements;        
+        public List<List<TextElement>> TextElements;
         public int CurrentPage = 1;
         public Vector SinglePageOffset;
         public int PageCount;
         public Vector CurrentOffset;
+
+        internal bool IsSingleImage(List<TextElement> Text)
+        {
+            bool SingleImage = false;
+            foreach (var Element in Text)
+            {
+                if (Element.ElementType == TextElementType.Image)
+                {
+                    if (SingleImage)
+                    {
+                        SingleImage = false;
+                        break;
+                    }
+                    else
+                    {
+                        SingleImage = true;
+                    }
+                }
+                else if (Element.ElementType != TextElementType.Break)
+                {
+                    SingleImage = false;
+                    break;
+                }
+            }
+            return SingleImage;
+        }
     }
 
     public class Letter : TextElement
@@ -40,7 +66,7 @@ namespace EPUBRenderer
             }
         }
         public override void SetSize()
-        {           
+        {
             Size.X = FontSize;
             Size.Y = FontSize;
         }
@@ -66,7 +92,7 @@ namespace EPUBRenderer
     }
 
     public class ImageInText : TextElement
-    {   
+    {
         private ImageSource _Image;
         public ImageSource Image
         {

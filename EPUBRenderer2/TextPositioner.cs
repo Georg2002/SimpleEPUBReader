@@ -59,7 +59,11 @@ namespace EPUBRenderer
                             double EffectiveRatio = Math.Max(WidthRatio, HeightRatio);
                             Image.Size /= EffectiveRatio;
                         }
-                        CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
+                        if (WordIndex != 0)
+                        {
+                            CurrentWritePos = ElementString[WordIndex - 1].Last().EndPos;
+                        }
+                       // CurrentWritePos = WritingDirectionModifiers.GetNewLinePos(CurrentWritePos, PageSize);
                         Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);
                         int StartPagePos = WritingDirectionModifiers.GetPagePosition(Image.StartPos, PageSize);
                         int EndPagePos = WritingDirectionModifiers.GetPagePosition(Image.EndPos, PageSize);
@@ -67,7 +71,7 @@ namespace EPUBRenderer
                         {
                             var NewPagePos = Math.Min(StartPagePos, EndPagePos);
                             CurrentWritePos = WritingDirectionModifiers.GetNewPagePos(PageSize, NewPagePos);
-                            Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);                       
+                            Image.StartPos = WritingDirectionModifiers.GetImageStartPos(Image, CurrentWritePos, PageSize);
                         }
                         CurrentWritePos = WritingDirectionModifiers.GetAfterImagePos(CurrentWritePos, PageSize, Image);
                         break;
