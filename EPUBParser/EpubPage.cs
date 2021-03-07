@@ -145,7 +145,7 @@ namespace EPUBParser
                             {
                                 Ruby += Child.InnerText;
                             }
-                            else if (Child.Name=="#text")
+                            else if (Child.Name=="#text" || Child.Name=="rb")
                             {
                                 Text += Child.InnerText;
                             }
