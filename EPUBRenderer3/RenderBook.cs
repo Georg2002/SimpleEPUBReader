@@ -10,7 +10,7 @@ namespace EPUBRenderer3
     internal class RenderBook
     {
         private Epub epub;
-        private List<PageFile> PageFiles;
+        public List<PageFile> PageFiles;
 
         public RenderBook(Epub epub)
         {

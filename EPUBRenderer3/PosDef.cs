@@ -8,15 +8,15 @@ namespace EPUBRenderer3
 {
    public struct PosDef
     {
-        public int FileNumber;
+        public int FileIndex;
         public int Line;
         public int Word;
         public int Letter;
 
 
-        public PosDef(int FileNumber = 1, int Line = 1, int Word = 1, int Letter = 1)
+        public PosDef(int FileIndex, int Line, int Word, int Letter)
         {
-            this.FileNumber = FileNumber;
+            this.FileIndex = FileIndex;
             this.Line = Line;
             this.Word = Word;
             this.Letter = Letter;

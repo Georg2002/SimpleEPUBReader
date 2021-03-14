@@ -7,25 +7,6 @@ using System.Windows;
 
 namespace EPUBRenderer3
 {
-    /*
-     *     public static Dictionary<char, char> VerticalVisualFixes = new Dictionary<char, char>()
-            {
-            {'」','﹂'},{'「','﹁'},{'（','︵'},
-            {'）','︶'},{'『','﹃'},{'』','﹄'},
-            {'。','︒'},{'、','︑'},{'？','?'},
-            {'!','!'},{'！','!'},{ 'ー','│'},
-            { '─', '|'},{ '…', '︙'},{'〈','︿' },
-            {'〉','﹀' },{'【','︻' },{'】','︼' },
-            {'≪','︽' },{'≫','︾' },{'《','︽' },
-            {'》','︾' },{'(','︵' },{')','︶' },
-            {'→','↓'},{'：','‥'},{'=','║'}, {'〔','︹'},
-            {'〕','︺' }, {'_','∣'},{'~','≀'},{'∼','≀'},{'～','≀'},{'\u0027','︑'},
-            {'゠','║' }
-        };
-        public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
-     */
-
-
     public static class CharInfo
     {
         public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();

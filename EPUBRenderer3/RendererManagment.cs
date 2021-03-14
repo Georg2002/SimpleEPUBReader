@@ -13,12 +13,33 @@ namespace EPUBRenderer3
     {
         RenderBook CurrBook;
 
+        Vector PageSize;
+
+        RenderPage ShownPage = null;
+
+        public Renderer()
+        {
+            SizeChanged += Renderer_SizeChanged;
+        }
+
+        private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            PageSize = new Vector(ActualWidth, ActualHeight);
+        }
+
         public void LoadBook(string Path, PosDef Position = new PosDef(), List<MarkingDef> Markings = null)
         {
             Markings = Markings == null ? new List<MarkingDef>() : Markings;
             Epub epub = new Epub(Path);
             CurrBook = new RenderBook(epub);
+          //  OpenPage
+        }
 
+
+        public void OpenPage(PosDef Position)
+        {
+          var  PageFile = CurrBook.PageFiles[Position.FileIndex];
+           // int PageIndex = Position. PageFile.Pages.Count
         }
     }
 }
