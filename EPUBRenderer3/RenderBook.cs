@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace EPUBRenderer3
 {
@@ -11,6 +12,7 @@ namespace EPUBRenderer3
     {
         private Epub epub;
         public List<PageFile> PageFiles;
+        public PosDef CurrPos;
 
         public RenderBook(Epub epub)
         {
@@ -20,7 +22,14 @@ namespace EPUBRenderer3
             {
                 PageFiles.Add(new PageFile(Page));
             }
+        }
 
+        internal void Position(Vector pageSize)
+        {
+            for (int i = 0; i < PageFiles.Count; i++)
+            {
+                PageFiles[i].PositionText(pageSize,i);
+            }
         }
     }
 }

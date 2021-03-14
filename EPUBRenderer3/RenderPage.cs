@@ -18,5 +18,15 @@ namespace EPUBRenderer3
             Lines.ForEach(a => Text = Text + a);
             return Text;
         }
+
+        public RenderPage()
+        {
+            Lines = new List<Line>();
+        }
+
+        public bool Within(PosDef Pos)
+        {
+            return Pos >= StartPos && Pos <= EndPos;
+        }
     }
 }

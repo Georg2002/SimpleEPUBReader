@@ -18,7 +18,7 @@ namespace EPUBRenderer3
             Lines = SplitAndOrder(page);
         }
 
-        public void PositionText(Vector PageSize)
+        public void PositionText(Vector PageSize,int Index)
         {
             Line Prev = null;
             Pages = new List<RenderPage>();
@@ -26,18 +26,23 @@ namespace EPUBRenderer3
 
             void FitLine(Line Line)
             {
-                var (FitWord ,FitLetter) = Line.Position(Prev, PageSize);
+                var (FitWord, FitLetter) = Line.Position(Prev, PageSize);
                 if (FitWord < Line.Words.Count)
                 {
-                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);                 
-                    CurrentPage.Lines.Add(FittingLine);
+                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);
+                    if (FittingLine.Words.Count != 0)
+                    {
+                        CurrentPage.Lines.Add(FittingLine);
+                    }
                     Pages.Add(CurrentPage);
+                    Prev = null;
                     CurrentPage = new RenderPage();
                     FitLine(OverflowLine);
                 }
                 else
                 {
                     CurrentPage.Lines.Add(Line);
+                    Prev = CurrentPage.Lines.Last();
                 }
             }
 
@@ -45,14 +50,23 @@ namespace EPUBRenderer3
             {
                 FitLine(Line);
             }
+            Pages.Add(CurrentPage);
 
-            var Curr = new PosDef(-1, 0, 0, 0);
+            var Curr = new PosDef(Index, 0, 0, 0);
 
+            if (PageSize.X<=627)
+            {
+                ;
+            }
             for (int i = 0; i < Pages.Count; i++)
             {
+               
                 var CurrPage = Pages[i];
                 CurrPage.StartPos = Curr;
-
+                if (i == 80 && Pages.Count == 111 && Pages[i+2].Lines.Count==5)
+                {
+                    ;
+                }
                 if (CurrPage.Lines.Count == 1)
                 {
                     if (CurrPage.Lines[0].Words.Count == 1)
@@ -76,12 +90,17 @@ namespace EPUBRenderer3
                 {
                     Curr.Line += CurrPage.Lines.Count - 1;
                     Curr.Word = CurrPage.Lines.Last().Words.Count - 1;
-                    Curr.Letter = CurrPage.Lines.Last().Words.Last().Letters.Count - 1;                    
+                    Curr.Letter = CurrPage.Lines.Last().Words.Last().Letters.Count - 1;
                 }
+                CurrPage.EndPos = Curr;
+                Curr.Increment(Lines);
             }
         }
 
-
+        bool PosValid(PosDef Pos)
+        {
+            return Lines.Count > Pos.Line && Lines[Pos.Line].Words.Count > Pos.Word && Lines[Pos.Line].Words[Pos.Word].Letters.Count > Pos.Letter;
+        }               
 
         public override string ToString()
         {
@@ -148,7 +167,6 @@ namespace EPUBRenderer3
                         case LinePartTypes.image:
                             var ImagePart = (ImageLinePart)Part;
                             Word.Letters.Add(new ImageLetter(ImagePart.GetImage()));
-                            Word.Letters.Add(new BreakLetter());
                             Line.Words.Add(Word);
                             Word = new Word();
                             break;

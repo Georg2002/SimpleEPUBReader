@@ -17,27 +17,62 @@ namespace EPUBRenderer3
     {
         public List<Letter> Letters;
         public WordTypes Type;
-        public int Position(Word Previous, Vector PageSize)
+        public int Position(Word PrevWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
         {
             Letter PrevLetter = null;
-            if (Previous != null)
+            if (PrevWord != null)
             {
-                PrevLetter = Previous.Letters.Last();
+                PrevLetter = PrevWord.Letters.Last();
             }
             int Fit = 0;
+
+            LetterPlacementInfo Info = new LetterPlacementInfo()
+            {
+                PageSize = PageSize,
+                PrevLetter = PrevLetter,
+                OwnWord = this,
+                PrevWord = PrevWord,
+                NewLine = NewLine,
+                TightFit = TightFit
+            };
+            bool AllFit = true;
             foreach (var Letter in Letters)
             {
-                bool LetterFit = Letter.Position(Previous, PrevLetter,this, PageSize);
-                PrevLetter = Letter;
+                bool LetterFit = Letter.Position(Info);
+                Info.NewLine = false;
+                Info.PrevLetter = Letter;
                 if (LetterFit)
                 {
                     Fit++;
                 }
-               else
+                else
                 {
+                    AllFit = false;
                     break;
                 }
             }
+
+            if (FinalRound) return Fit;
+            if (NewLine)
+            {
+                if (!AllFit)
+                {
+                    Fit = Position(PrevWord, PageSize, false, true);
+                }
+            }
+            else if(!AllFit)
+            {
+                if (TightFit)
+                {
+                    Fit = Position(PrevWord, PageSize, false, true, true);
+                }
+                else
+                {
+                    Fit = Position(PrevWord, PageSize, true);
+                }                
+            }
+           
+          
             return Fit;
         }
         public Word()
@@ -63,35 +98,49 @@ namespace EPUBRenderer3
     internal class Line
     {
         public List<Word> Words;
-        public Tuple<int,int> Position(Line Previous, Vector PageSize)
+        public Tuple<int, int> Position(Line Previous, Vector PageSize)
         {
             Word Prev = null;
             if (Previous != null)
             {
                 Prev = Previous.Words.Last();
             }
-            
+
             int WordFit = 0;
             int LetterFit = 0;
             foreach (var Word in Words)
             {
-                WordFit++;
+                
                 LetterFit = Word.Position(Prev, PageSize);
-                Prev = Word;
-                if (LetterFit < Word.Letters.Count)
+                if (LetterFit<Word.Letters.Count)
                 {
                     break;
                 }
+                WordFit++;
+                Prev = Word;
             }
             return new Tuple<int, int>(WordFit, LetterFit);
         }
 
-        public Tuple<Line,Line> Split(int WordCount, int LetterCount)
+        public Tuple<Line, Line> Split(int WordCount, int LetterCount)
         {
-            var Front = Words.Take(WordCount).ToList();
-            Front[Front.Count-1] = new Word( Front.Last().Letters.Take(LetterCount).ToList(), Front.Last().Type);
-            var Rear = Words.GetRange(WordCount - 1, Words.Count - WordCount + 1).ToList();
-            Rear[0] = new Word( Rear.First().Letters.GetRange(LetterCount, Rear.First().Letters.Count - LetterCount), Rear.First().Type);
+            if (WordCount==0)
+            {
+                return new Tuple<Line, Line>(new Line(), new Line(Words));
+            }
+            var Front = Words.Take(WordCount+1).ToList();
+            Front[Front.Count - 1] = new Word(Front.Last().Letters.Take(LetterCount).ToList(), Front.Last().Type);
+            int k = 0;
+            if (Words[WordCount-1].Letters.Count==LetterCount)
+            {
+                k = 1;
+            }
+            var Rear = Words.GetRange(WordCount+k, Words.Count - WordCount -k).ToList();
+            if (k==0)
+            {
+                Rear[0] = new Word(Rear.First().Letters.GetRange(LetterCount, Rear.First().Letters.Count - LetterCount), Rear.First().Type);
+            }
+            
             return new Tuple<Line, Line>(new Line(Front), new Line(Rear));
         }
 

@@ -30,7 +30,7 @@ namespace EPUBRenderer3
             {'〕',new SpecialCharacter(new Vector(),1,'︺')}, {'_',new SpecialCharacter(new Vector(),1,'∣')},
             {'~',new SpecialCharacter(new Vector(),1,'≀')},{'∼',new SpecialCharacter(new Vector(),1,'≀')},
             {'～',new SpecialCharacter(new Vector(),1,'≀')},{'\u0027',new SpecialCharacter(new Vector(),1,'︑')},
-            {'゠',new SpecialCharacter(new Vector(),1,'║')}
+            {'゠',new SpecialCharacter(new Vector(),1,'║')},{'＝',new SpecialCharacter(new Vector(),1,'║')}
         };
 
     }

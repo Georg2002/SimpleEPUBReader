@@ -25,13 +25,14 @@ namespace EPUBRenderer3
                         {
                             case LetterTypes.Letter:
                                 var Text = (FormattedText)Letter.GetRenderElement();
-                                drawingContext.DrawText(Text, new Point(Letter.StartPosition.X,Letter.StartPosition.Y));
+                                var DrawPos = Letter.StartPosition + ((TextLetter)Letter).Offset;                                
+                                drawingContext.DrawText(Text, new Point(DrawPos.X, DrawPos.Y));
                                 break;
                             case LetterTypes.Image:
                                 var Img = (ImageSource)Letter.GetRenderElement();
                                 var StartPoint = new Point(Letter.StartPosition.X, Letter.StartPosition.Y);
                                 var EndPoint = new Point(Letter.EndPosition.X, Letter.EndPosition.Y);
-                                drawingContext.DrawImage(Img, new Rect(StartPoint,EndPoint));;
+                                drawingContext.DrawImage(Img, new Rect(StartPoint,EndPoint));
                                 break;
                             case LetterTypes.Break:                                
                                 break;
@@ -41,6 +42,6 @@ namespace EPUBRenderer3
                     }
                 }
             }                     
-        }
+        }     
     }
 }
