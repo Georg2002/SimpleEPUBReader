@@ -13,12 +13,13 @@ namespace EPUBRenderer3
     {
         RenderBook CurrBook;
         Vector PageSize;
-        RenderPage ShownPage = null;
+        RenderPage ShownPage = null;  
 
         public Renderer()
         {
             SizeChanged += Renderer_SizeChanged;
-
+            MinHeight = 100;
+            MinWidth = 100;
         }
 
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -26,24 +27,24 @@ namespace EPUBRenderer3
             PageSize = new Vector(ActualWidth, ActualHeight);
             if (CurrBook != null)
             {
+                CurrBook.Position(PageSize);
                 OpenPage(CurrBook.CurrPos);
             }
         }
 
         public void LoadBook(string Path, PosDef Position = new PosDef(), List<MarkingDef> Markings = null)
         {
-            Markings = Markings == null ? new List<MarkingDef>() : Markings;
+            Markings = Markings ?? new List<MarkingDef>();
             Epub epub = new Epub(Path);
             CurrBook = new RenderBook(epub);
+            CurrBook.Position(PageSize);
             OpenPage(Position);
         }
 
 
         public void OpenPage(PosDef Position)
         {
-            CurrBook.CurrPos = Position;
-
-            CurrBook.Position(PageSize);
+            CurrBook.CurrPos = Position;            
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
             ShownPage = PageFile.Pages.Find(a => a.Within(Position));
             InvalidateVisual();

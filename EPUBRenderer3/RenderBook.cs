@@ -18,18 +18,28 @@ namespace EPUBRenderer3
         {
             this.epub = epub;
             PageFiles = new List<PageFile>();
+            int i = 0;
             foreach (var Page in epub.Pages)
             {
+                if (i == 10)
+                {
+                    ;
+                }
+                i++;
                 PageFiles.Add(new PageFile(Page));
             }
         }
 
         internal void Position(Vector pageSize)
         {
-        //    for (int i = 0; i < PageFiles.Count; i++)
-        //    {
-        //        PageFiles[i].PositionText(pageSize, i);
-        //    }
+         //  for (int i = 0; i < PageFiles.Count; i++)
+         //  {
+         //       if (i==10)
+         //       {
+         //           ;
+         //       }
+         //      PageFiles[i].PositionText(pageSize, i);
+         //  }
           Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
         }
     }

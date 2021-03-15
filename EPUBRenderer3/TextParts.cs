@@ -80,6 +80,18 @@ namespace EPUBRenderer3
             Letters = new List<Letter>();
         }
 
+        public bool Visible()
+        {            
+            foreach (var Letter in Letters)
+            {
+                if (Letter.Type!=LetterTypes.Break)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public Word(List<Letter> Letters, WordTypes Type)
         {
             this.Letters = Letters;
@@ -89,7 +101,7 @@ namespace EPUBRenderer3
         public override string ToString()
         {
             string Text = "";
-            Letters.ForEach(a => Text = Text + a);
+            Letters.ForEach(a => Text += a);
             return Text;
         }
 
@@ -164,7 +176,7 @@ namespace EPUBRenderer3
         public override string ToString()
         {
             string Text = "";
-            Words.ForEach(a => Text = Text + a);
+            Words.ForEach(a => Text += a);
             return Text;
         }
     }

@@ -30,7 +30,7 @@ namespace EPUBRenderer3
         public const float RubyScale = 0.7f;
         public const float RubyFontSize = RubyScale * StandardFontSize;
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
-        public const float RubyOffset =0.9f * LineDist;
+        public const float RubyOffset = 1f * LineDist;
 
         public Vector StartPosition;
         public Vector EndPosition;
@@ -89,11 +89,11 @@ namespace EPUBRenderer3
             var NewLine = Info.NewLine;
             var OwnWord = Info.OwnWord;
             var NextWord = Info.NextWord;
-            var PrevWord = Info.PrevWord;   
+            var PrevWord = Info.PrevWord;
             if (OwnWord.Type == WordTypes.Normal)
             {
                 FontSize = StandardFontSize;
-                StartPosition = PrevLetter == null ? new Vector(PageSize.X - LineDist + FontSize, 0) : StartPosition = PrevLetter.NextWritePos;
+                StartPosition = PrevLetter == null ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
                 if (PrevWord != null && PrevWord.Type == WordTypes.Ruby && ((TextLetter)PrevLetter).FontSize == RubyFontSize)
                 {
                     StartPosition.X -= RubyOffset - StandardFontSize;
@@ -107,15 +107,15 @@ namespace EPUBRenderer3
                 }
 
                 StartPosition = NewLine ? new Vector(StartPosition.X - LineDist, 0) : StartPosition;
-                StartPosition = StartPosition + VertSpacing;
+                StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);
 
                 if (TightFit && EndPosition.Y > PageSize.Y)
                 {
                     StartPosition.Y = 0;
-                    StartPosition.X = StartPosition.X - LineDist;
+                    StartPosition.X -= LineDist;
                     EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                    
+
                 }
                 NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
                 return InsidePage(PageSize);
@@ -127,14 +127,13 @@ namespace EPUBRenderer3
                 float RubyCount = OwnWord.Letters.Count;
                 float TextCount = PrevWord.Letters.Count;
                 Vector VertSpacing = new Vector();
-                VertSpacing.Y = Math.Max((TextCount / RubyCount -  RubyScale) * StandardFontSize / 2, 0);
-                
+                VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * StandardFontSize / 2, 0);
+
                 double TextLength = PrevWord.Length();
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize + 2 * VertSpacing.Y);
                 if (((TextLetter)PrevLetter).FontSize == StandardFontSize)
                 {
-                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5*(TextLength + RubyLength));
-                    //StartPosition.Y += RubyFontSize * 0.22;
+                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5 * (TextLength + RubyLength));
                 }
                 else
                 {
@@ -149,7 +148,7 @@ namespace EPUBRenderer3
 
         public override object GetRenderElement()
         {
-            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black,1);
+            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1) {TextAlignment=TextAlignment.Center };
         }
 
         public override string ToString()
@@ -172,7 +171,9 @@ namespace EPUBRenderer3
         {
             var PrevLetter = Info.PrevLetter;
             var PageSize = Info.PageSize;
+            var PrevWord = Info.PrevWord;
 
+            bool MustScale = PageSize.X < Image.Width || PageSize.Y < Image.Height;  
             if (PrevLetter == null)
             {
                 StartPosition = new Vector(PageSize.X, 0);
@@ -181,21 +182,33 @@ namespace EPUBRenderer3
             {
                 StartPosition = new Vector(PrevLetter.EndPosition.X, 0);
             }
-            if (PageSize.X < Image.Width || PageSize.Y < Image.Height)
-            {
-                double PRatio = PageSize.X / PageSize.Y;
-                double IRatio = Image.Width / Image.Height;
-                var RenderSize = PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
-                StartPosition = PRatio < IRatio ? new Vector(StartPosition.X, (PageSize.Y - RenderSize.Y) / 2) : StartPosition;
-                EndPosition = StartPosition + RenderSize;
+            Vector RenderSize;
+            
+            if (MustScale)
+            {                
+                if (PrevWord != null) return false;
+                RenderSize = GetMaxRenderSize(PageSize);
+                
+                StartPosition = (PageSize - RenderSize )/ 2;               
+                NextWritePos = new Vector(-1, PageSize.Y + 1);
             }
             else
             {
-                EndPosition = StartPosition + new Vector(-Image.Width, Image.Height);
+                RenderSize = new Vector(-Image.Width, Image.Height);
+                StartPosition.Y = (PageSize.Y - Image.Height) / 2;
             }
 
-            NextWritePos = new Vector(EndPosition.X, 0);
-            return EndPosition.Y <= PageSize.Y;
+            EndPosition = StartPosition + RenderSize;
+            NextWritePos = new Vector(EndPosition.X-LineDist, 0);
+          
+            return EndPosition.Y <= PageSize.Y && EndPosition.X >= 0;
+        }
+
+        public Vector GetMaxRenderSize(Vector PageSize)
+        {
+            double PRatio = PageSize.X / PageSize.Y;
+            double IRatio = Image.Width / Image.Height;
+            return PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
         }
 
         public override object GetRenderElement()

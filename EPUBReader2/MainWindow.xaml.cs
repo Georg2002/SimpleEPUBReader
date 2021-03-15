@@ -9,10 +9,12 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EPUBRenderer3;
+using Microsoft.Win32;
 
 namespace EPUBReader2
 {
@@ -21,15 +23,20 @@ namespace EPUBReader2
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MouseManager MouseManager;
+
         public MainWindow()
         {
             InitializeComponent();
-        
+            MouseManager = new MouseManager(Bar, ContentGrid);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Renderer.LoadBook(@"D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub", new PosDef(30,0,0,0));
+            //C:\Users\georg\Desktop\b\Zeug\a\Learning\Books\日常\[ìýüEèG_éáéþé¯ é»éóéóé┐ & Æÿ_ê╔ôñ ò¢É¼] ô·ÅÝé╠ë─ïxé¦.epub
+            //D:\Informatik\EPUBReader\TestResources\DanMachi.epub
+            //D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub
+            Renderer.LoadBook(@"D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub", new PosDef(30, 0, 0, 0));
         }
 
         private void Right_Click(object sender, RoutedEventArgs e)
@@ -40,6 +47,63 @@ namespace EPUBReader2
         private void Left_Click(object sender, RoutedEventArgs e)
         {
             Renderer.Switch(1);
+        }
+
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            MouseManager.MouseMove(Mouse.GetPosition(this));
+        }
+
+        private void OpenButton_Click(object sender, RoutedEventArgs e)
+        {
+            var Dialog = new OpenFileDialog
+            {
+                Filter = "Epub files(.epub)|*.epub",
+                Multiselect = false
+            };
+            if (Dialog.ShowDialog() == true)
+            {
+                Renderer.LoadBook(Dialog.FileName);
+            }
+        }
+
+        private void Library_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Chapter_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Pages_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Color_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Fullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowStyle.None == this.WindowStyle)
+            {
+                WindowStyle = WindowStyle.SingleBorderWindow;
+                WindowState = WindowState.Normal;
+            }
+            else
+            {
+                WindowStyle = WindowStyle.None;
+                WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

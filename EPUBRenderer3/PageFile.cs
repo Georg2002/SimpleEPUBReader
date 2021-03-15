@@ -120,7 +120,7 @@ namespace EPUBRenderer3
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
                             bool NoRuby = string.IsNullOrEmpty(TextPart.Ruby) && TextPart.Type != LinePartTypes.sesame;
-                            char Prev = 'a';
+                            char Prev = 'a';                           
                             foreach (var Character in TextPart.Text)
                             {
                                 if (NoRuby && CharInfo.PossibleLineBreaks.Contains(Prev) && !CharInfo.PossibleLineBreaks.Contains(Character))
@@ -130,6 +130,10 @@ namespace EPUBRenderer3
                                 }
                                 Word.Letters.Add(new TextLetter(Character));
                                 Prev = Character;
+                            }
+                            if (Word.Letters.Count == 0)
+                            {
+                                break;
                             }
                             Line.Words.Add(Word);
                             Word = new Word();
@@ -150,8 +154,8 @@ namespace EPUBRenderer3
                                     {
                                         Word.Letters.Add(new TextLetter('﹅'));
                                     }
-                                    Word.Type = WordTypes.Ruby;
-                                }
+                                    
+                                }                            
                                 Line.Words.Add(Word);
                                 Word = new Word();
                             }

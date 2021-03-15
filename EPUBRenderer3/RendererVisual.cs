@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace EPUBRenderer3
 {
-    public partial class Renderer :  FrameworkElement
+    public partial class Renderer : FrameworkElement
     {
         protected override void OnRender(DrawingContext drawingContext)
         {
@@ -25,23 +25,31 @@ namespace EPUBRenderer3
                         {
                             case LetterTypes.Letter:
                                 var Text = (FormattedText)Letter.GetRenderElement();
-                                var DrawPos = Letter.StartPosition + ((TextLetter)Letter).Offset;                                
+                                var TxtLetter = (TextLetter)Letter;
+                                var DrawPos = Letter.StartPosition + TxtLetter.Offset * TxtLetter.FontSize; ;
                                 drawingContext.DrawText(Text, new Point(DrawPos.X, DrawPos.Y));
                                 break;
                             case LetterTypes.Image:
-                                var Img = (ImageSource)Letter.GetRenderElement();
+                                var ImgLetter = (ImageLetter)Letter;
+                                var Img = (ImageSource)Letter.GetRenderElement();                               
+                                if (ShownPage.Lines.Count == 1 && Line.Words.Count == 1 && Word.Letters.Count == 1)
+                                {
+                                    Vector RenderSize = ImgLetter.GetMaxRenderSize(PageSize);
+                                    ImgLetter.StartPosition = (PageSize - RenderSize) / 2;
+                                    ImgLetter.EndPosition = ImgLetter.StartPosition + RenderSize;                                    
+                                }
                                 var StartPoint = new Point(Letter.StartPosition.X, Letter.StartPosition.Y);
                                 var EndPoint = new Point(Letter.EndPosition.X, Letter.EndPosition.Y);
-                                drawingContext.DrawImage(Img, new Rect(StartPoint,EndPoint));
+                                drawingContext.DrawImage(Img, new Rect(StartPoint, EndPoint));
                                 break;
-                            case LetterTypes.Break:                                
+                            case LetterTypes.Break:
                                 break;
                             default:
                                 throw new NotImplementedException();
                         }
                     }
                 }
-            }                     
-        }     
+            }
+        }
     }
 }
