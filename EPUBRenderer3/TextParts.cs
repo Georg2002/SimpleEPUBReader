@@ -17,7 +17,7 @@ namespace EPUBRenderer3
     {
         public List<Letter> Letters;
         public WordTypes Type;
-        public int Position(Word PrevWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
+        public int Position(Word PrevWord,Word NextWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
         {
             Letter PrevLetter = null;
             if (PrevWord != null)
@@ -32,6 +32,7 @@ namespace EPUBRenderer3
                 PrevLetter = PrevLetter,
                 OwnWord = this,
                 PrevWord = PrevWord,
+                NextWord = NextWord,
                 NewLine = NewLine,
                 TightFit = TightFit
             };
@@ -50,28 +51,27 @@ namespace EPUBRenderer3
                     AllFit = false;
                     break;
                 }
-            }
+            }                       
 
             if (FinalRound) return Fit;
             if (NewLine)
             {
                 if (!AllFit)
                 {
-                    Fit = Position(PrevWord, PageSize, false, true);
+                    Fit = Position(PrevWord, NextWord,PageSize, false, true);
                 }
             }
             else if(!AllFit)
             {
                 if (TightFit)
                 {
-                    Fit = Position(PrevWord, PageSize, false, true, true);
+                    Fit = Position(PrevWord, NextWord, PageSize, false, true, true);
                 }
                 else
                 {
-                    Fit = Position(PrevWord, PageSize, true);
+                    Fit = Position(PrevWord, NextWord, PageSize, true);
                 }                
-            }
-           
+            }           
           
             return Fit;
         }
@@ -93,6 +93,11 @@ namespace EPUBRenderer3
             return Text;
         }
 
+        public double Length()
+        {
+            return Letters.Last().EndPosition.Y - Letters.First().StartPosition.Y;
+        }
+
     }
 
     internal class Line
@@ -108,10 +113,12 @@ namespace EPUBRenderer3
 
             int WordFit = 0;
             int LetterFit = 0;
-            foreach (var Word in Words)
+            Word NextWord = null;
+            for (int i = 0; i < Words.Count; i++)
             {
-                
-                LetterFit = Word.Position(Prev, PageSize);
+                var Word = Words[i];
+                NextWord = i == Words.Count - 1 ? null : Words[i + 1];
+                LetterFit = Word.Position(Prev,NextWord, PageSize);
                 if (LetterFit<Word.Letters.Count)
                 {
                     break;
@@ -131,7 +138,7 @@ namespace EPUBRenderer3
             var Front = Words.Take(WordCount+1).ToList();
             Front[Front.Count - 1] = new Word(Front.Last().Letters.Take(LetterCount).ToList(), Front.Last().Type);
             int k = 0;
-            if (Words[WordCount-1].Letters.Count==LetterCount)
+            if (Words[WordCount].Letters.Count==LetterCount)
             {
                 k = 1;
             }

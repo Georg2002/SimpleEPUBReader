@@ -7,7 +7,7 @@
         xmlns:Render="clr-namespace:EPUBRenderer3;assembly=EPUBRenderer3"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="MainWindow" Height="450" Width="800" MinHeight="200" MinWidth="200">
+        Title="MainWindow" Height="450" Width="800" MinHeight="400" MinWidth="400">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>

@@ -26,10 +26,11 @@ namespace EPUBRenderer3
 
         internal void Position(Vector pageSize)
         {
-            for (int i = 0; i < PageFiles.Count; i++)
-            {
-                PageFiles[i].PositionText(pageSize,i);
-            }
+        //    for (int i = 0; i < PageFiles.Count; i++)
+        //    {
+        //        PageFiles[i].PositionText(pageSize, i);
+        //    }
+          Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
         }
     }
 }

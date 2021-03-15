@@ -16,6 +16,7 @@ namespace EPUBRenderer3
     internal struct LetterPlacementInfo
     {
         public Word PrevWord;
+        public Word NextWord;
         public Letter PrevLetter;
         public Word OwnWord;
         public Vector PageSize;
@@ -25,9 +26,11 @@ namespace EPUBRenderer3
 
     internal class Letter
     {
-        public const float FontSizeStandard = 20;
-        public const float RubyFontSize = 0.5f * FontSizeStandard;
-        public const float LineDist = 1.2f * (FontSizeStandard + RubyFontSize);
+        public const float StandardFontSize = 19;
+        public const float RubyScale = 0.7f;
+        public const float RubyFontSize = RubyScale * StandardFontSize;
+        public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
+        public const float RubyOffset =0.9f * LineDist;
 
         public Vector StartPosition;
         public Vector EndPosition;
@@ -85,46 +88,68 @@ namespace EPUBRenderer3
             var TightFit = Info.TightFit;
             var NewLine = Info.NewLine;
             var OwnWord = Info.OwnWord;
-            //  if (OwnWord.Type == WordTypes.Normal)
+            var NextWord = Info.NextWord;
+            var PrevWord = Info.PrevWord;   
+            if (OwnWord.Type == WordTypes.Normal)
             {
-                if (OwnWord.Type != WordTypes.Normal)
+                FontSize = StandardFontSize;
+                StartPosition = PrevLetter == null ? new Vector(PageSize.X - LineDist + FontSize, 0) : StartPosition = PrevLetter.NextWritePos;
+                if (PrevWord != null && PrevWord.Type == WordTypes.Ruby && ((TextLetter)PrevLetter).FontSize == RubyFontSize)
                 {
-                    Character = '#';
+                    StartPosition.X -= RubyOffset - StandardFontSize;
                 }
-                FontSize = FontSizeStandard;
-                if (PrevLetter == null)
+                Vector VertSpacing = new Vector();
+                if (NextWord != null && NextWord.Type == WordTypes.Ruby)
                 {
-                    StartPosition = new Vector(PageSize.X - LineDist + FontSize, 0);
+                    float RubyCount = NextWord.Letters.Count;
+                    float TextCount = OwnWord.Letters.Count;
+                    VertSpacing.Y = Math.Max((RubyCount * RubyScale / TextCount - 1) * StandardFontSize / 2, 0);
+                }
+
+                StartPosition = NewLine ? new Vector(StartPosition.X - LineDist, 0) : StartPosition;
+                StartPosition = StartPosition + VertSpacing;
+                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+
+                if (TightFit && EndPosition.Y > PageSize.Y)
+                {
+                    StartPosition.Y = 0;
+                    StartPosition.X = StartPosition.X - LineDist;
+                    EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+                    
+                }
+                NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                return InsidePage(PageSize);
+            }
+            else
+            {
+                FontSize = RubyFontSize;
+
+                float RubyCount = OwnWord.Letters.Count;
+                float TextCount = PrevWord.Letters.Count;
+                Vector VertSpacing = new Vector();
+                VertSpacing.Y = Math.Max((TextCount / RubyCount -  RubyScale) * StandardFontSize / 2, 0);
+                
+                double TextLength = PrevWord.Length();
+                double RubyLength = OwnWord.Letters.Count * (RubyFontSize + 2 * VertSpacing.Y);
+                if (((TextLetter)PrevLetter).FontSize == StandardFontSize)
+                {
+                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5*(TextLength + RubyLength));
+                    //StartPosition.Y += RubyFontSize * 0.22;
                 }
                 else
                 {
                     StartPosition = PrevLetter.NextWritePos;
                 }
-              StartPosition =  NewLine ? new Vector(StartPosition.X-LineDist,0): StartPosition;
+                StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                NextWritePos = EndPosition + new Vector(FontSize, 0);
-            
-                    if (TightFit&&EndPosition.Y > PageSize.Y)
-                    {
-                        StartPosition.Y = 0;
-                        StartPosition.X = StartPosition.X - LineDist;
-                        EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                        NextWritePos = EndPosition + new Vector(FontSize, 0);
-                    }
-                    return InsidePage(PageSize);
-              
-              
-            }
-            //   else
-            {
-                FontSize = RubyFontSize;
+                NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
                 return true;
             }
         }
 
         public override object GetRenderElement()
         {
-            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1);
+            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black,1);
         }
 
         public override string ToString()
@@ -193,13 +218,13 @@ namespace EPUBRenderer3
 
             if (PrevLetter == null)
             {
-                StartPosition = new Vector(PageSize.X - LineDist + FontSizeStandard, 0);
+                StartPosition = new Vector(PageSize.X - LineDist + StandardFontSize, 0);
                 EndPosition = new Vector(PageSize.X - LineDist, 0);
             }
             else
             {
-                StartPosition = PrevLetter.EndPosition + new Vector(-FontSizeStandard, 0);
-                EndPosition = PrevLetter.EndPosition;
+                StartPosition = PrevLetter.NextWritePos;
+                EndPosition = StartPosition + new Vector(-StandardFontSize, 0);
             }
 
             NextWritePos = new Vector(StartPosition.X - LineDist, 0);

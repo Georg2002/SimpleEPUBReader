@@ -47,26 +47,18 @@ namespace EPUBRenderer3
             }
 
             foreach (var Line in Lines)
-            {
+            {               
                 FitLine(Line);
             }
             Pages.Add(CurrentPage);
 
             var Curr = new PosDef(Index, 0, 0, 0);
-
-            if (PageSize.X<=627)
-            {
-                ;
-            }
+          
             for (int i = 0; i < Pages.Count; i++)
             {
                
                 var CurrPage = Pages[i];
-                CurrPage.StartPos = Curr;
-                if (i == 80 && Pages.Count == 111 && Pages[i+2].Lines.Count==5)
-                {
-                    ;
-                }
+                CurrPage.StartPos = Curr;              
                 if (CurrPage.Lines.Count == 1)
                 {
                     if (CurrPage.Lines[0].Words.Count == 1)
