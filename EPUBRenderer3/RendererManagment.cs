@@ -40,10 +40,15 @@ namespace EPUBRenderer3
             Markings = Markings ?? new List<MarkingDef>();
             Epub epub = new Epub(Path);
             CurrBook = new RenderBook(epub);
+            SetMarkings(Markings);
             CurrBook.Position(PageSize);
             OpenPage(Position);
         }
 
+        private void SetMarkings(List<MarkingDef> Markings)
+        {
+            CurrBook.SetMarkings(Markings);          
+        }
 
         public void OpenPage(PosDef Position)
         {
@@ -133,6 +138,22 @@ namespace EPUBRenderer3
         public int GetCurrentPage()
         {
            return CurrBook.GetCurrentPage();
+        }
+
+        public List<string> GetChapters()
+        {
+            return CurrBook.GetChapters();
+        }
+
+        public void SetChapter(int chapterIndex)
+        {
+            PosDef Pos = CurrBook.GetChapterPos(chapterIndex);
+            OpenPage(Pos);
+        }
+
+        public LibraryBook GetCurrentBook()
+        {
+            return CurrBook.GetLibraryBook();
         }
     }
 }

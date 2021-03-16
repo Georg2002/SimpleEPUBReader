@@ -21,14 +21,7 @@ namespace EPUBRenderer3
                 foreach (var Word in Line.Words)
                 {
                     foreach (var Letter in Word.Letters)
-                    {
-                        if (Letter.MarkingColorIndex != 0)
-                        {
-                           
-                            
-                        }
-
-
+                    {           
                         switch (Letter.Type)
                         {
                             case LetterTypes.Letter:
@@ -59,8 +52,7 @@ namespace EPUBRenderer3
                                 drawingContext.DrawImage(Img, new Rect(StartPoint, EndPoint));
 
                                 if (Letter.MarkingColorIndex != 0)
-                                {
-                                   
+                                {                                   
                                     var R = new Rect(StartPoint, EndPoint);
                                     drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
                                 }
@@ -73,6 +65,6 @@ namespace EPUBRenderer3
                     }
                 }
             }
-        }    
+        }      
     }
 }

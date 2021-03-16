@@ -23,7 +23,7 @@
             <Button Grid.Column="0" Click="Left_Click" Style="{StaticResource SwitchButtonStyle}"/>
             <Button Grid.Column="2" Click="Right_Click" Style="{StaticResource SwitchButtonStyle}"/>
             <Render:Renderer x:Name="Renderer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10"/>
-            <local:MenuControl Grid.ColumnSpan="3"/>
+            <local:MenuControl x:Name="Menu" Visibility="Collapsed" Grid.ColumnSpan="3"/>
         </Grid>
         <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="10"/>       
         <Border x:Name="Bar" VerticalAlignment="Top" Height="60" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="0">

@@ -32,15 +32,11 @@ namespace EPUBRenderer3
 
         internal void Position(Vector pageSize)
         {
-            for (int i = 0; i < PageFiles.Count; i++)
-            {
-                if (i == 10)
-                {
-                    ;
-                }
-                PageFiles[i].PositionText(pageSize, i);
-            }
-            // Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
+         //   for (int i = 0; i < PageFiles.Count; i++)
+         //   {                
+         //       PageFiles[i].PositionText(pageSize, i);
+         //   }
+            Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
         }
 
         internal void RemoveMarking(PosDef firstHit, PosDef secondHit)
@@ -59,6 +55,15 @@ namespace EPUBRenderer3
                 Pos.Word < PageFiles[Pos.FileIndex].Lines[Pos.Line].Words.Count &&
                 Pos.Letter < PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters.Count
                 && Pos.FileIndex >= 0 && Pos.Line >= 0 && Pos.Word >= 0 && Pos.Letter >= 0;
+        }
+
+        internal void SetMarkings(List<MarkingDef> markings)
+        {
+            foreach (var Marking in markings)
+            {
+                var Pos = Marking.Pos;
+                PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
+            }
         }
 
         private void Iterate(PosDef A, PosDef B, Action<Letter> Action)
@@ -139,6 +144,58 @@ namespace EPUBRenderer3
                 }
             }
             return Count;
+        }
+
+        internal List<string> GetChapters()
+        {
+            var Res = new List<string>();
+            foreach (var Chapter in epub.toc.Chapters)
+            {
+                Res.Add(Chapter.Title);
+            }
+            return Res;
+        }
+
+        internal LibraryBook GetLibraryBook()
+        {
+            var Book = new LibraryBook();
+            Book.CurrPos = CurrPos;
+            Book.FilePath = epub.FilePath;
+            Book.Title = epub.Settings.Title;
+            Book.Markings = GetMarkings();
+            return Book;
+        }
+
+        private List<MarkingDef> GetMarkings()
+        {
+            var Markings = new List<MarkingDef>();
+            for (int F = 0; F < PageFiles.Count; F++)
+            {
+                var File = PageFiles[F];
+                for (int Li = 0; Li < File.Lines.Count; Li++)
+                {
+                    var Line = File.Lines[Li];
+                    for (int W = 0; W < Line.Words.Count; W++)
+                    {
+                        var Word = Line.Words[W];
+                        for (int Le = 0; Le < Word.Letters.Count; Le++)
+                        {
+                            var Letter = Word.Letters[Le];
+                            if (Letter.MarkingColorIndex != 0)
+                            {
+                                Markings.Add(new MarkingDef(new PosDef(F, Li, W, Le), Letter.MarkingColorIndex));
+                            }
+                        }
+                    }
+                }
+            }
+            return Markings;
+        }
+
+        internal PosDef GetChapterPos(int chapterIndex)
+        {
+            var Chapter = epub.toc.Chapters[chapterIndex];
+            return new PosDef(epub.Pages.FindIndex(a => a.FullName == Chapter.Source), 0, 0, 0);
         }
     }
 }

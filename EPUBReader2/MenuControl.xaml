@@ -8,31 +8,34 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" >
     <Grid>
-        <ScrollViewer>
-            <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" BorderBrush="Transparent">
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="string">
-                        <Grid Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" Height="40">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="50"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Index}" Grid.Column="2"  Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" TextAlignment="Center" VerticalAlignment="Center"/>
-                            <Button Grid.Column="1" Style="{StaticResource MenuButtonStyle}" >
-                                <Border Style="{StaticResource BorderStyle}" >
-                                    <TextBlock Text="{Binding Text}" TextAlignment="Left"/>
-                                </Border>
-                            </Button>
-                            <Button x:Name="DeleteButton" Grid.Column="0" Style="{StaticResource MenuButtonStyle}" Visibility="{Binding Vis}">
-                                <Border Style="{StaticResource BorderStyle}">
-                                    <TextBlock Text="Löschen"/>
-                                </Border>
-                            </Button>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </ScrollViewer>
+        <ListBox x:Name="ListBox" HorizontalContentAlignment="Stretch" BorderBrush="Transparent" >
+            <ListBox.Resources>
+                <Style TargetType="ScrollBar">
+                    <Setter Property="Width" Value="30"/>
+                </Style>
+            </ListBox.Resources>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="string">
+                    <Grid Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" Height="40">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Number}" Grid.Column="2"  Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" Style="{StaticResource MenuButtonStyle}" Click="Select_Click">
+                            <Border Style="{StaticResource BorderStyle}" >
+                                <TextBlock Text="{Binding Text}" TextAlignment="Left"/>
+                            </Border>
+                        </Button>
+                        <Button x:Name="DeleteButton" Grid.Column="0" Style="{StaticResource MenuButtonStyle}" Visibility="{Binding Vis}" Click="DeleteButton_Click">
+                            <Border Style="{StaticResource BorderStyle}">
+                                <TextBlock Text="Löschen"/>
+                            </Border>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </UserControl>

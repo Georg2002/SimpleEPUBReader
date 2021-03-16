@@ -9,6 +9,7 @@ namespace EPUBRenderer3
     public struct LibraryBook
     {
         public string FilePath;
+        public string Title;
         public PosDef CurrPos;
         public List<MarkingDef> Markings;
     }

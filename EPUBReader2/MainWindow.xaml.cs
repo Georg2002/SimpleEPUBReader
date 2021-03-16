@@ -23,6 +23,8 @@ namespace EPUBReader2
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Library Library = new Library();
+        private bool FunctionsLocked = false;
         private readonly MouseManager MouseManager;
         public byte ColorIndex = 1;
         private const byte Alpha = 100;
@@ -38,15 +40,28 @@ namespace EPUBReader2
             InitializeComponent();
             MouseManager = new MouseManager(Bar, ContentGrid, Renderer, this);
             Renderer.MarkingColors = MarkingColors;
-            Bar.Margin = new Thickness(0,-MouseManager.BarHeight,0,0);
+            Bar.Margin = new Thickness(0, -MouseManager.BarHeight, 0, 0);
             ContentGrid.Margin = new Thickness(0, MouseManager.BarHeight / 2, 0, MouseManager.BarHeight / 2);
             ColorButton.Background = MarkingColors[ColorIndex];
             PagesControl.Main = this;
+            Menu.Main = this;
+        }
+
+        internal void DeleteBook(int index)
+        {
+            Library.DeleteBook(index);
+            Menu.SetToLibrary(Library.GetTitles());
         }
 
         internal int GetCurrentPage()
         {
             return Renderer.GetCurrentPage();
+        }
+
+        internal void SetToBook(int index)
+        {
+            LibraryBook Book = Library.GetBook(index);
+            Renderer.LoadBook(Book.FilePath, Book.CurrPos, Book.Markings);
         }
 
         internal int GetPageCount()
@@ -79,6 +94,7 @@ namespace EPUBReader2
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
+            if (FunctionsLocked) return;
             var Dialog = new OpenFileDialog
             {
                 Filter = "Epub files(.epub)|*.epub",
@@ -86,34 +102,71 @@ namespace EPUBReader2
             };
             if (Dialog.ShowDialog() == true)
             {
+                Library.AddOrReplaceBook(Renderer.GetCurrentBook());
                 Renderer.LoadBook(Dialog.FileName);
             }
         }
 
         private void Library_Click(object sender, RoutedEventArgs e)
         {
+            if (Menu.Visibility == Visibility.Visible)
+            {
 
+                Menu.Visibility = Visibility.Collapsed;
+                MouseManager.Locked = false;
+                FunctionsLocked = false;  
+            }
+            else
+            {
+                if (FunctionsLocked) return;
+                MouseManager.Locked = true;
+                FunctionsLocked = true;
+                Menu.Visibility = Visibility.Visible;
+                Library.AddOrReplaceBook(Renderer.GetCurrentBook());
+                Menu.SetToLibrary(Library.GetTitles());
+            }
+            
         }
 
         private void Chapter_Click(object sender, RoutedEventArgs e)
         {
+            if (Menu.Visibility == Visibility.Visible)
+            {
 
+                Menu.Visibility = Visibility.Collapsed;
+                MouseManager.Locked = false;
+                FunctionsLocked = false;
+            }
+            else
+            {
+                if (FunctionsLocked) return;
+                MouseManager.Locked = true;
+                FunctionsLocked = true;
+                Menu.Visibility = Visibility.Visible;
+                Menu.SetToChapters(Renderer.GetChapters());
+            }
+        }
+
+        public void SetChapter(int ChapterIndex)
+        {
+            Renderer.SetChapter(ChapterIndex);
         }
 
         private void Pages_Click(object sender, RoutedEventArgs e)
         {
+            if (FunctionsLocked) return;
             MouseManager.Locked = true;
             PagesControl.Visibility = Visibility.Visible;
         }
 
         public void FinishPageJump()
         {
-            PagesControl.Visibility =  Visibility.Collapsed;
+            PagesControl.Visibility = Visibility.Collapsed;
             MouseManager.Locked = false;
         }
 
         public void JumpPages(int Amount)
-        {                  
+        {
             Renderer.Switch(Amount);
         }
 
