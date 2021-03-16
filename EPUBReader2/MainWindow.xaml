@@ -8,6 +8,9 @@
         mc:Ignorable="d"
         Loaded="Window_Loaded"
         MouseMove="Window_MouseMove"
+        MouseDown="Window_MouseMove"
+        MouseUp="Window_MouseMove"
+        MouseRightButtonDown="Window_MouseMove"
         Title="EPUBReader 3" Height="450" Width="800" MinHeight="400" MinWidth="400">
     <Grid>        
         <Grid x:Name="ContentGrid" Margin="0,20,0,20">

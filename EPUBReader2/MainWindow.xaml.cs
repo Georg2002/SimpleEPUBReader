@@ -23,12 +23,21 @@ namespace EPUBReader2
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MouseManager MouseManager;
+        private readonly MouseManager MouseManager;
+        public byte ColorIndex;
+        private const byte Alpha = 100;
+        readonly Brush[] MarkingColors = new Brush[] {
+            new SolidColorBrush(new Color() { R = 255, G = 0, B = 0, A = Alpha }),
+            new SolidColorBrush( new Color() { R = 0, G = 255,B = 0,A = Alpha}),
+            new SolidColorBrush(new Color() { R = 255, G = 255,B = 0,A = Alpha}),
+            new SolidColorBrush(new Color() {R = 0, G = 0,B = 255,A = Alpha})
+        };
 
         public MainWindow()
         {
             InitializeComponent();
-            MouseManager = new MouseManager(Bar, ContentGrid);
+            MouseManager = new MouseManager(Bar, ContentGrid, Renderer, this);
+            Renderer.MarkingColors = MarkingColors;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -51,7 +60,7 @@ namespace EPUBReader2
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
-            MouseManager.MouseMove(Mouse.GetPosition(this));
+            MouseManager.MouseMove(Mouse.GetPosition(this), Mouse.LeftButton == MouseButtonState.Pressed, Mouse.RightButton == MouseButtonState.Pressed);
         }
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
@@ -89,7 +98,7 @@ namespace EPUBReader2
 
         private void Fullscreen_Click(object sender, RoutedEventArgs e)
         {
-            if (WindowStyle.None == this.WindowStyle)
+            if (WindowStyle.None == WindowStyle)
             {
                 WindowStyle = WindowStyle.SingleBorderWindow;
                 WindowState = WindowState.Normal;

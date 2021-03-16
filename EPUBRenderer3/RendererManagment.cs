@@ -11,9 +11,12 @@ namespace EPUBRenderer3
 {
     public partial class Renderer : FrameworkElement
     {
-        RenderBook CurrBook;
+        public RenderBook CurrBook;
         Vector PageSize;
-        RenderPage ShownPage = null;  
+        RenderPage ShownPage = null;
+        PosDef FirstHit;
+        PosDef SecondHit;
+      public  Brush[] MarkingColors;
 
         public Renderer()
         {
@@ -44,7 +47,7 @@ namespace EPUBRenderer3
 
         public void OpenPage(PosDef Position)
         {
-            CurrBook.CurrPos = Position;            
+            CurrBook.CurrPos = Position;
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
             ShownPage = PageFile.Pages.Find(a => a.Within(Position));
             InvalidateVisual();
@@ -56,7 +59,7 @@ namespace EPUBRenderer3
             int PageIndex = CurrBook.PageFiles[FileIndex].Pages.IndexOf(ShownPage);
             PageIndex += Dir;
             if (PageIndex < 0)
-            {                
+            {
                 if (FileIndex != 0)
                 {
                     FileIndex--;
@@ -68,7 +71,7 @@ namespace EPUBRenderer3
                 }
             }
             else if (PageIndex >= CurrBook.PageFiles[FileIndex].Pages.Count)
-            {                
+            {
                 if (FileIndex != CurrBook.PageFiles.Count - 1)
                 {
                     FileIndex++;
@@ -82,5 +85,40 @@ namespace EPUBRenderer3
 
             OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
         }
+
+        public bool StartMarking(Point relPoint)
+        {
+            bool Valid = false;
+            if (CurrBook != null)
+            {
+                FirstHit = ShownPage.Intersect(relPoint);
+                Valid = FirstHit.FileIndex != -1;
+            }
+            return Valid;
+        }
+
+        public void DrawTempMarking(Point relPoint,byte ColorIndex)
+        {
+            CurrBook.RemoveMarking(FirstHit, SecondHit);
+            SecondHit = ShownPage.Intersect(relPoint);
+            CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
+            InvalidateVisual();
+        }
+
+        public void FinishMarking(Point relPoint, byte ColorIndex)
+        {
+            DrawTempMarking(relPoint, ColorIndex);
+            SecondHit = new PosDef(-1, -1, -1, -1);
+        }
+
+        public void RemoveMarking(Point relPoint)
+        {
+            if (CurrBook!=null)
+            {
+                SecondHit = ShownPage.Intersect(relPoint);
+                CurrBook.RemoveMarking(FirstHit, SecondHit);
+            }
+            InvalidateVisual();
+        }      
     }
 }

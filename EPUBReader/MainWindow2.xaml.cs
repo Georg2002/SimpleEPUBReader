@@ -83,7 +83,7 @@ namespace EPUBReader
                 }
             }
         }
-
+        
         private void Base_MouseMove(object sender, MouseEventArgs e)
         {
             Point MousePos = e.GetPosition(Viewer);

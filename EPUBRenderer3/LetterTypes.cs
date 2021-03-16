@@ -42,6 +42,11 @@ namespace EPUBRenderer3
             return false;
         }
 
+        internal bool Inside(Point relPoint)
+        {
+            return relPoint.X < StartPosition.X && relPoint.Y > StartPosition.Y && relPoint.X > EndPosition.X && relPoint.Y < EndPosition.Y;
+        }
+
         public virtual object GetRenderElement()
         {
             return null;

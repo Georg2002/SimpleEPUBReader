@@ -9,6 +9,7 @@ using System.Windows.Media;
 
 namespace EPUBRenderer3
 {
+
     public partial class Renderer : FrameworkElement
     {
         protected override void OnRender(DrawingContext drawingContext)
@@ -21,6 +22,15 @@ namespace EPUBRenderer3
                 {
                     foreach (var Letter in Word.Letters)
                     {
+                        if (Letter.MarkingColorIndex != 0)
+                        {
+                            double Width = Letter.EndPosition.X - Letter.StartPosition.Y;
+                            double Height = Letter.EndPosition.Y - Letter.StartPosition.Y;
+                            var R = new Rect(Letter.StartPosition.X,Letter.StartPosition.Y, Width, Height);
+                            drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
+                        }
+
+
                         switch (Letter.Type)
                         {
                             case LetterTypes.Letter:

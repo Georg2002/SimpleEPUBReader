@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace EPUBRenderer3
 {
+#pragma warning disable CS0660 // Type defines operator == or operator != but does not override Object.Equals(object o)
+#pragma warning disable CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
     public struct PosDef
+#pragma warning restore CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
+#pragma warning restore CS0660 // Type defines operator == or operator != but does not override Object.Equals(object o)
     {
         public int FileIndex;
         public int Line;
@@ -22,21 +26,34 @@ namespace EPUBRenderer3
             this.Letter = Letter;
         }
 
+        public static PosDef InvalidPosition = new PosDef(-1, -1, -1, -1);
+
         public static bool operator <(PosDef A, PosDef B)
         {
-            if (A.Line < B.Line)
+            if (A.FileIndex < B.FileIndex)
             {
                 return true;
             }
-            else if (A.Line == B.Line)
+            else if (A.FileIndex == B.FileIndex)
             {
-                if (A.Word < B.Word)
+                if (A.Line < B.Line)
                 {
                     return true;
                 }
-                else if (A.Word == B.Word)
+                else if (A.Line == B.Line)
                 {
-                    return A.Letter < B.Letter;
+                    if (A.Word < B.Word)
+                    {
+                        return true;
+                    }
+                    else if (A.Word == B.Word)
+                    {
+                        return A.Letter < B.Letter;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
@@ -94,11 +111,11 @@ namespace EPUBRenderer3
                 }
                 else
                 {
-                    if (Line<lines.Count - 1)
+                    if (Line < lines.Count - 1)
                     {
                         Line++;
                         Word = 0;
-                        Letter = 0;                        
+                        Letter = 0;
                     }
                     else
                     {
