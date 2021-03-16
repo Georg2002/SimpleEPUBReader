@@ -14,8 +14,8 @@ namespace EPUBRenderer3
         public RenderBook CurrBook;
         Vector PageSize;
         RenderPage ShownPage = null;
-        PosDef FirstHit;
-        PosDef SecondHit;
+        PosDef FirstHit = PosDef.InvalidPosition;
+        PosDef SecondHit = PosDef.InvalidPosition;
       public  Brush[] MarkingColors;
 
         public Renderer()
@@ -58,31 +58,31 @@ namespace EPUBRenderer3
             int FileIndex = CurrBook.CurrPos.FileIndex;
             int PageIndex = CurrBook.PageFiles[FileIndex].Pages.IndexOf(ShownPage);
             PageIndex += Dir;
-            if (PageIndex < 0)
+            while (PageIndex < 0 || PageIndex >= CurrBook.PageFiles[FileIndex].Pages.Count)
             {
-                if (FileIndex != 0)
+                if (PageIndex < 0)
                 {
                     FileIndex--;
-                    PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count - 1;
+                    if (FileIndex < 0)
+                    {
+                        FileIndex = 0;
+                        PageIndex = 0;
+                        break;
+                    }
+                    PageIndex += CurrBook.PageFiles[FileIndex].Pages.Count;
                 }
                 else
-                {
-                    PageIndex++;
-                }
-            }
-            else if (PageIndex >= CurrBook.PageFiles[FileIndex].Pages.Count)
-            {
-                if (FileIndex != CurrBook.PageFiles.Count - 1)
                 {
                     FileIndex++;
-                    PageIndex = 0;
+                    if (FileIndex >= CurrBook.PageFiles.Count)
+                    {
+                        FileIndex = CurrBook.PageFiles.Count - 1;
+                        PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count  -1;
+                        break;
+                    }
+                    PageIndex -= CurrBook.PageFiles[FileIndex-1].Pages.Count;
                 }
-                else
-                {
-                    PageIndex--;
-                }
-            }
-
+            }          
             OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
         }
 
@@ -115,10 +115,24 @@ namespace EPUBRenderer3
         {
             if (CurrBook!=null)
             {
-                SecondHit = ShownPage.Intersect(relPoint);
-                CurrBook.RemoveMarking(FirstHit, SecondHit);
+                PosDef Hit = ShownPage.Intersect(relPoint);
+                if (Hit.FileIndex == -1) return;
+                PosDef A;
+                PosDef B;
+                (A, B) = CurrBook.GetConnectedMarkings(Hit,ShownPage);
+                CurrBook.RemoveMarking(A, B);
             }
             InvalidateVisual();
-        }      
+        }
+
+        public int GetPageCount()
+        {
+            return CurrBook.GetPageCount();
+        }
+
+        public int GetCurrentPage()
+        {
+           return CurrBook.GetCurrentPage();
+        }
     }
 }

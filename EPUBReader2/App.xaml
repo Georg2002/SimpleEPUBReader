@@ -21,10 +21,10 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="MenuButtonStyle" TargetType="{x:Type ButtonBase}">
-            <Setter Property="Margin" Value="10,0,10,0"/>
+        <Style x:Key="MenuButtonStyle" TargetType="{x:Type ButtonBase}">            
             <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="3,0,3,0"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -41,6 +41,11 @@
                     <Setter Property="Background" Value="#FFC3C3C3"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="BorderStyle" TargetType="Border">
+            <Style.Setters>
+                <Setter Property="Margin" Value="6"/>
+            </Style.Setters>
         </Style>
     </Application.Resources>
 </Application>

@@ -24,9 +24,9 @@ namespace EPUBReader2
     public partial class MainWindow : Window
     {
         private readonly MouseManager MouseManager;
-        public byte ColorIndex;
+        public byte ColorIndex = 1;
         private const byte Alpha = 100;
-        readonly Brush[] MarkingColors = new Brush[] {
+        readonly Brush[] MarkingColors = new Brush[] {null,
             new SolidColorBrush(new Color() { R = 255, G = 0, B = 0, A = Alpha }),
             new SolidColorBrush( new Color() { R = 0, G = 255,B = 0,A = Alpha}),
             new SolidColorBrush(new Color() { R = 255, G = 255,B = 0,A = Alpha}),
@@ -38,6 +38,20 @@ namespace EPUBReader2
             InitializeComponent();
             MouseManager = new MouseManager(Bar, ContentGrid, Renderer, this);
             Renderer.MarkingColors = MarkingColors;
+            Bar.Margin = new Thickness(0,-MouseManager.BarHeight,0,0);
+            ContentGrid.Margin = new Thickness(0, MouseManager.BarHeight / 2, 0, MouseManager.BarHeight / 2);
+            ColorButton.Background = MarkingColors[ColorIndex];
+            PagesControl.Main = this;
+        }
+
+        internal int GetCurrentPage()
+        {
+            return Renderer.GetCurrentPage();
+        }
+
+        internal int GetPageCount()
+        {
+            return Renderer.GetPageCount();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -45,7 +59,7 @@ namespace EPUBReader2
             //C:\Users\georg\Desktop\b\Zeug\a\Learning\Books\日常\[ìýüEèG_éáéþé¯ é»éóéóé┐ & Æÿ_ê╔ôñ ò¢É¼] ô·ÅÝé╠ë─ïxé¦.epub
             //D:\Informatik\EPUBReader\TestResources\DanMachi.epub
             //D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub
-            Renderer.LoadBook(@"D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub", new PosDef(30, 0, 0, 0));
+            Renderer.LoadBook(@"D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub", new PosDef(29, 0, 0, 0));
         }
 
         private void Right_Click(object sender, RoutedEventArgs e)
@@ -88,19 +102,36 @@ namespace EPUBReader2
 
         private void Pages_Click(object sender, RoutedEventArgs e)
         {
+            MouseManager.Locked = true;
+            PagesControl.Visibility = Visibility.Visible;
+        }
 
+        public void FinishPageJump()
+        {
+            PagesControl.Visibility =  Visibility.Collapsed;
+            MouseManager.Locked = false;
+        }
+
+        public void JumpPages(int Amount)
+        {                  
+            Renderer.Switch(Amount);
         }
 
         private void Color_Click(object sender, RoutedEventArgs e)
         {
-
+            ColorIndex++;
+            if (ColorIndex == MarkingColors.Length)
+            {
+                ColorIndex = 1;
+            }
+            ColorButton.Background = MarkingColors[ColorIndex];
         }
 
         private void Fullscreen_Click(object sender, RoutedEventArgs e)
         {
-            if (WindowStyle.None == WindowStyle)
+            if (WindowState == WindowState.Maximized)
             {
-                WindowStyle = WindowStyle.SingleBorderWindow;
+                WindowStyle = WindowStyle.ToolWindow;
                 WindowState = WindowState.Normal;
             }
             else

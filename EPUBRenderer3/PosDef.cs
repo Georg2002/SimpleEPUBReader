@@ -33,7 +33,7 @@ namespace EPUBRenderer3
             if (A.FileIndex < B.FileIndex)
             {
                 return true;
-            }
+            }          
             else if (A.FileIndex == B.FileIndex)
             {
                 if (A.Line < B.Line)
@@ -83,7 +83,7 @@ namespace EPUBRenderer3
 
         public static bool operator ==(PosDef A, PosDef B)
         {
-            return A.Line == B.Line && A.Word == B.Word && A.Letter == B.Letter;
+            return  A.FileIndex==B.FileIndex && A.Line == B.Line && A.Word == B.Word && A.Letter == B.Letter;
         }
 
         public static bool operator !=(PosDef A, PosDef B)
@@ -122,6 +122,39 @@ namespace EPUBRenderer3
                         Line = -1;
                         Word = -1;
                         Letter = -1;
+                        FileIndex = -1;
+                    }
+                }
+            }
+        }
+
+        internal void Decrement(List<Line> lines)
+        {
+            if (Letter > 0)
+            {
+                Letter--;
+            }
+            else
+            {
+                if (Word > 0)
+                {
+                    Word--;
+                    Letter = lines[Line].Words[Word].Letters.Count - 1;
+                }
+                else
+                {
+                    if (Line > 0)
+                    {
+                        Line--;
+                        Word = lines[Line].Words.Count - 1;
+                        Letter = lines[Line].Words[Word].Letters.Count - 1;
+                    }
+                    else
+                    {
+                        Line = -1;
+                        Word = -1;
+                        Letter = -1;
+                        FileIndex = -1;
                     }
                 }
             }

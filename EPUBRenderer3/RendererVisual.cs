@@ -24,10 +24,8 @@ namespace EPUBRenderer3
                     {
                         if (Letter.MarkingColorIndex != 0)
                         {
-                            double Width = Letter.EndPosition.X - Letter.StartPosition.Y;
-                            double Height = Letter.EndPosition.Y - Letter.StartPosition.Y;
-                            var R = new Rect(Letter.StartPosition.X,Letter.StartPosition.Y, Width, Height);
-                            drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
+                           
+                            
                         }
 
 
@@ -38,6 +36,14 @@ namespace EPUBRenderer3
                                 var TxtLetter = (TextLetter)Letter;
                                 var DrawPos = Letter.StartPosition + TxtLetter.Offset * TxtLetter.FontSize; ;
                                 drawingContext.DrawText(Text, new Point(DrawPos.X, DrawPos.Y));
+                                if (Letter.MarkingColorIndex != 0)
+                                {
+                                    double Width = Letter.StartPosition.X - Letter.EndPosition.X;
+                                    double Height = Letter.EndPosition.Y - Letter.StartPosition.Y;
+                                    var R = new Rect(Letter.EndPosition.X, Letter.StartPosition.Y + TxtLetter.FontSize * 0.2, Width, Height);
+                                    drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
+                                }
+                              
                                 break;
                             case LetterTypes.Image:
                                 var ImgLetter = (ImageLetter)Letter;
@@ -51,6 +57,13 @@ namespace EPUBRenderer3
                                 var StartPoint = new Point(Letter.StartPosition.X, Letter.StartPosition.Y);
                                 var EndPoint = new Point(Letter.EndPosition.X, Letter.EndPosition.Y);
                                 drawingContext.DrawImage(Img, new Rect(StartPoint, EndPoint));
+
+                                if (Letter.MarkingColorIndex != 0)
+                                {
+                                   
+                                    var R = new Rect(StartPoint, EndPoint);
+                                    drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
+                                }
                                 break;
                             case LetterTypes.Break:
                                 break;
@@ -60,6 +73,6 @@ namespace EPUBRenderer3
                     }
                 }
             }
-        }
+        }    
     }
 }

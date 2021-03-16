@@ -28,8 +28,8 @@ namespace EPUBRenderer3
             {
                 var (FitWord, FitLetter) = Line.Position(Prev, PageSize);
                 if (FitWord < Line.Words.Count)
-                {
-                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);
+                {             
+                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);               
                     if (FittingLine.Words.Count != 0)
                     {
                         CurrentPage.Lines.Add(FittingLine);
@@ -175,10 +175,8 @@ namespace EPUBRenderer3
                             throw new NotImplementedException();
                     }
                 }
-
-                Lines.Add(Line);
+                Lines.Add(Line);                
             }
-
             return Lines;
         }
     }

@@ -30,6 +30,96 @@ namespace EPUBRenderer3
             return Pos >= StartPos && Pos <= EndPos;
         }
 
+        private Letter GetLocal(PosDef Local)
+        {
+            return Lines[Local.Line].Words[Local.Word].Letters[Local.Letter];
+        }
+
+        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, List<Line> AllLines)
+        {
+            PosDef Start = Pos;
+            PosDef End = Pos;
+            Start.FileIndex = End.FileIndex = StartPos.FileIndex;
+            var Local = ToLocal(Pos);
+            byte ColorIndex = GetLocal(Local).MarkingColorIndex;
+            if (ColorIndex == 0)
+            {
+                return new Tuple<PosDef, PosDef>(PosDef.InvalidPosition, PosDef.InvalidPosition);
+            }
+            Letter Letter;
+            do
+            {
+                Local.Decrement(Lines);
+                if (Local.FileIndex == -1) break;
+                Letter = GetLocal(Local);
+                if (Letter.MarkingColorIndex != ColorIndex && Letter.Type != LetterTypes.Break)
+                {
+                    break;
+                }
+                else
+                {
+                    Start.Decrement(AllLines);
+                }
+            }
+            while (true);
+            Local = ToLocal(Pos);
+            do
+            {
+                Local.Increment(Lines);
+                if (Local.FileIndex == -1) break;
+                Letter = GetLocal(Local);
+                if (Letter.MarkingColorIndex != ColorIndex && Letter.Type != LetterTypes.Break)
+                {
+                    break;
+                }
+                else
+                {
+                    End.Increment(AllLines);
+                }
+            }
+            while (true);
+            return new Tuple<PosDef, PosDef>(Start, End);
+        }
+
+        private PosDef ToLocal(PosDef Global)
+        {
+            if (Global.FileIndex != StartPos.FileIndex || Global < StartPos || Global > EndPos) return PosDef.InvalidPosition;
+
+            if (StartPos.Line == Global.Line)
+            {
+                if (StartPos.Word == Global.Word)
+                {
+                    return new PosDef(StartPos.FileIndex, 0, 0, Global.Letter - StartPos.Letter);
+                }
+                else
+                {
+                    return new PosDef(StartPos.FileIndex, 0, Global.Word - StartPos.Word, Global.Letter);
+                }
+            }
+            else
+            {
+                return new PosDef(StartPos.FileIndex, Global.Line - StartPos.Line, Global.Word, Global.Letter);
+            }
+        }
+
+        private PosDef ToGlobal(PosDef Local)
+        {
+            var Global = new PosDef();
+            Global.FileIndex = StartPos.FileIndex;
+            Global.Line = StartPos.Line + Local.Line;
+            if (Local.Line == 0)
+            {
+                Global.Word = StartPos.Word + Local.Word;
+                Global.Letter = Local.Word == 0 ? StartPos.Letter + Local.Letter : Local.Letter;
+            }
+            else
+            {
+                Global.Word = Local.Word;
+                Global.Letter = Local.Letter;
+            }
+            return Global;
+        }
+
         internal PosDef Intersect(Point relPoint)
         {
             for (int Li = 0; Li < Lines.Count; Li++)
@@ -41,7 +131,7 @@ namespace EPUBRenderer3
                         var Letter = Lines[Li].Words[W].Letters[Le];
                         if (Letter.Inside(relPoint))
                         {
-                            return new PosDef(StartPos.FileIndex, Li, W, Le);
+                            return ToGlobal(new PosDef(StartPos.FileIndex, Li, W, Le));
                         }
                     }
                 }

@@ -147,13 +147,18 @@ namespace EPUBRenderer3
             {
                 return new Tuple<Line, Line>(new Line(), new Line(Words));
             }
-            var Front = Words.Take(WordCount+1).ToList();
-            Front[Front.Count - 1] = new Word(Front.Last().Letters.Take(LetterCount).ToList(), Front.Last().Type);
-            int k = 0;
-            if (Words[WordCount].Letters.Count==LetterCount)
+            var Front = new List<Word>();
+            if (LetterCount == 0)
             {
-                k = 1;
+                Front = Words.Take(WordCount ).ToList();                
             }
+            else
+            {
+                Front = Words.Take(WordCount + 1).ToList();
+                Front[Front.Count - 1] = new Word(Front.Last().Letters.Take(LetterCount).ToList(), Front.Last().Type);
+            }
+
+            int k = Words[WordCount].Letters.Count == LetterCount ? 1 : 0;         
             var Rear = Words.GetRange(WordCount+k, Words.Count - WordCount -k).ToList();
             if (k==0)
             {

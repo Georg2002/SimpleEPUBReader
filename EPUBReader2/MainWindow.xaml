@@ -11,19 +11,22 @@
         MouseDown="Window_MouseMove"
         MouseUp="Window_MouseMove"
         MouseRightButtonDown="Window_MouseMove"
+        WindowStyle="ToolWindow"
         Title="EPUBReader 3" Height="450" Width="800" MinHeight="400" MinWidth="400">
-    <Grid>        
-        <Grid x:Name="ContentGrid" Margin="0,20,0,20">
+    <Grid>
+        <Grid x:Name="ContentGrid" Margin="0,30,0,30">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*" MinWidth="10" MaxWidth="40"/>
                 <ColumnDefinition Width="10*"/>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*" MinWidth="10" MaxWidth="40"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Click="Left_Click" Style="{StaticResource SwitchButtonStyle}"/>
             <Button Grid.Column="2" Click="Right_Click" Style="{StaticResource SwitchButtonStyle}"/>
-            <Render:Renderer x:Name="Renderer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <Render:Renderer x:Name="Renderer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10"/>
+            <local:MenuControl Grid.ColumnSpan="3"/>
         </Grid>
-        <Border x:Name="Bar" VerticalAlignment="Top" Height="40" Margin="0,-40,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}">
+        <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="10"/>       
+        <Border x:Name="Bar" VerticalAlignment="Top" Height="60" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
@@ -35,14 +38,42 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <Button Content="Öffnen" Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" x:Name="OpenButton"/>
-                <Button Content="Bibliothek" Click="Library_Click" Grid.Column="1" Style="{StaticResource MenuButtonStyle}"/>
-                <Button Content="Kapitel" Click="Chapter_Click" Grid.Column="2" Style="{StaticResource MenuButtonStyle}"/>
-                <Button Content="Seiten" Click="Pages_Click" Grid.Column="3" Style="{StaticResource MenuButtonStyle}"/>
-                <Button Content="Farbe wechseln" Click="Color_Click" Grid.Column="4" Style="{StaticResource MenuButtonStyle}"/>
-                <Button Content="Vollbild" Click="Fullscreen_Click" Grid.Column="5" Style="{StaticResource MenuButtonStyle}"/>
-                <Button Content="Schließen" Click="Close_Click" Grid.Column="6" Style="{StaticResource MenuButtonStyle}"/>
+                <Button Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" x:Name="OpenButton">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Öffnen"/>
+                    </Border>
+                </Button>
+                <Button Click="Library_Click" Grid.Column="1" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Bibliothek"/>
+                    </Border>
+                </Button>
+                <Button Click="Chapter_Click" Grid.Column="2" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Kapitel"/>
+                    </Border>
+                </Button>
+                <Button Click="Pages_Click" Grid.Column="3" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Seiten"/>
+                    </Border>
+                </Button>
+                <Button Click="Color_Click" x:Name="ColorButton" Grid.Column="4" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Farbe wechseln"/>
+                    </Border>
+                </Button>
+                <Button Click="Fullscreen_Click" Grid.Column="5" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Vollbild"/>
+                    </Border>
+                </Button>
+                <Button Click="Close_Click" Grid.Column="6" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Schließen"/>
+                    </Border>
+                </Button>
             </Grid>
-        </Border>
+        </Border>        
     </Grid>
 </Window>

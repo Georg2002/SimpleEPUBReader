@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CharInfo.cs" />
     <Compile Include="LetterTypes.cs" />
+    <Compile Include="LibraryBook.cs" />
     <Compile Include="TextParts.cs" />
     <Compile Include="MarkingDef.cs" />
     <Compile Include="PageFile.cs" />

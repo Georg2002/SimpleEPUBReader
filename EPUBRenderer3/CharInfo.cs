@@ -12,6 +12,7 @@ namespace EPUBRenderer3
         public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
 
         private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0, -1), 2.3f, '≀');
+        private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.25, 0), 1, '？');
 
         public static Dictionary<char, SpecialCharacter> SpecialCharacters = new Dictionary<char, SpecialCharacter>()
         {
@@ -19,7 +20,8 @@ namespace EPUBRenderer3
             {'（',new SpecialCharacter(new Vector(),1,'︵')},{'）',new SpecialCharacter(new Vector(),1,'︶')},
             {'『',new SpecialCharacter(new Vector(),1,'﹃')},{'』',new SpecialCharacter(new Vector(),1,'﹄')},
             {'。',new SpecialCharacter(new Vector(),1,'︒')},{'、',new SpecialCharacter(new Vector(),1,'︑')},
-            {'?',new SpecialCharacter(new Vector(),1,'？')},{'!',new SpecialCharacter(new Vector(),1,'!')},
+            {'?',Questionmark},{'？',Questionmark}
+            ,{'!',new SpecialCharacter(new Vector(),1,'!')},
             {'！',new SpecialCharacter(new Vector(),1,'!')},{ 'ー',new SpecialCharacter(new Vector(),1,'│')},
             { '─',new SpecialCharacter(new Vector(),1,'│')},{'…',new SpecialCharacter(new Vector(),1,'︙')},
             {'〈',new SpecialCharacter(new Vector(),1,'︿')},{'〉',new SpecialCharacter(new Vector(),1,'﹀')},

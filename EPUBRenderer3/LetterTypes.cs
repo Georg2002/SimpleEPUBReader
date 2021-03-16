@@ -69,7 +69,7 @@ namespace EPUBRenderer3
         public float FontSize;
         public char Character;
         public Vector Offset;
-        private static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
+        private readonly static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
      FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
 
         public TextLetter(char Character)
@@ -153,7 +153,7 @@ namespace EPUBRenderer3
 
         public override object GetRenderElement()
         {
-            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1) {TextAlignment=TextAlignment.Center };
+            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1);// {TextAlignment=TextAlignment.Center };
         }
 
         public override string ToString()

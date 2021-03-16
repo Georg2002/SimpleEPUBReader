@@ -12,14 +12,14 @@ namespace EPUBReader2
 {
     class MouseManager
     {
-        Border Bar;
-        Grid ContentGrid;
+        readonly Border Bar;
+        readonly Grid ContentGrid;
         bool MovingDown;
         bool MovingUp;
-        ThicknessAnimation BarAnimationDown;
-        ThicknessAnimation BarAnimationUp;
-        ThicknessAnimation ShrinkingAnimation;
-        ThicknessAnimation ExpandingAnimation;
+        readonly ThicknessAnimation BarAnimationDown;
+        readonly ThicknessAnimation BarAnimationUp;
+        readonly ThicknessAnimation ShrinkingAnimation;
+        readonly ThicknessAnimation ExpandingAnimation;
         DateTime LastMove;
         TimeSpan Delta;
         Point MousePos;
@@ -30,12 +30,14 @@ namespace EPUBReader2
         bool Touchdown;
         bool Liftup;
         bool MarkingInProgress;
-        Renderer Renderer;
-        MainWindow MainWindow;
+        readonly Renderer Renderer;
+        readonly MainWindow MainWindow;
 
 
-        const double BarHeight = 40;
-        const double ShrunkDetectionHeight = 0.7 * BarHeight;
+        public const double BarHeight = 60;
+        const double ShrunkDetectionHeight = 0.3 * BarHeight;
+
+        public bool Locked;
 
         public MouseManager(Border Bar, Grid ContentGrid, Renderer Renderer, MainWindow main)
         {
@@ -84,13 +86,13 @@ namespace EPUBReader2
                 Renderer.RemoveMarking(RelPoint);
             }
 
-
             if (MarkingInProgress)
             {
              
                 if (Liftup)
                 {
                     Renderer.FinishMarking(RelPoint,MainWindow.ColorIndex);
+                    MarkingInProgress = false;
                 }
                 else
                 {
@@ -105,10 +107,11 @@ namespace EPUBReader2
                     MarkingInProgress = MarkingValid;
                 }
             }
-        }
+        }          
 
         private void HandleAnimation()
         {
+            if (Locked) return;
             if (MousePos.Y < ShrunkDetectionHeight && !MovingDown)
             {
                 MovingDown = true;
