@@ -43,7 +43,7 @@ namespace EPUBReader2
 
         internal LibraryBook GetBook(int index)
         {
-            if (index <=0 || index >= Books.Count) return new LibraryBook();          
+            if (index <0 || index >= Books.Count) return new LibraryBook();          
             return Books[index];
         }
 

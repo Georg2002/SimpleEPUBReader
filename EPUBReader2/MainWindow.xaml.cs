@@ -48,17 +48,16 @@ namespace EPUBReader2
             Bar.Margin = new Thickness(0, -MouseManager.BarHeight, 0, 0);
             ContentGrid.Margin = new Thickness(0, MouseManager.BarHeight / 2, 0, MouseManager.BarHeight / 2);
             PagesControl.Main = this;
-            Menu.Main = this;            
+            Menu.Main = this;
         }
-
-
 
         private void LoadSave()
         {
             SaveStruc Save = SaveAndLoad.LoadSave();
             ColorIndex = Save.ColorIndex != 0 && Save.ColorIndex < MarkingColors.Length ? Save.ColorIndex : (byte)1;
             ColorButton.Background = MarkingColors[ColorIndex];
-            if (!Directory.Exists(Path.GetPathRoot(Save.LastDirectory)))
+            string Root = Path.GetPathRoot(Save.LastDirectory);
+            if (!Directory.Exists(Root) || Root == "\\")
             {
                 Save.LastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             }
@@ -70,7 +69,7 @@ namespace EPUBReader2
             if (Save.Books != null)
             {
                 Library.SetFromSave(Save.Books);
-                if (Save.CurrentBookIndex != 0 && Save.CurrentBookIndex < Save.Books.Count)
+                if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count)
                 {
                     SetToBook(Save.CurrentBookIndex);
                 }
@@ -102,10 +101,6 @@ namespace EPUBReader2
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //C:\Users\georg\Desktop\b\Zeug\a\Learning\Books\日常\[ìýüEèG_éáéþé¯ é»éóéóé┐ & Æÿ_ê╔ôñ ò¢É¼] ô·ÅÝé╠ë─ïxé¦.epub
-            //D:\Informatik\EPUBReader\TestResources\DanMachi.epub
-            //D:\Informatik\EPUBReader\TestResources\星界の紋章第一巻.epub
-
             var Args = Environment.GetCommandLineArgs();
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
@@ -116,14 +111,12 @@ namespace EPUBReader2
 
         private void Right_Click(object sender, RoutedEventArgs e)
         {
-            Renderer.Switch(-1);
-            PagesControl.Refresh();
+            JumpPages(-1);
         }
 
         private void Left_Click(object sender, RoutedEventArgs e)
         {
-            Renderer.Switch(1);
-            PagesControl.Refresh();
+            JumpPages(1);
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -203,6 +196,7 @@ namespace EPUBReader2
         public void JumpPages(int Amount)
         {
             Renderer.Switch(Amount);
+            PagesControl.Refresh();
         }
 
         private void Color_Click(object sender, RoutedEventArgs e)
@@ -231,7 +225,7 @@ namespace EPUBReader2
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();           
+            Application.Current.Shutdown();
         }
 
         private SaveStruc GetSave()
@@ -255,6 +249,6 @@ namespace EPUBReader2
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveAndLoad.Save(GetSave());
-        }             
+        }
     }
 }

@@ -38,7 +38,11 @@ namespace EPUBRenderer3
 
         public void LoadBook(string Path, PosDef Position = new PosDef(), List<MrkDef> Markings = null)
         {
-            if (string.IsNullOrEmpty(Path) ||  !File.Exists(Path) || !Path.ToLower().EndsWith(".epub")) return;
+            if (string.IsNullOrEmpty(Path) || !File.Exists(Path) || !Path.ToLower().EndsWith(".epub"))
+            {
+                MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             Markings = Markings ?? new List<MrkDef>();
             Epub epub = new Epub(Path);
             CurrBook = new RenderBook(epub);

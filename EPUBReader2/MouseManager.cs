@@ -21,7 +21,8 @@ namespace EPUBReader2
         readonly ThicknessAnimation ShrinkingAnimation;
         readonly ThicknessAnimation ExpandingAnimation;
         DateTime LastMove;
-        TimeSpan Delta;
+        DateTime TouchdownTime;
+        double Delta;
         Point MousePos;
         Point LastMousePos;
         Point MouseDownPos;
@@ -32,7 +33,9 @@ namespace EPUBReader2
         bool MarkingInProgress;
         readonly Renderer Renderer;
         readonly MainWindow MainWindow;
-
+        Vector AverageSpeed = new Vector();
+        bool Switched = false;
+        double SSinceTouchdown;
 
         public const double BarHeight = 60;
         const double ShrunkDetectionHeight = 0.3 * BarHeight;
@@ -56,7 +59,7 @@ namespace EPUBReader2
         internal void MouseMove(Point Pos, bool Down, bool RightDown)
         {
             this.RightDown = RightDown;
-            Delta = DateTime.Now.Subtract(LastMove);
+            Delta = DateTime.Now.Subtract(LastMove).TotalSeconds;
             LastMove = DateTime.Now;
             MousePos = Pos;
             Touchdown = false;
@@ -69,13 +72,36 @@ namespace EPUBReader2
                 if (MouseDown)
                 {
                     MouseDownPos = Pos;
+                    TouchdownTime = DateTime.Now;
                 }
             }
-
+            else
+            {
+                SSinceTouchdown = DateTime.Now.Subtract(TouchdownTime).TotalSeconds;
+            }
+            if (Delta != 0)
+            {
+                AverageSpeed = AverageSpeed * 0.9 + 0.1 * new Vector(MousePos.X - LastMousePos.X, MousePos.Y - LastMousePos.Y) / Delta;
+            }    
+            if (Math.Abs(AverageSpeed.LengthSquared) > 1000000) AverageSpeed = new Vector();         
             HandleAnimation();
             HandleMarkings();
+            HandleGestures();
 
             LastMousePos = Pos;
+        }
+
+        private void HandleGestures()
+        {           
+            if ( MouseDown && !Switched && Math.Abs(AverageSpeed.X) > 400 && Math.Abs( AverageSpeed.Y ) < 200 && SSinceTouchdown < 0.2 && SSinceTouchdown > 0.01)
+            {
+                int Direction = AverageSpeed.X > 0 ? 1:-1;
+                MainWindow.JumpPages(Direction);
+                Switched = true;
+                AverageSpeed = new Vector();
+                MarkingInProgress = false;
+            }
+            if (Liftup) Switched = false;
         }
 
         private void HandleMarkings()
@@ -84,11 +110,10 @@ namespace EPUBReader2
             if (RightDown)
             {
                 Renderer.RemoveMarking(RelPoint);
-            }
-
-            if (MarkingInProgress)
-            {
-             
+                MarkingInProgress = false;
+            }            
+            if (MarkingInProgress && SSinceTouchdown > 0.1)
+            {             
                 if (Liftup)
                 {
                     Renderer.FinishMarking(RelPoint,MainWindow.ColorIndex);

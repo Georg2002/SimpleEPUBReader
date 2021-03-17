@@ -21,8 +21,8 @@ namespace EPUBRenderer3
             {'『',new SpecialCharacter(new Vector(),1,'﹃')},{'』',new SpecialCharacter(new Vector(),1,'﹄')},
             {'。',new SpecialCharacter(new Vector(),1,'︒')},{'、',new SpecialCharacter(new Vector(),1,'︑')},
             {'?',Questionmark},{'？',Questionmark}
-            ,{'!',new SpecialCharacter(new Vector(),1,'!')},
-            {'！',new SpecialCharacter(new Vector(),1,'!')},{ 'ー',new SpecialCharacter(new Vector(),1,'│')},
+            ,{'!',new SpecialCharacter(new Vector(-0.4,0),1,'!')},
+            {'！',new SpecialCharacter(new Vector(-0.4,0),1,'!')},{ 'ー',new SpecialCharacter(new Vector(),1,'│')},
             { '─',new SpecialCharacter(new Vector(),1,'│')},{'…',new SpecialCharacter(new Vector(),1,'︙')},
             {'〈',new SpecialCharacter(new Vector(),1,'︿')},{'〉',new SpecialCharacter(new Vector(),1,'﹀')},
             {'【',new SpecialCharacter(new Vector(),1,'︻')},{'】',new SpecialCharacter(new Vector(),1,'︼')},
