@@ -20,7 +20,7 @@ namespace EPUBReader2
     /// </summary>
     public partial class MenuControl : UserControl
     {
-        bool ShowingChapters = false;
+     public   bool ShowingChapters = false;
 
         public MenuControl()
         {

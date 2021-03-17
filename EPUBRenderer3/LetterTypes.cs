@@ -138,7 +138,7 @@ namespace EPUBRenderer3
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize + 2 * VertSpacing.Y);
                 if (((TextLetter)PrevLetter).FontSize == StandardFontSize)
                 {
-                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5 * (TextLength + RubyLength));
+                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5 * (TextLength + RubyLength));                  
                 }
                 else
                 {

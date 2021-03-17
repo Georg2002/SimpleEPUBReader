@@ -3,13 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPUBReader", "EPUBReader\EPUBReader.csproj", "{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{8A194257-D63F-46D9-A889-B822E0C58D91}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPUBParser", "EPUBParser\EPUBParser.csproj", "{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPUBRenderer", "EPUBRenderer2\EPUBRenderer.csproj", "{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPUBRenderer3", "EPUBRenderer3\EPUBRenderer3.csproj", "{F36DC9DB-5567-42CB-8407-DA6773DABFF2}"
 EndProject
@@ -23,14 +19,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Debug|x64.ActiveCfg = Debug|x64
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Debug|x64.Build.0 = Debug|x64
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Release|x64.ActiveCfg = Release|Any CPU
-		{8DFC2999-4CF8-497C-BF5C-EB825BACD4D1}.Release|x64.Build.0 = Release|Any CPU
 		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|x64.ActiveCfg = Debug|x64
@@ -47,14 +35,6 @@ Global
 		{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}.Release|x64.ActiveCfg = Release|Any CPU
 		{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}.Release|x64.Build.0 = Release|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Debug|x64.Build.0 = Debug|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Release|x64.ActiveCfg = Release|Any CPU
-		{C34B6EBB-9928-4C58-AA61-8FEF4A8B898F}.Release|x64.Build.0 = Release|Any CPU
 		{F36DC9DB-5567-42CB-8407-DA6773DABFF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F36DC9DB-5567-42CB-8407-DA6773DABFF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F36DC9DB-5567-42CB-8407-DA6773DABFF2}.Debug|x64.ActiveCfg = Debug|Any CPU

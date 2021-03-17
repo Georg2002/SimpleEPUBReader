@@ -22,8 +22,8 @@
                 <ColumnDefinition Width="10*"/>
                 <ColumnDefinition Width="1*" MinWidth="10" MaxWidth="40"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Click="Left_Click" Style="{StaticResource SwitchButtonStyle}"/>
-            <Button Grid.Column="2" Click="Right_Click" Style="{StaticResource SwitchButtonStyle}"/>
+            <Button Grid.Column="0" Click="Left_Click" Style="{StaticResource SwitchButtonStyle}" Margin="0,-200,0,-200"/>
+            <Button Grid.Column="2" Click="Right_Click" Style="{StaticResource SwitchButtonStyle}" Margin="0,-200,0,-200"/>
             <Render:Renderer x:Name="Renderer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10"/>
             <local:MenuControl x:Name="Menu" Visibility="Collapsed" Grid.ColumnSpan="3"/>
         </Grid>

@@ -94,14 +94,6 @@
       <Project>{11c25e01-ca30-47a6-8e32-d77fa35bc9dd}</Project>
       <Name>EPUBParser</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EPUBReader\EPUBReader.csproj">
-      <Project>{8dfc2999-4cf8-497c-bf5c-eb825bacd4d1}</Project>
-      <Name>EPUBReader</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EPUBRenderer2\EPUBRenderer.csproj">
-      <Project>{c34b6ebb-9928-4c58-aa61-8fef4a8b898f}</Project>
-      <Name>EPUBRenderer</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -17,20 +17,23 @@ namespace EPUBRenderer3
         public RenderBook(Epub epub)
         {
             this.epub = epub;
-            PageFiles = new List<PageFile>();           
+            PageFiles = new List<PageFile>();
             foreach (var Page in epub.Pages)
-            {             
+            {
                 PageFiles.Add(new PageFile(Page));
             }
         }
 
         internal void Position(Vector pageSize)
         {
-            //   for (int i = 0; i < PageFiles.Count; i++)
-            //   {                
-            //       PageFiles[i].PositionText(pageSize, i);
-            //   }
+        #if (DEBUG)
+                 for (int i = 0; i < PageFiles.Count; i++)
+                 {                
+                     PageFiles[i].PositionText(pageSize, i);
+                 }
+        #else
             Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
+        #endif
         }
 
         internal void RemoveMarking(PosDef firstHit, PosDef secondHit)

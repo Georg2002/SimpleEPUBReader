@@ -139,7 +139,7 @@ namespace EPUBReader2
         {
             if (Menu.Visibility == Visibility.Visible)
             {
-
+                if (Menu.ShowingChapters) return;
                 Menu.Visibility = Visibility.Collapsed;
                 MouseManager.Locked = false;
                 FunctionsLocked = false;
@@ -160,7 +160,7 @@ namespace EPUBReader2
         {
             if (Menu.Visibility == Visibility.Visible)
             {
-
+                if (!Menu.ShowingChapters) return;          
                 Menu.Visibility = Visibility.Collapsed;
                 MouseManager.Locked = false;
                 FunctionsLocked = false;
