@@ -11,6 +11,6 @@ namespace EPUBRenderer3
         public string FilePath;
         public string Title;
         public PosDef CurrPos;
-        public List<MarkingDef> Markings;
+        public List<MrkDef> Markings;
     }
 }

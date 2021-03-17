@@ -49,7 +49,7 @@
     <Compile Include="LetterTypes.cs" />
     <Compile Include="LibraryBook.cs" />
     <Compile Include="TextParts.cs" />
-    <Compile Include="MarkingDef.cs" />
+    <Compile Include="MrkDef.cs" />
     <Compile Include="PageFile.cs" />
     <Compile Include="PosDef.cs" />
     <Compile Include="RenderBook.cs" />

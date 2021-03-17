@@ -43,7 +43,23 @@ namespace EPUBReader2
 
         internal LibraryBook GetBook(int index)
         {
+            if (index <=0 || index >= Books.Count) return new LibraryBook();          
             return Books[index];
+        }
+
+        internal void SetFromSave(List<LibraryBook> books)
+        {
+            this.Books = books;
+        }
+
+        internal int GetIndex(LibraryBook book)
+        {
+            return Books.IndexOf(book);
+        }
+
+        internal List<LibraryBook> GetBooks()
+        {
+            return Books;
         }
     }
 }

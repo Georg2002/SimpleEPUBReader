@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace EPUBRenderer3
 {
@@ -12,11 +13,38 @@ namespace EPUBRenderer3
 #pragma warning restore CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
 #pragma warning restore CS0660 // Type defines operator == or operator != but does not override Object.Equals(object o)
     {
+        [XmlIgnore]
         public int FileIndex;
+        [XmlIgnore]
         public int Line;
+        [XmlIgnore]
         public int Word;
+        [XmlIgnore]
         public int Letter;
-
+        [XmlText]
+        public string ShrtTxt
+        {
+            get
+            {
+                return $"{FileIndex}|{Line }|{Word }|{Letter}";
+            }
+            set
+            {
+                var Numbers = value.Split('|');
+                if (Numbers.Length != 4) return;
+                try
+                {
+                    FileIndex = Convert.ToInt32(Numbers[0]);
+                    Line = Convert.ToInt32(Numbers[1]);
+                    Word = Convert.ToInt32(Numbers[2]);
+                    Letter = Convert.ToInt32(Numbers[3]);
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+            }
+        }
 
         public PosDef(int FileIndex, int Line, int Word, int Letter)
         {
@@ -33,7 +61,7 @@ namespace EPUBRenderer3
             if (A.FileIndex < B.FileIndex)
             {
                 return true;
-            }          
+            }
             else if (A.FileIndex == B.FileIndex)
             {
                 if (A.Line < B.Line)
@@ -83,7 +111,7 @@ namespace EPUBRenderer3
 
         public static bool operator ==(PosDef A, PosDef B)
         {
-            return  A.FileIndex==B.FileIndex && A.Line == B.Line && A.Word == B.Word && A.Letter == B.Letter;
+            return A.FileIndex == B.FileIndex && A.Line == B.Line && A.Word == B.Word && A.Letter == B.Letter;
         }
 
         public static bool operator !=(PosDef A, PosDef B)

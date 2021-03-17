@@ -69,7 +69,7 @@ namespace EPUBReader2
             Refresh();
         }
 
-        private void Refresh()
+        public void Refresh()
         {
             TxtInidicator.Text = $"{Main.GetCurrentPage()}/{Main.GetPageCount()}";
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,9 +36,10 @@ namespace EPUBRenderer3
             }
         }
 
-        public void LoadBook(string Path, PosDef Position = new PosDef(), List<MarkingDef> Markings = null)
+        public void LoadBook(string Path, PosDef Position = new PosDef(), List<MrkDef> Markings = null)
         {
-            Markings = Markings ?? new List<MarkingDef>();
+            if (string.IsNullOrEmpty(Path) ||  !File.Exists(Path) || !Path.ToLower().EndsWith(".epub")) return;
+            Markings = Markings ?? new List<MrkDef>();
             Epub epub = new Epub(Path);
             CurrBook = new RenderBook(epub);
             SetMarkings(Markings);
@@ -45,13 +47,14 @@ namespace EPUBRenderer3
             OpenPage(Position);
         }
 
-        private void SetMarkings(List<MarkingDef> Markings)
+        private void SetMarkings(List<MrkDef> Markings)
         {
             CurrBook.SetMarkings(Markings);          
         }
 
         public void OpenPage(PosDef Position)
         {
+            if (CurrBook == null) return;
             CurrBook.CurrPos = Position;
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
             ShownPage = PageFile.Pages.Find(a => a.Within(Position));
@@ -60,6 +63,7 @@ namespace EPUBRenderer3
 
         public void Switch(int Dir)
         {
+            if (CurrBook == null) return;
             int FileIndex = CurrBook.CurrPos.FileIndex;
             int PageIndex = CurrBook.PageFiles[FileIndex].Pages.IndexOf(ShownPage);
             PageIndex += Dir;
@@ -132,16 +136,19 @@ namespace EPUBRenderer3
 
         public int GetPageCount()
         {
+            if (CurrBook == null) return 0;
             return CurrBook.GetPageCount();
         }
 
         public int GetCurrentPage()
         {
-           return CurrBook.GetCurrentPage();
+            if (CurrBook == null) return 0;
+            return CurrBook.GetCurrentPage();
         }
 
         public List<string> GetChapters()
         {
+            if (CurrBook == null) return new List<string>();
             return CurrBook.GetChapters();
         }
 
@@ -153,7 +160,8 @@ namespace EPUBRenderer3
 
         public LibraryBook GetCurrentBook()
         {
-            return CurrBook.GetLibraryBook();
+            if (CurrBook == null) return new LibraryBook() { CurrPos = PosDef.InvalidPosition};
+                return CurrBook.GetLibraryBook();
         }
     }
 }
