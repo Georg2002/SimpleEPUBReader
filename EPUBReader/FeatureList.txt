@@ -1,7 +1,0 @@
-1) vertikaler und horizontaler Text (nach .css, per Einstellung überschreibbar)
-2) Bilder, müssen nicht im Text eingebunden sein
-3) Text markieren
-4) Bibliothek, Bücher hinzufügen und löschen
-5) Blättern, auch über Leiste zum Ziehen und über Eingabefeld
-6) muss auch mit Touchscreen gut funktionieren
-7) Ruby/Furigana
