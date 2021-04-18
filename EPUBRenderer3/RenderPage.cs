@@ -20,6 +20,26 @@ namespace EPUBRenderer3
             return Text;
         }
 
+        internal bool IsSingleImage()
+        {
+
+            for (int Li = 0; Li < Lines.Count; Li++)
+            {
+                for (int W = 0; W < Lines[Li].Words.Count; W++)
+                {
+                    for (int Le = 0; Le < Lines[Li].Words[W].Letters.Count; Le++)
+                    {
+                        var Letter = Lines[Li].Words[W].Letters[Le];
+                        if (Letter.Type == LetterTypes.Letter)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
         public RenderPage()
         {
             Lines = new List<Line>();

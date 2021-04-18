@@ -28,7 +28,7 @@
             <local:MenuControl x:Name="Menu" Visibility="Collapsed" Grid.ColumnSpan="3"/>
         </Grid>
         <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="10"/>       
-        <Border x:Name="Bar" VerticalAlignment="Top" Height="60" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="0">
+        <Border x:Name="Bar" VerticalAlignment="Top" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>

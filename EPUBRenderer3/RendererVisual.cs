@@ -16,6 +16,8 @@ namespace EPUBRenderer3
         {
             if (ShownPage == null) return;
 
+            bool SingleImage = ShownPage.IsSingleImage();
+
             foreach (var Line in ShownPage.Lines)
             {
                 foreach (var Word in Line.Words)
@@ -33,7 +35,7 @@ namespace EPUBRenderer3
                                 {
                                     double Width = Letter.StartPosition.X - Letter.EndPosition.X;
                                     double Height = Letter.EndPosition.Y - Letter.StartPosition.Y;
-                                    var R = new Rect(Letter.EndPosition.X, Letter.StartPosition.Y + TxtLetter.FontSize * 0.2, Width, Height);
+                                    var R = new Rect(Letter.EndPosition.X, Letter.StartPosition.Y + TxtLetter.FontSize * 0.24, Width, Height);
                                     drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
                                 }
                               
@@ -41,7 +43,7 @@ namespace EPUBRenderer3
                             case LetterTypes.Image:
                                 var ImgLetter = (ImageLetter)Letter;
                                 var Img = (ImageSource)Letter.GetRenderElement();                               
-                                if (ShownPage.Lines.Count == 1 && Line.Words.Count == 1 && Word.Letters.Count == 1)
+                                if (SingleImage)
                                 {
                                     Vector RenderSize = ImgLetter.GetMaxRenderSize(PageSize);
                                     ImgLetter.StartPosition = (PageSize - RenderSize) / 2;

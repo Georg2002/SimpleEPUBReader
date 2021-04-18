@@ -20,6 +20,7 @@ namespace EPUBRenderer3
         public Letter PrevLetter;
         public Word OwnWord;
         public Vector PageSize;
+        public bool Last;
         public bool NewLine;
         public bool TightFit;
     }
@@ -30,10 +31,14 @@ namespace EPUBRenderer3
         public const float RubyScale = 0.7f;
         public const float RubyFontSize = RubyScale * StandardFontSize;
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
-        public const float RubyOffset = 1f * LineDist;
+        public const float RubyOffset = 0.93f * LineDist;
+        public const float RubyVertOffset = (StandardFontSize - RubyFontSize) * 0.24f;
+        public static readonly Vector OutsideVector = new Vector(-100000,-100000);
 
         public Vector StartPosition;
         public Vector EndPosition;
+        public virtual Vector HitboxStart { get => StartPosition; }
+        public virtual Vector HitboxEnd { get => EndPosition; }
         public Vector NextWritePos;
         public LetterTypes Type;
         public byte MarkingColorIndex;
@@ -44,7 +49,7 @@ namespace EPUBRenderer3
 
         internal bool Inside(Point relPoint)
         {
-            return relPoint.X < StartPosition.X && relPoint.Y > StartPosition.Y && relPoint.X > EndPosition.X && relPoint.Y < EndPosition.Y;
+            return relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
         }
 
         public virtual object GetRenderElement()
@@ -57,9 +62,14 @@ namespace EPUBRenderer3
             return Type.ToString();
         }
 
-        public bool InsidePage(Vector PageSize)
+        public bool InsidePageVert(Vector PageSize)
         {
-            return EndPosition.X >= 0 && EndPosition.Y <= PageSize.Y;
+            return EndPosition.Y <= PageSize.Y;
+        }
+         
+        public bool InsidePageHor(Vector PageSize)
+        {
+            return EndPosition.X >= 0;
         }
     }
 
@@ -71,6 +81,9 @@ namespace EPUBRenderer3
         public Vector Offset;
         private readonly static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
      FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
+        private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2,0);
+        public override Vector HitboxStart { get =>  FontSize == StandardFontSize ? StartPosition + HitboxExpansion : OutsideVector; }
+        public override Vector HitboxEnd { get => FontSize == StandardFontSize ? EndPosition - HitboxExpansion : OutsideVector; }
 
         public TextLetter(char Character)
         {
@@ -99,10 +112,6 @@ namespace EPUBRenderer3
             {
                 FontSize = StandardFontSize;
                 StartPosition = PrevLetter == null ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
-                if (PrevWord != null && PrevWord.Type == WordTypes.Ruby && ((TextLetter)PrevLetter).FontSize == RubyFontSize)
-                {
-                    StartPosition.X -= RubyOffset - StandardFontSize;
-                }
                 Vector VertSpacing = new Vector();
                 if (NextWord != null && NextWord.Type == WordTypes.Ruby)
                 {
@@ -123,11 +132,12 @@ namespace EPUBRenderer3
 
                 }
                 NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
-                return InsidePage(PageSize);
+                return InsidePageVert(PageSize);
             }
             else
             {
                 FontSize = RubyFontSize;
+                var Last = Info.Last;
 
                 float RubyCount = OwnWord.Letters.Count;
                 float TextCount = PrevWord.Letters.Count;
@@ -138,7 +148,7 @@ namespace EPUBRenderer3
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize + 2 * VertSpacing.Y);
                 if (((TextLetter)PrevLetter).FontSize == StandardFontSize)
                 {
-                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5 * (TextLength + RubyLength));                  
+                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, RubyVertOffset - 0.5 * (TextLength + RubyLength));
                 }
                 else
                 {
@@ -146,7 +156,14 @@ namespace EPUBRenderer3
                 }
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                if (Last)
+                {
+                    NextWritePos = PrevWord.Letters.Last().NextWritePos;
+                }
+                else
+                {
+                    NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                }
                 return true;
             }
         }
@@ -178,7 +195,7 @@ namespace EPUBRenderer3
             var PageSize = Info.PageSize;
             var PrevWord = Info.PrevWord;
 
-            bool MustScale = PageSize.X < Image.Width || PageSize.Y < Image.Height;  
+            bool MustScale = PageSize.X < Image.Width || PageSize.Y < Image.Height;
             if (PrevLetter == null)
             {
                 StartPosition = new Vector(PageSize.X, 0);
@@ -188,13 +205,13 @@ namespace EPUBRenderer3
                 StartPosition = new Vector(PrevLetter.EndPosition.X, 0);
             }
             Vector RenderSize;
-            
+
             if (MustScale)
-            {                
+            {
                 if (PrevWord != null) return false;
                 RenderSize = GetMaxRenderSize(PageSize);
-                
-                StartPosition = (PageSize - RenderSize )/ 2;               
+
+                StartPosition = (PageSize - RenderSize) / 2;
                 NextWritePos = new Vector(-1, PageSize.Y + 1);
             }
             else
@@ -204,9 +221,9 @@ namespace EPUBRenderer3
             }
 
             EndPosition = StartPosition + RenderSize;
-            NextWritePos = new Vector(EndPosition.X-LineDist, 0);
-          
-            return EndPosition.Y <= PageSize.Y && EndPosition.X >= 0;
+            NextWritePos = new Vector(EndPosition.X - LineDist, 0);
+
+            return InsidePageHor(PageSize);
         }
 
         public Vector GetMaxRenderSize(Vector PageSize)

@@ -47,6 +47,7 @@ namespace EPUBReader2
             Renderer.MarkingColors = MarkingColors;
             Bar.Margin = new Thickness(0, -MouseManager.BarHeight, 0, 0);
             ContentGrid.Margin = new Thickness(0, MouseManager.BarHeight / 2, 0, MouseManager.BarHeight / 2);
+            Bar.Height = MouseManager.BarHeight;
             PagesControl.Main = this;
             Menu.Main = this;
         }
@@ -69,7 +70,7 @@ namespace EPUBReader2
             if (Save.Books != null)
             {
                 Library.SetFromSave(Save.Books);
-                if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count)
+                if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count && Renderer.CurrBook == null)
                 {
                     SetToBook(Save.CurrentBookIndex);
                 }
@@ -101,7 +102,7 @@ namespace EPUBReader2
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var Args = Environment.GetCommandLineArgs();
+            var Args = Environment.GetCommandLineArgs();        
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
                 Renderer.LoadBook(Args[1]);
@@ -160,7 +161,7 @@ namespace EPUBReader2
         {
             if (Menu.Visibility == Visibility.Visible)
             {
-                if (!Menu.ShowingChapters) return;          
+                if (!Menu.ShowingChapters) return;
                 Menu.Visibility = Visibility.Collapsed;
                 MouseManager.Locked = false;
                 FunctionsLocked = false;

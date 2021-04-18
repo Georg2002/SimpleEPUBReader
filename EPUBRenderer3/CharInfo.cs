@@ -11,7 +11,7 @@ namespace EPUBRenderer3
     {
         public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
 
-        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0, -1), 2.3f, '≀');
+        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0.06, -1), 2.3f, '≀');
         private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');
 
         public static Dictionary<char, SpecialCharacter> SpecialCharacters = new Dictionary<char, SpecialCharacter>()

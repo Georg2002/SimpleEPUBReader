@@ -18,7 +18,7 @@ namespace EPUBRenderer3
             Lines = SplitAndOrder(page);
         }
 
-        public void PositionText(Vector PageSize,int Index)
+        public void PositionText(Vector PageSize, int Index)
         {
             Line Prev = null;
             Pages = new List<RenderPage>();
@@ -28,8 +28,8 @@ namespace EPUBRenderer3
             {
                 var (FitWord, FitLetter) = Line.Position(Prev, PageSize);
                 if (FitWord < Line.Words.Count)
-                {             
-                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);               
+                {
+                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);
                     if (FittingLine.Words.Count != 0)
                     {
                         CurrentPage.Lines.Add(FittingLine);
@@ -47,18 +47,18 @@ namespace EPUBRenderer3
             }
 
             foreach (var Line in Lines)
-            {               
+            {
                 FitLine(Line);
             }
             Pages.Add(CurrentPage);
 
             var Curr = new PosDef(Index, 0, 0, 0);
-          
+
             for (int i = 0; i < Pages.Count; i++)
             {
-               
+
                 var CurrPage = Pages[i];
-                CurrPage.StartPos = Curr;              
+                CurrPage.StartPos = Curr;
                 if (CurrPage.Lines.Count == 1)
                 {
                     if (CurrPage.Lines[0].Words.Count == 1)
@@ -92,7 +92,7 @@ namespace EPUBRenderer3
         bool PosValid(PosDef Pos)
         {
             return Lines.Count > Pos.Line && Lines[Pos.Line].Words.Count > Pos.Word && Lines[Pos.Line].Words[Pos.Word].Letters.Count > Pos.Letter;
-        }               
+        }
 
         public override string ToString()
         {
@@ -120,7 +120,7 @@ namespace EPUBRenderer3
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
                             bool NoRuby = string.IsNullOrEmpty(TextPart.Ruby) && TextPart.Type != LinePartTypes.sesame;
-                            char Prev = 'a';                           
+                            char Prev = 'a';
                             foreach (var Character in TextPart.Text)
                             {
                                 if (NoRuby && CharInfo.PossibleLineBreaks.Contains(Prev) && !CharInfo.PossibleLineBreaks.Contains(Character))
@@ -154,8 +154,8 @@ namespace EPUBRenderer3
                                     {
                                         Word.Letters.Add(new TextLetter('﹅'));
                                     }
-                                    
-                                }                            
+
+                                }
                                 Line.Words.Add(Word);
                                 Word = new Word();
                             }
@@ -175,7 +175,7 @@ namespace EPUBRenderer3
                             throw new NotImplementedException();
                     }
                 }
-                Lines.Add(Line);                
+                Lines.Add(Line);
             }
             return Lines;
         }

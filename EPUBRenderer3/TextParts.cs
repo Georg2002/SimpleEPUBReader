@@ -34,11 +34,14 @@ namespace EPUBRenderer3
                 PrevWord = PrevWord,
                 NextWord = NextWord,
                 NewLine = NewLine,
-                TightFit = TightFit
+                TightFit = TightFit,
+                Last = false
             };
             bool AllFit = true;
-            foreach (var Letter in Letters)
+            for (int i = 0; i < Letters.Count; i++)
             {
+                var Letter = Letters[i];
+                Info.Last = i == Letters.Count - 1;
                 bool LetterFit = Letter.Position(Info);
                 Info.NewLine = false;
                 Info.PrevLetter = Letter;
@@ -51,8 +54,11 @@ namespace EPUBRenderer3
                     AllFit = false;
                     break;
                 }
-            }                       
-
+            }
+            if (Fit != 0 && !Letters[Fit - 1].InsidePageHor(PageSize))
+            {
+                return 0;
+            }
             if (FinalRound) return Fit;
             if (NewLine)
             {
@@ -131,8 +137,13 @@ namespace EPUBRenderer3
                 var Word = Words[i];
                 NextWord = i == Words.Count - 1 ? null : Words[i + 1];
                 LetterFit = Word.Position(Prev,NextWord, PageSize);
-                if (LetterFit<Word.Letters.Count)
-                {
+            //    if (!Word.Letters.Last().InsidePage(PageSize) && NextWord!=null && NextWord.Type == WordTypes.Ruby)
+            //    {
+            //        ;
+            //    }
+                //     if (LetterFit<Word.Letters.Count || !Word.Letters.Last().InsidePage(PageSize))
+                if (LetterFit < Word.Letters.Count)
+                   {
                     break;
                 }
                 WordFit++;
