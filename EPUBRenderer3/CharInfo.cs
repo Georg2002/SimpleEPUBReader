@@ -9,7 +9,8 @@ namespace EPUBRenderer3
 {
     public static class CharInfo
     {
-        public static char[] PossibleLineBreaks = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
+        public static char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》".ToCharArray();
+        public static char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔".ToCharArray();
 
         private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0.06, -1), 2.3f, '≀');
         private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');

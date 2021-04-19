@@ -120,15 +120,32 @@ namespace EPUBRenderer3
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
                             bool NoRuby = string.IsNullOrEmpty(TextPart.Ruby) && TextPart.Type != LinePartTypes.sesame;
-                            char Prev = 'a';
+                            char Prev = 'a';                        
                             foreach (var Character in TextPart.Text)
                             {
-                                if (NoRuby && CharInfo.PossibleLineBreaks.Contains(Prev) && !CharInfo.PossibleLineBreaks.Contains(Character))
+                                bool NewWordBefore = NoRuby && CharInfo.PossibleLineBreaksBefore.Contains(Character);
+                                bool NewWordAfter = NoRuby && CharInfo.PossibleLineBreaksAfter.Contains(Prev) && !CharInfo.PossibleLineBreaksAfter.Contains(Character);
+
+
+                                if (NewWordBefore)
                                 {
-                                    Line.Words.Add(Word);
-                                    Word = new Word();
+                                    if (Word.Letters.Count != 0)
+                                    {
+                                        Line.Words.Add(Word);
+                                        Word = new Word();
+                                    }
+                                    Word.Letters.Add(new TextLetter(Character));
                                 }
-                                Word.Letters.Add(new TextLetter(Character));
+                                else
+                                {
+                                    if (NewWordAfter)
+                                    {                                                                 
+                                        Line.Words.Add(Word);
+                                        Word = new Word();
+                                    }
+                                    Word.Letters.Add(new TextLetter(Character));
+                                }
+                               
                                 Prev = Character;
                             }
                             if (Word.Letters.Count == 0)
