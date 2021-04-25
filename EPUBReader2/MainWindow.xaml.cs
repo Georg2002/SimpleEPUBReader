@@ -39,6 +39,7 @@ namespace EPUBReader2
             new SolidColorBrush(new Color() { R = 255, G = 255,B = 0,A = Alpha}),
             new SolidColorBrush(new Color() {R = 0, G = 0,B = 255,A = Alpha})
         };
+        private Vector WindowSize;
 
         public MainWindow()
         {
@@ -75,6 +76,20 @@ namespace EPUBReader2
                     SetToBook(Save.CurrentBookIndex);
                 }
             }
+            if (Save.WindowSize.X != 0 && Save.WindowSize.Y != 0)
+            {
+#if DEBUG
+                Height = 750;
+                Width = 1170;
+                Title = "Debug mode active, start window size preset";
+#else
+                if (Save.WindowSize.Y >= MinHeight && Save.WindowSize.X >= MinWidth)
+                {
+                    Height = Save.WindowSize.Y;
+                    Width = Save.WindowSize.X;
+                }     
+#endif
+            }
             if (Save.Fullscreen) Fullscreen_Click(null, null);
         }
 
@@ -102,7 +117,7 @@ namespace EPUBReader2
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var Args = Environment.GetCommandLineArgs();        
+            var Args = Environment.GetCommandLineArgs();
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
                 Renderer.LoadBook(Args[1]);
@@ -149,6 +164,7 @@ namespace EPUBReader2
             {
                 if (FunctionsLocked) return;
                 MouseManager.Locked = true;
+                MouseManager.MoveDown();
                 FunctionsLocked = true;
                 Menu.Visibility = Visibility.Visible;
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
@@ -169,6 +185,7 @@ namespace EPUBReader2
             else
             {
                 if (FunctionsLocked) return;
+                MouseManager.MoveDown();
                 MouseManager.Locked = true;
                 FunctionsLocked = true;
                 Menu.Visibility = Visibility.Visible;
@@ -239,12 +256,18 @@ namespace EPUBReader2
             Save.Fullscreen = WindowState == WindowState.Maximized;
             Save.ColorIndex = ColorIndex;
             Save.LastDirectory = Dialog.InitialDirectory;
+            Save.WindowSize = WindowSize;
             return Save;
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             PagesControl.Refresh();
+            if (WindowState == WindowState.Normal)
+            {
+                WindowSize.X = ActualWidth;
+                WindowSize.Y = ActualHeight;
+            }           
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

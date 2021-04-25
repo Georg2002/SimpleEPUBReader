@@ -44,6 +44,11 @@ namespace EPUBReader2
         public bool Locked;
         int SwipeDetectCount = 0;
 
+        public readonly Thickness BarDownMarg = new Thickness(0, 0, 0, 0);
+        public readonly Thickness BarUpMarg = new Thickness(0, -BarHeight, 0, 0);
+        public readonly Thickness GridShrinkMarg = new Thickness(0, BarHeight, 0, 0);
+        public readonly Thickness GridExpMarg = new Thickness(0, BarHeight / 2, 0, BarHeight / 2);
+
         public MouseManager(Border Bar, Grid ContentGrid, Renderer Renderer, MainWindow main)
         {
             MainWindow = main;
@@ -53,10 +58,10 @@ namespace EPUBReader2
             this.Renderer = Renderer;
             const double TimeDown = 150;
             const double TimeUp = 300;
-            BarAnimationDown = new ThicknessAnimation(new Thickness(0, 0, 0, 0), new Duration(TimeSpan.FromMilliseconds(TimeDown)));
-            BarAnimationUp = new ThicknessAnimation(new Thickness(0, -BarHeight, 0, 0), new Duration(TimeSpan.FromMilliseconds(TimeUp)));
-            ShrinkingAnimation = new ThicknessAnimation(new Thickness(0, BarHeight, 0, 0), new Duration(TimeSpan.FromMilliseconds(TimeDown)));
-            ExpandingAnimation = new ThicknessAnimation(new Thickness(0, BarHeight / 2, 0, BarHeight / 2), new Duration(TimeSpan.FromMilliseconds(TimeUp)));
+            BarAnimationDown = new ThicknessAnimation(BarDownMarg, new Duration(TimeSpan.FromMilliseconds(TimeDown)));
+            BarAnimationUp = new ThicknessAnimation(BarUpMarg, new Duration(TimeSpan.FromMilliseconds(TimeUp)));
+            ShrinkingAnimation = new ThicknessAnimation(GridShrinkMarg, new Duration(TimeSpan.FromMilliseconds(TimeDown)));
+            ExpandingAnimation = new ThicknessAnimation(GridExpMarg, new Duration(TimeSpan.FromMilliseconds(TimeUp)));
         }
 
         internal void MouseMove(Point Pos, bool Down, bool RightDown)
@@ -179,6 +184,14 @@ namespace EPUBReader2
                 MovingDown = false;
                 MovingUp = true;
             }
+        }
+
+        internal void MoveDown()
+        {
+            Bar.BeginAnimation(Border.MarginProperty, null);
+            ContentGrid.BeginAnimation(Grid.MarginProperty, null);
+            Bar.Margin = BarDownMarg;
+            ContentGrid.Margin = GridShrinkMarg;
         }
     }
 }
