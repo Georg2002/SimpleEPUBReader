@@ -30,12 +30,12 @@ namespace EPUBRenderer3
                                 var Text = (FormattedText)Letter.GetRenderElement();
                                 var TxtLetter = (TextLetter)Letter;
                                 var DrawPos = Letter.StartPosition + TxtLetter.Offset * TxtLetter.FontSize; ;
-                                drawingContext.DrawText(Text, new Point(DrawPos.X, DrawPos.Y));
+                                drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));
                                 if (Letter.MarkingColorIndex != 0)
                                 {
                                     double Width = Letter.StartPosition.X - Letter.EndPosition.X;
                                     double Height = Letter.EndPosition.Y - Letter.StartPosition.Y;
-                                    var R = new Rect(Letter.EndPosition.X, Letter.StartPosition.Y + TxtLetter.FontSize * 0.24, Width, Height);
+                                    var R = new Rect(Letter.EndPosition.X, Letter.StartPosition.Y + TxtLetter.FontSize * CharInfo.FontOffset, Width, Height);
                                     drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
                                 }
                               

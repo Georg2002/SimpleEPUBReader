@@ -170,7 +170,8 @@ namespace EPUBRenderer3
 
         public override object GetRenderElement()
         {
-            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1);// {TextAlignment=TextAlignment.Center };
+            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture,
+                FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1) {TextAlignment=TextAlignment.Center };
         }
 
         public override string ToString()
@@ -196,32 +197,36 @@ namespace EPUBRenderer3
             var PrevWord = Info.PrevWord;
 
             bool MustScale = PageSize.X < Image.Width || PageSize.Y < Image.Height;
-            if (PrevLetter == null)
+            bool Inline = Image.Width <= LineDist * 2 && Image.Height <= 2 * LineDist;
+            StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);           
+            Vector RenderSize = new Vector(-Image.Width, Image.Height);
+            if (Inline)
             {
-                StartPosition = new Vector(PageSize.X, 0);
+                double Scale = LineDist <= Image.Width ? LineDist / Image.Width : 1;
+                RenderSize *= Scale;
+                StartPosition = PrevLetter == null ? StartPosition : PrevLetter.NextWritePos;
+                StartPosition += new Vector( -(StandardFontSize + RenderSize.X) / 2, StandardFontSize*CharInfo.FontOffset);
+                EndPosition = StartPosition + RenderSize;
+                NextWritePos = PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);               
             }
             else
             {
-                StartPosition = new Vector(PrevLetter.EndPosition.X, 0);
-            }
-            Vector RenderSize;
+                if (MustScale)
+                {
+                    if (PrevWord != null) return false;
+                    RenderSize = GetMaxRenderSize(PageSize);
 
-            if (MustScale)
-            {
-                if (PrevWord != null) return false;
-                RenderSize = GetMaxRenderSize(PageSize);
+                    StartPosition = (PageSize - RenderSize) / 2;
+                    NextWritePos = new Vector(-1, PageSize.Y + 1);
+                }
+                else
+                {
+                    StartPosition.Y = (PageSize.Y - Image.Height) / 2;
+                }
 
-                StartPosition = (PageSize - RenderSize) / 2;
-                NextWritePos = new Vector(-1, PageSize.Y + 1);
-            }
-            else
-            {
-                RenderSize = new Vector(-Image.Width, Image.Height);
-                StartPosition.Y = (PageSize.Y - Image.Height) / 2;
-            }
-
-            EndPosition = StartPosition + RenderSize;
-            NextWritePos = new Vector(EndPosition.X - LineDist, 0);
+                EndPosition = StartPosition + RenderSize;
+                NextWritePos = new Vector(EndPosition.X - LineDist, 0);
+            }            
 
             return InsidePageHor(PageSize);
         }
