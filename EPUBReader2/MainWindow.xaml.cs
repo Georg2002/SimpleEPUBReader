@@ -54,7 +54,7 @@ namespace EPUBReader2
         }
 
         private void LoadSave()
-        {
+        {         
             SaveStruc Save = SaveAndLoad.LoadSave();
             ColorIndex = Save.ColorIndex != 0 && Save.ColorIndex < MarkingColors.Length ? Save.ColorIndex : (byte)1;
             ColorButton.Background = MarkingColors[ColorIndex];
@@ -69,8 +69,8 @@ namespace EPUBReader2
             }
             Dialog.InitialDirectory = Save.LastDirectory;
             if (Save.Books != null)
-            {
-                Library.SetFromSave(Save.Books);
+            {              
+                Library.SetFromSave(Save.Books);   
                 if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count && Renderer.CurrBook == null)
                 {
                     SetToBook(Save.CurrentBookIndex);
@@ -121,8 +121,8 @@ namespace EPUBReader2
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
                 Renderer.LoadBook(Args[1]);
-            }
-            LoadSave();
+            }           
+            LoadSave();          
         }
 
         private void Right_Click(object sender, RoutedEventArgs e)

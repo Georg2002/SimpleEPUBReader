@@ -71,6 +71,11 @@ namespace EPUBRenderer3
         {
             return EndPosition.X >= 0;
         }
+
+        public bool InsidePage(Vector PageSize)
+        {
+            return InsidePageHor(PageSize) && InsidePageVert(PageSize);
+        }
     }
 
     internal class TextLetter : Letter
@@ -207,7 +212,7 @@ namespace EPUBRenderer3
                 StartPosition = PrevLetter == null ? StartPosition : PrevLetter.NextWritePos;
                 StartPosition += new Vector( -(StandardFontSize + RenderSize.X) / 2, StandardFontSize*CharInfo.FontOffset);
                 EndPosition = StartPosition + RenderSize;
-                NextWritePos = PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);               
+                NextWritePos =  PrevLetter == null ? new Vector(PageSize.X - LineDist, EndPosition.Y) : PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);               
             }
             else
             {
@@ -228,7 +233,7 @@ namespace EPUBRenderer3
                 NextWritePos = new Vector(EndPosition.X - LineDist, 0);
             }            
 
-            return InsidePageHor(PageSize);
+            return InsidePage(PageSize);
         }
 
         public Vector GetMaxRenderSize(Vector PageSize)
