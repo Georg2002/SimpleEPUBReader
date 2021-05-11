@@ -134,6 +134,7 @@ namespace EPUBReader2
             if (Draw && AverageSpeed.X * ResScal > 30 && SSinceTouchdown < 0.2 && SSinceTouchdown >= MinTime)
             {
                 MarkingInProgress = false;
+                Console.WriteLine("Marking aborted due to high speeds");
             }
             MarkingInProgress = Switched ? false : MarkingInProgress;
             var RelPoint = MainWindow.TranslatePoint(MousePos, Renderer);
@@ -141,6 +142,7 @@ namespace EPUBReader2
             {
                 Renderer.RemoveMarking(RelPoint);
                 MarkingInProgress = false;
+                Console.WriteLine("Right click, marking removal attempted");
             }
             if (MarkingInProgress)
             {
@@ -150,6 +152,7 @@ namespace EPUBReader2
                     {
                         Renderer.FinishMarking(RelPoint, MainWindow.ColorIndex);
                     }
+                    Console.Write("Liftup, marking finished\n");
                     MarkingInProgress = false;
                 }
                 else if (Draw && Delta > 0)
@@ -163,6 +166,7 @@ namespace EPUBReader2
                 {
                     bool MarkingValid = Renderer.StartMarking(RelPoint);
                     MarkingInProgress = MarkingValid;
+                    Console.Write("Touchdown, marking in progress attempted, valid: " + MarkingValid.ToString() +"\n");
                 }
             }
         }

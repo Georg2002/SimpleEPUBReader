@@ -33,7 +33,7 @@ namespace EPUBRenderer3
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
         public const float RubyVertOffset = (StandardFontSize - RubyFontSize) * 0.24f;
-        public static readonly Vector OutsideVector = new Vector(-100000,-100000);
+        public static readonly Vector OutsideVector = new Vector(-100000, -100000);
 
         public Vector StartPosition;
         public Vector EndPosition;
@@ -66,7 +66,7 @@ namespace EPUBRenderer3
         {
             return EndPosition.Y <= PageSize.Y;
         }
-         
+
         public bool InsidePageHor(Vector PageSize)
         {
             return EndPosition.X >= 0;
@@ -86,9 +86,11 @@ namespace EPUBRenderer3
         public Vector Offset;
         private readonly static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
      FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
-        private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2,0);
-        public override Vector HitboxStart { get =>  FontSize == StandardFontSize ? StartPosition + HitboxExpansion : OutsideVector; }
-        public override Vector HitboxEnd { get => FontSize == StandardFontSize ? EndPosition - HitboxExpansion : OutsideVector; }
+        private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2, 0);
+        private Vector _HitboxStart;
+        public override Vector HitboxStart { get => _HitboxStart; }
+        private Vector _HitboxEnd;
+        public override Vector HitboxEnd { get => _HitboxEnd; }
 
         public TextLetter(char Character)
         {
@@ -137,6 +139,8 @@ namespace EPUBRenderer3
 
                 }
                 NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                _HitboxStart = StartPosition + HitboxExpansion - VertSpacing;
+                _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;
                 return InsidePageVert(PageSize);
             }
             else
@@ -169,6 +173,8 @@ namespace EPUBRenderer3
                 {
                     NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
                 }
+                _HitboxStart = OutsideVector;
+                _HitboxEnd = OutsideVector;
                 return true;
             }
         }
@@ -176,7 +182,8 @@ namespace EPUBRenderer3
         public override object GetRenderElement()
         {
             return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture,
-                FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1) {TextAlignment=TextAlignment.Center };
+                FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1)
+            { TextAlignment = TextAlignment.Center };
         }
 
         public override string ToString()
@@ -203,16 +210,22 @@ namespace EPUBRenderer3
 
             bool MustScale = PageSize.X < Image.Width || PageSize.Y < Image.Height;
             bool Inline = Image.Width <= LineDist * 2 && Image.Height <= 2 * LineDist;
-            StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);           
+            StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);
             Vector RenderSize = new Vector(-Image.Width, Image.Height);
             if (Inline)
             {
                 double Scale = LineDist <= Image.Width ? LineDist / Image.Width : 1;
                 RenderSize *= Scale;
                 StartPosition = PrevLetter == null ? StartPosition : PrevLetter.NextWritePos;
-                StartPosition += new Vector( -(StandardFontSize + RenderSize.X) / 2, StandardFontSize*CharInfo.FontOffset);
+                if (Info.NewLine)
+                {
+                    StartPosition.X -= LineDist;
+                    StartPosition.Y = 0;
+                    PrevLetter = null;
+                }
+                StartPosition += new Vector(-(StandardFontSize + RenderSize.X) / 2, StandardFontSize * CharInfo.FontOffset);
                 EndPosition = StartPosition + RenderSize;
-                NextWritePos =  PrevLetter == null ? new Vector(PageSize.X - LineDist, EndPosition.Y) : PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);               
+                NextWritePos = PrevLetter == null ? new Vector(StartPosition.X + (StandardFontSize + RenderSize.X) / 2, EndPosition.Y) : PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);
             }
             else
             {
@@ -231,7 +244,7 @@ namespace EPUBRenderer3
 
                 EndPosition = StartPosition + RenderSize;
                 NextWritePos = new Vector(EndPosition.X - LineDist, 0);
-            }            
+            }
 
             return InsidePage(PageSize);
         }
@@ -271,8 +284,15 @@ namespace EPUBRenderer3
                 StartPosition = PrevLetter.NextWritePos;
                 EndPosition = StartPosition + new Vector(-StandardFontSize, 0);
             }
-
-            NextWritePos = new Vector(StartPosition.X - LineDist, 0);
+            if (PrevLetter != null && PrevLetter.Type == LetterTypes.Image)
+            {
+                //ignores the first break after an image in order to remove redundant breaks
+                NextWritePos = StartPosition;
+            }
+            else
+            {
+                NextWritePos = new Vector(StartPosition.X - LineDist, 0);
+            }
             return true;
         }
 
