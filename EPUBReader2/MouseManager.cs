@@ -103,7 +103,7 @@ namespace EPUBReader2
 
         private void HandleGestures()
         {
-            Console.Write(AverageSpeed.X.ToString());
+           // Console.WriteLine(AverageSpeed.X.ToString());
             SwipeDetectCount = MouseDown ? SwipeDetectCount : 0;
             if (MouseDown && !Switched && Math.Abs(AverageSpeed.X) * ResScal > 50 && Math.Abs(AverageSpeed.Y) / Math.Abs(AverageSpeed.X) < 0.25 && SSinceTouchdown < 0.1 && SSinceTouchdown > 0.01)
             {
@@ -131,13 +131,15 @@ namespace EPUBReader2
             const double MinTime = 0.1;
             Vector MoveSinceTouchdown = new Vector(MousePos.X - MouseDownPos.X, MousePos.Y - MouseDownPos.Y);
             bool Draw = SSinceTouchdown > MinTime;
-            if (Draw && AverageSpeed.X * ResScal > 30 && SSinceTouchdown < 0.2 && SSinceTouchdown >= MinTime)
-            {
-                MarkingInProgress = false;
-                Console.WriteLine("Marking aborted due to high speeds");
-            }
-            MarkingInProgress = Switched ? false : MarkingInProgress;
             var RelPoint = MainWindow.TranslatePoint(MousePos, Renderer);
+         //   if (Draw && AverageSpeed.X * ResScal > 30 && SSinceTouchdown < 0.1 && SSinceTouchdown >= MinTime)
+         //   {
+         //       MarkingInProgress = false;
+         //       Renderer.FinishMarking(RelPoint, MainWindow.ColorIndex);
+         //       Console.WriteLine("Marking aborted due to high speeds");
+         //   }
+            MarkingInProgress = Switched ? false : MarkingInProgress;
+           
             if (RightDown)
             {
                 Renderer.RemoveMarking(RelPoint);

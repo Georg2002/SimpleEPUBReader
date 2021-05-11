@@ -15,7 +15,7 @@ namespace EPUBRenderer3
         private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0, -1), 2.3f, '≀');
         private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');//new Vector(0.21, 0)
 
-        public const float FontOffset = 0.24f;
+        public const float FontOffset = 0.24f;//0.24
 
         public static Dictionary<char, SpecialCharacter> SpecialCharacters = new Dictionary<char, SpecialCharacter>()
         {

@@ -29,15 +29,9 @@ namespace EPUBRenderer3
                             case LetterTypes.Letter:
                                 var Text = (FormattedText)Letter.GetRenderElement();
                                 var TxtLetter = (TextLetter)Letter;
-                                var DrawPos = Letter.StartPosition + TxtLetter.Offset * TxtLetter.FontSize; ;
-                                drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));
-                                if (Letter.MarkingColorIndex != 0)
-                                {
-                                    double Width = Letter.StartPosition.X - Letter.EndPosition.X;
-                                    double Height = Letter.EndPosition.Y - Letter.StartPosition.Y;
-                                    var R = new Rect(Letter.EndPosition.X, Letter.StartPosition.Y + TxtLetter.FontSize * CharInfo.FontOffset, Width, Height);
-                                    drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
-                                }
+                                var DrawPos = Letter.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
+                                DrawPos.Y -= TxtLetter.FontSize * CharInfo.FontOffset;
+                                drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));                               
                               
                                 break;
                             case LetterTypes.Image:
@@ -52,17 +46,16 @@ namespace EPUBRenderer3
                                 var StartPoint = new Point(Letter.StartPosition.X, Letter.StartPosition.Y);
                                 var EndPoint = new Point(Letter.EndPosition.X, Letter.EndPosition.Y);
                                 drawingContext.DrawImage(Img, new Rect(StartPoint, EndPoint));
-
-                                if (Letter.MarkingColorIndex != 0)
-                                {                                   
-                                    var R = new Rect(StartPoint, EndPoint);
-                                    drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, R);
-                                }
+                               
                                 break;
                             case LetterTypes.Break:
                                 break;
                             default:
                                 throw new NotImplementedException();
+                        }
+                        if (Letter.MarkingColorIndex != 0)
+                        {
+                            drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, Letter.GetMarkingRect());
                         }
                     }
                 }

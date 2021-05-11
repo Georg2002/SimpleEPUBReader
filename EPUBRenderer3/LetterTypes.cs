@@ -27,8 +27,8 @@ namespace EPUBRenderer3
 
     internal class Letter
     {
-        public const float StandardFontSize = 19;
-        public const float RubyScale = 0.7f;
+        public const float StandardFontSize = 19;//19
+        public const float RubyScale = 0.7f;//0.7
         public const float RubyFontSize = RubyScale * StandardFontSize;
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
@@ -55,6 +55,12 @@ namespace EPUBRenderer3
         public virtual object GetRenderElement()
         {
             return null;
+        }
+
+        public virtual Rect GetMarkingRect()
+        {
+            //arranged to avoid negative numbers
+            return new Rect(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
         }
 
         public override string ToString()
@@ -91,6 +97,7 @@ namespace EPUBRenderer3
         public override Vector HitboxStart { get => _HitboxStart; }
         private Vector _HitboxEnd;
         public override Vector HitboxEnd { get => _HitboxEnd; }
+        private Vector VertSpacing;
 
         public TextLetter(char Character)
         {
@@ -119,7 +126,7 @@ namespace EPUBRenderer3
             {
                 FontSize = StandardFontSize;
                 StartPosition = PrevLetter == null ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
-                Vector VertSpacing = new Vector();
+                VertSpacing = new Vector();
                 if (NextWord != null && NextWord.Type == WordTypes.Ruby)
                 {
                     float RubyCount = NextWord.Letters.Count;
@@ -150,7 +157,7 @@ namespace EPUBRenderer3
 
                 float RubyCount = OwnWord.Letters.Count;
                 float TextCount = PrevWord.Letters.Count;
-                Vector VertSpacing = new Vector();
+                VertSpacing = new Vector();
                 VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * StandardFontSize / 2, 0);
 
                 double TextLength = PrevWord.Length();
@@ -177,6 +184,16 @@ namespace EPUBRenderer3
                 _HitboxEnd = OutsideVector;
                 return true;
             }
+        }
+
+        public override Rect GetMarkingRect()
+        {
+            Rect MarkingRect = new Rect();
+            MarkingRect.Y = StartPosition.Y - VertSpacing.Y;
+            MarkingRect.X = EndPosition.X;
+            MarkingRect.Width = FontSize;
+            MarkingRect.Height = VertSpacing.Y * 2 + FontSize;
+            return MarkingRect;
         }
 
         public override object GetRenderElement()
@@ -223,7 +240,7 @@ namespace EPUBRenderer3
                     StartPosition.Y = 0;
                     PrevLetter = null;
                 }
-                StartPosition += new Vector(-(StandardFontSize + RenderSize.X) / 2, StandardFontSize * CharInfo.FontOffset);
+                StartPosition += new Vector(-(StandardFontSize + RenderSize.X) / 2, 0);
                 EndPosition = StartPosition + RenderSize;
                 NextWritePos = PrevLetter == null ? new Vector(StartPosition.X + (StandardFontSize + RenderSize.X) / 2, EndPosition.Y) : PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);
             }
