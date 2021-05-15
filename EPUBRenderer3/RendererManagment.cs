@@ -17,7 +17,7 @@ namespace EPUBRenderer3
         RenderPage ShownPage = null;
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
-      public  Brush[] MarkingColors;
+        public Brush[] MarkingColors;   
 
         public Renderer()
         {
@@ -32,7 +32,7 @@ namespace EPUBRenderer3
             if (CurrBook != null)
             {
                 CurrBook.Position(PageSize);
-                OpenPage(CurrBook.CurrPos);
+                OpenPage(CurrBook.CurrPos);     
             }
         }
 
@@ -53,7 +53,7 @@ namespace EPUBRenderer3
 
         private void SetMarkings(List<MrkDef> Markings)
         {
-            CurrBook.SetMarkings(Markings);          
+            CurrBook.SetMarkings(Markings);
         }
 
         public void OpenPage(PosDef Position)
@@ -90,12 +90,12 @@ namespace EPUBRenderer3
                     if (FileIndex >= CurrBook.PageFiles.Count)
                     {
                         FileIndex = CurrBook.PageFiles.Count - 1;
-                        PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count  -1;
+                        PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count - 1;
                         break;
                     }
-                    PageIndex -= CurrBook.PageFiles[FileIndex-1].Pages.Count;
+                    PageIndex -= CurrBook.PageFiles[FileIndex - 1].Pages.Count;
                 }
-            }          
+            }
             OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
         }
 
@@ -110,7 +110,7 @@ namespace EPUBRenderer3
             return Valid;
         }
 
-        public void DrawTempMarking(Point relPoint,byte ColorIndex)
+        public void DrawTempMarking(Point relPoint, byte ColorIndex)
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
             SecondHit = ShownPage.Intersect(relPoint);
@@ -126,13 +126,13 @@ namespace EPUBRenderer3
 
         public void RemoveMarking(Point relPoint)
         {
-            if (CurrBook!=null)
+            if (CurrBook != null)
             {
                 PosDef Hit = ShownPage.Intersect(relPoint);
                 if (Hit.FileIndex == -1) return;
                 PosDef A;
                 PosDef B;
-                (A, B) = CurrBook.GetConnectedMarkings(Hit,ShownPage);
+                (A, B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
                 CurrBook.RemoveMarking(A, B);
             }
             InvalidateVisual();
@@ -164,8 +164,8 @@ namespace EPUBRenderer3
 
         public LibraryBook GetCurrentBook()
         {
-            if (CurrBook == null) return new LibraryBook() { CurrPos = PosDef.InvalidPosition};
-                return CurrBook.GetLibraryBook();
+            if (CurrBook == null) return new LibraryBook() { CurrPos = PosDef.InvalidPosition };
+            return CurrBook.GetLibraryBook();
         }
     }
 }

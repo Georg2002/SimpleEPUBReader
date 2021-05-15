@@ -32,7 +32,6 @@ namespace EPUBRenderer3
         public const float RubyFontSize = RubyScale * StandardFontSize;
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
-        public const float RubyVertOffset = (StandardFontSize - RubyFontSize) * 0.24f;
         public static readonly Vector OutsideVector = new Vector(-100000, -100000);
 
         public Vector StartPosition;
@@ -90,8 +89,7 @@ namespace EPUBRenderer3
         public float FontSize;
         public char Character;
         public Vector Offset;
-        private readonly static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
-     FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
+      
         private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2, 0);
         private Vector _HitboxStart;
         public override Vector HitboxStart { get => _HitboxStart; }
@@ -164,7 +162,7 @@ namespace EPUBRenderer3
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize + 2 * VertSpacing.Y);
                 if (((TextLetter)PrevLetter).FontSize == StandardFontSize)
                 {
-                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, RubyVertOffset - 0.5 * (TextLength + RubyLength));
+                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, - 0.5 * (TextLength + RubyLength));
                 }
                 else
                 {
@@ -199,7 +197,7 @@ namespace EPUBRenderer3
         public override object GetRenderElement()
         {
             return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture,
-                FlowDirection.RightToLeft, StandardTypeface, FontSize * RelScale, Brushes.Black, 1)
+                FlowDirection.RightToLeft, CharInfo.StandardTypeface, FontSize * RelScale, Brushes.Black, 1)
             { TextAlignment = TextAlignment.Center };
         }
 

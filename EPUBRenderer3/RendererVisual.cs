@@ -60,6 +60,12 @@ namespace EPUBRenderer3
                     }
                 }
             }
+            int Total = GetPageCount();
+            int Current = GetCurrentPage();
+            FormattedText PageText = new FormattedText($"{Current}/{Total}", CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black,1);
+            double Width = PageText.Width;
+            drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
         }      
     }
 }

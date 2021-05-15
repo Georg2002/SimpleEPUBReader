@@ -121,10 +121,7 @@ namespace EPUBRenderer3
             int Count = 0;
             foreach (var File in PageFiles)
             {
-                foreach (var Page in File.Pages)
-                {
-                    Count++;
-                }
+                Count += File.Pages.Count;                     
             }
             return Count;
         }
@@ -134,14 +131,21 @@ namespace EPUBRenderer3
             int Count = 0;
             foreach (var File in PageFiles)
             {
-                foreach (var Page in File.Pages)
+                if (File.Pages.Last().EndPos < CurrPos)
                 {
-                    if (Page.StartPos > CurrPos)
-                    {
-                        return Count;
-                    }
-                    Count++;
+                    Count += File.Pages.Count;
                 }
+                else
+                {
+                    foreach (var Page in File.Pages)
+                    {
+                        if (Page.StartPos > CurrPos)
+                        {
+                            return Count;
+                        }
+                        Count++;
+                    }
+                }               
             }
             return Count;
         }
