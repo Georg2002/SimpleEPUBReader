@@ -55,7 +55,8 @@ namespace EPUBRenderer3
                         }
                         if (Letter.MarkingColorIndex != 0)
                         {
-                            drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null, Letter.GetMarkingRect());
+                            var Rect = Letter.GetMarkingRect();
+                            drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null,Rect );
                         }
                     }
                 }

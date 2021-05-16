@@ -22,7 +22,7 @@ namespace EPUBRenderer3
 
         internal bool IsSingleImage()
         {
-
+            bool ImageFound = false;
             for (int Li = 0; Li < Lines.Count; Li++)
             {
                 for (int W = 0; W < Lines[Li].Words.Count; W++)
@@ -33,6 +33,11 @@ namespace EPUBRenderer3
                         if (Letter.Type == LetterTypes.Letter)
                         {
                             return false;
+                        }
+                        else if (Letter.Type == LetterTypes.Image)
+                        {
+                            if (ImageFound) return false;
+                            ImageFound = true;
                         }
                     }
                 }

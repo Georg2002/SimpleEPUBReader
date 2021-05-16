@@ -128,12 +128,12 @@ namespace EPUBParser
             switch (Node.Name)
             {
                 case "#text":
-                case "nav":                    
+                case "nav":
                     Text = Node.InnerText;
-                   if (!string.IsNullOrWhiteSpace(Text))
-                    {                  
+                    if (!string.IsNullOrWhiteSpace(Text))
+                    {
                         Parts.Add(new TextLinePart(Text, ""));
-                    }                  
+                    }
                     break;
                 case "ruby":
                     if (Node.ChildNodes.Count >= 2)
@@ -145,7 +145,7 @@ namespace EPUBParser
                             {
                                 Ruby += Child.InnerText;
                             }
-                            else if (Child.Name=="#text" || Child.Name=="rb")
+                            else if (Child.Name == "#text" || Child.Name == "rb")
                             {
                                 Text += Child.InnerText;
                             }
@@ -154,7 +154,7 @@ namespace EPUBParser
                                 Logger.Report("Broken ruby found, ignoring", LogType.Error);
                                 break;
                             }
-                        }                       
+                        }
                         Parts.Add(new TextLinePart(Text, Ruby));
                     }
                     else
@@ -175,7 +175,7 @@ namespace EPUBParser
                     foreach (var ChildNode in Node.ChildNodes)
                     {
                         AddAppropriatePart(ChildNode, Entries, File);
-                    }            
+                    }
                     break;
                 case "p":
                     foreach (var ChildNode in Node.ChildNodes)
@@ -200,7 +200,7 @@ namespace EPUBParser
                     }
                     var Image = new ImageLinePart(Link);
                     //Set later to allow parallelization
-                    Parts.Add(Image);              
+                    Parts.Add(Image);
                     break;
                 default:
                     Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\""
@@ -217,6 +217,8 @@ namespace EPUBParser
         private void AddSpanElement(HtmlNode node, List<ZipEntry> Entries, ZipEntry File)
         {
             var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
+            var IgnoreAttribute = HTMLParser.SafeAttributeGet(node, "data-amznremoved-m8", true);
+            if (IgnoreAttribute == "true") return;
 
             switch (classAttribute)
             {

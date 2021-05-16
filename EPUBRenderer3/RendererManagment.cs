@@ -113,7 +113,7 @@ namespace EPUBRenderer3
         public void DrawTempMarking(Point relPoint, byte ColorIndex)
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
-            SecondHit = ShownPage.Intersect(relPoint);
+            SecondHit = ShownPage.Intersect(relPoint);           
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
             InvalidateVisual();
         }

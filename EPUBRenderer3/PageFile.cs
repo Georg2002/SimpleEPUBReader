@@ -113,11 +113,7 @@ namespace EPUBRenderer3
                 var Word = new Word();
 
                 foreach (var Part in RawLine.Parts)
-                {
-                    if (Part.Text != null && Part.Text.Contains("そのうちにマリコルヌが"))
-                    {
-                        ;
-                    }
+                {                  
                     switch (Part.Type)
                     {
                         case LinePartTypes.sesame:
