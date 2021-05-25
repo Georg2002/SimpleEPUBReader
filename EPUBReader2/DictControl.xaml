@@ -37,7 +37,8 @@
         <Button Grid.Column="0" Grid.Row="2" Content="⇓" Style="{StaticResource DictButtonStyle}" Click="Button_Click_1"/>
         <Button Grid.Column="1" Grid.Row="2" Content="⇓" Style="{StaticResource DictButtonStyle}" Click="Button_Click_2"/>
         <ListBox Grid.Row="3" Grid.ColumnSpan="2" x:Name="List" HorizontalContentAlignment="Stretch"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderThickness="0">
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderThickness="0" 
+                 ScrollViewer.CanContentScroll="False">
             <ListBox.Resources>
                 <Style TargetType="ScrollBar">
                     <Setter Property="Width" Value="10"/>

@@ -53,42 +53,42 @@
                 </Grid.ColumnDefinitions>
                 <Button Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" x:Name="OpenButton">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Öffnen"/>
+                        <TextBlock Text="Open"/>
                     </Border>
                 </Button>
                 <Button Click="Library_Click" Grid.Column="1" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Bibliothek"/>
+                        <TextBlock Text="Library"/>
                     </Border>
                 </Button>
                 <Button Click="Chapter_Click" Grid.Column="2" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Kapitel"/>
+                        <TextBlock Text="Chapters"/>
                     </Border>
                 </Button>
                 <Button Click="Pages_Click" Grid.Column="3" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Seiten"/>
+                        <TextBlock Text="Pages"/>
                     </Border>
                 </Button>
                 <Button Click="Color_Click" x:Name="ColorButton" Grid.Column="4" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Farbe wechseln"/>
+                        <TextBlock Text="Change color"/>
                     </Border>
                 </Button>
                 <Button Click="Fullscreen_Click" Grid.Column="5" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Vollbild"/>
+                        <TextBlock Text="Fullscreen"/>
                     </Border>
                 </Button>
                 <Button Click="Dict_Click" Grid.Column="6" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Lexikon"/>
+                        <TextBlock Text="Dictionary"/>
                     </Border>
                 </Button>
                 <Button Click="Close_Click" Grid.Column="7" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Schließen"/>
+                        <TextBlock Text="Close"/>
                     </Border>
                 </Button>
             </Grid>

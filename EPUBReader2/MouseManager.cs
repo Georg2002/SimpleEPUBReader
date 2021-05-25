@@ -119,7 +119,7 @@ namespace EPUBReader2
                 if (Draw && Delta > 0)
                 {
                     Renderer.ContinueSelection(RelPoint);
-                  MainWindow.Lookup( Renderer.GetSelection());
+                    MainWindow.Lookup(Renderer.GetSelection());
                 }
             }
             else

@@ -88,8 +88,10 @@ namespace EPUBReader2
            //adjective
            new Inflection("かった","い"),new Inflection("くない","い"),
            new Inflection("く","い"),new Inflection("くある","い"),
+           new Inflection("ければ","い"),
+
            //random, sort later
-             new Inflection("された","される"),
+             new Inflection("された","される"),new Inflection("てる","ている"),
            new Inflection("される","す"), new Inflection("される","する"),
 
            //present-negative
@@ -121,6 +123,13 @@ namespace EPUBReader2
            new Inflection("みます","む"), new Inflection("きます","く"),
            new Inflection("ります","る"),new Inflection("います","う"),
 
+           //stem-backtransformations
+           new Inflection("ぎ","ぐ"),new Inflection("い","う"),
+           new Inflection("し","す"), new Inflection("ち","つ"),
+           new Inflection("び","ぶ"), new Inflection("に","ぬ"),
+           new Inflection("み","む"), new Inflection("き","く"),
+           new Inflection("り","る"),
+
            //te-form
            new Inflection("て","た"), new Inflection("で","だ"), 
            new Inflection("くて","い"),new Inflection("いる",""),  
@@ -141,7 +150,24 @@ namespace EPUBReader2
            new Inflection("しよう","する"), new Inflection("こよう","くる"),
 
            //shimau-chau
-           new Inflection("しまう","")
+           new Inflection("しまう",""),
+
+           //imperative
+            new Inflection("ろ","る"), new Inflection("せ","す"),
+           new Inflection("け","く"), new Inflection("げ","ぐ"),
+            new Inflection("べ","ぶ"), new Inflection("て","つ"),
+              new Inflection("め","む"), new Inflection("れ","る"),
+           new Inflection("ね","ぬ"), new Inflection("え","う"),
+            new Inflection("しろ","する"), new Inflection("こい","くる"),
+             new Inflection("くれる","くれ"),
+
+               //ba-form
+            new Inflection("せば","す"),
+           new Inflection("けば","く"), new Inflection("げば","ぐ"),
+            new Inflection("べば","ぶ"), new Inflection("てば","つ"),
+              new Inflection("めば","む"), new Inflection("れば","る"),
+           new Inflection("ねば","ぬ"), new Inflection("えば","う"),
+           
        };
 
         //思われます 思われる　思う

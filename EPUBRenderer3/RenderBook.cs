@@ -68,7 +68,24 @@ namespace EPUBRenderer3
 
         internal Letter GetLetter(PosDef Pos)
         {
-            return PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters[Pos.Letter];
+            if (Pos == PosDef.InvalidPosition) return null;
+            if (Pos.FileIndex < PageFiles.Count && Pos.FileIndex >=0)
+            {
+                var Page = PageFiles[Pos.FileIndex];
+                if (Pos.Line < Page.Lines.Count && Pos.Line >= 0)
+                {
+                    var Line = Page.Lines[Pos.Line];
+                    if (Pos.Word < Line.Words.Count && Pos.Word >= 0)
+                    {
+                        var Word = Line.Words[Pos.Word];
+                        if (Pos.Letter < Word.Letters.Count && Pos.Letter >= 0)
+                        {
+                            return Word.Letters[Pos.Letter];
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         private void Iterate(PosDef A, PosDef B, Action<Letter> Action)
@@ -207,6 +224,12 @@ namespace EPUBRenderer3
             if (selectionStart == PosDef.InvalidPosition ||selectionEnd== PosDef.InvalidPosition)
             {
                 return Text;
+            }
+            if (selectionEnd < selectionStart)
+            {
+                var x = selectionEnd;
+                selectionEnd = selectionStart;
+                selectionStart = x;
             }
             Iterate(selectionStart, selectionEnd, a =>
             {

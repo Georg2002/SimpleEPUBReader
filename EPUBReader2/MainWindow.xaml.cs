@@ -109,7 +109,7 @@ namespace EPUBReader2
         internal bool MouseOverText()
         {
             var Pos = Mouse.GetPosition(Renderer);
-            return WindowSize.Y >= Pos.Y && WindowSize.X >= Pos.X && Pos.X >= 0 && Pos.Y >= 0;
+            return Renderer.ActualHeight >= Pos.Y && Renderer.ActualWidth >= Pos.X && Pos.X >= 0 && Pos.Y >= 0;
         }
 
         internal void SetToBook(int LibraryIndex)

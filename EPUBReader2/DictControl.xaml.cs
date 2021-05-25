@@ -41,6 +41,7 @@ namespace EPUBReader2
 
         public void ActiveSet(bool Set)
         {
+            SelectionChanged("");
             Active = Set;
         }
 

@@ -70,15 +70,16 @@ namespace EPUBReader2
                 JEntries = (IJapaneseEntry[])await DictTasks[0];
                 KEntries = (IKanjiEntry[])await DictTasks[1];
                 NEntries = (INameEntry[])await DictTasks[2];
-            }         
+            }
 
             text = text.Trim();
             string[] Searchwords = GetSearchwords(text);
             string Hiragana = LanguageResources.GetHiragana(text);
+            Console.WriteLine(Searchwords.Length.ToString());
             List<DictWord> Results = new List<DictWord>();
             var J = JLookup(Searchwords);
             var K = KLookup(text);
-            var N = NLookup(Hiragana);            
+            var N = NLookup(Hiragana);
             Results.AddRange(await J);
             Results.AddRange(await K);
             Results.AddRange(await N);
@@ -100,7 +101,7 @@ namespace EPUBReader2
                         foreach (var IKanji in Entry.Kanjis)
                         {
                             NewRes.WrittenForm = Accumulate(NewRes.WrittenForm, IKanji.Text);
-                        }                     
+                        }
                         foreach (var Reading in Entry.Readings)
                         {
                             NewRes.Readings = Accumulate(NewRes.Readings, Reading.Text);
@@ -141,7 +142,7 @@ namespace EPUBReader2
                                 if (Reading.Type.Value == 3 || Reading.Type.Value == 4)
                                 {
                                     NewRes.Readings = Accumulate(NewRes.Readings, Reading.Value);
-                                }                               
+                                }
                             }
                             Results.Add(NewRes);
                         }
@@ -192,14 +193,23 @@ namespace EPUBReader2
         private string[] GetSearchwords(string text)
         {
             var BaseForm = LanguageResources.GetPossibleBaseForms(text);
-            string[] res = new string[BaseForm.Count + 2];
-            res[0] = text;
-            res[1] = LanguageResources.GetKatakana(text);
-            for (int i = 0; i < BaseForm.Count; i++)
+
+            string Katakana = LanguageResources.GetKatakana(text);      
+            List<string> res = new List<string>();
+            res.Add(text);
+            if (Katakana != text)
             {
-                res[2 + i] = BaseForm[i];
+                res.Add(Katakana);
             }
-            return res;
+
+            foreach (var Form in BaseForm)
+            {
+                if (Form != null && Form != text)
+                {
+                    res.Add(Form);
+                }
+            }
+            return res.ToArray();
         }
 
         private string Accumulate(string Sum, string New)

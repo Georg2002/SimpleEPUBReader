@@ -18,8 +18,9 @@ namespace EPUBRenderer3
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
         public Brush[] MarkingColors;
-        private PosDef SelectionEnd = PosDef.InvalidPosition;
+        private PosDef SelectionEnd = PosDef.InvalidPosition;       
         private PosDef SelectionStart = PosDef.InvalidPosition;
+
 
         public Renderer()
         {
@@ -30,11 +31,29 @@ namespace EPUBRenderer3
 
         public void MoveSelection(int front, int end)
         {
+            if (SelectionEnd == PosDef.InvalidPosition || SelectionStart == PosDef.InvalidPosition)
+            {
+                return;
+            }
             RemoveSelection();
+            if (SelectionStart > SelectionEnd)
+            {
+                var X = SelectionStart;
+                SelectionStart = SelectionEnd;
+                SelectionEnd = X;
+            }
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            var Lines = CurrBook.PageFiles[CurrBook.CurrPos.FileIndex].Lines;
+            var Lines = CurrBook.PageFiles[SelectionStart.FileIndex].Lines;
             MoveSelectionPoints(front, end, Lines);
+
+            Letter StartLetter = CurrBook.GetLetter(SelectionStart);
+            Letter EndLetter = CurrBook.GetLetter(SelectionEnd);
+            if (StartLetter == null || EndLetter == null)
+            {
+                SelectionEnd = EndOld;
+                SelectionStart = StartOld;
+            }
             //revert if overtook
             if (SelectionStart > SelectionEnd)
             {
@@ -51,17 +70,24 @@ namespace EPUBRenderer3
             var StartOld = SelectionStart;
             if (front > 0) SelectionStart.Increment(Lines);
             else if (front < 0) SelectionStart.Decrement(Lines);
-            if (SelectionStart.FileIndex == -1) SelectionStart = StartOld;
+            if (SelectionStart.FileIndex == -1)
+            {
+                SelectionStart = StartOld;
+                return;
+            }
             if (end > 0) SelectionEnd.Increment(Lines);
             else if (end < 0) SelectionEnd.Decrement(Lines);
-            if (SelectionEnd.FileIndex == -1) SelectionEnd = EndOld;
+            if (SelectionEnd.FileIndex == -1)
+            {
+                SelectionEnd = EndOld;
+                return;
+            }
 
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
             Letter EndLetter = CurrBook.GetLetter(SelectionEnd);
-            if (StartLetter == null ||EndLetter == null)
+
+            if (StartLetter == null || EndLetter == null)
             {
-                SelectionEnd = EndOld;
-                SelectionStart = StartOld;
                 return;
             }
             if (StartLetter.Type == LetterTypes.Letter && EndLetter.Type == LetterTypes.Letter)
@@ -72,8 +98,8 @@ namespace EPUBRenderer3
                 {
                     return;
                 }
-            }           
-                MoveSelectionPoints(front, end, Lines);            
+            }
+            MoveSelectionPoints(front, end, Lines);
         }
 
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -93,6 +119,8 @@ namespace EPUBRenderer3
                 MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            SelectionStart = PosDef.InvalidPosition;
+            SelectionEnd = PosDef.InvalidPosition;
             Markings = Markings ?? new List<MrkDef>();
             Epub epub = new Epub(Path);
             CurrBook = new RenderBook(epub);
@@ -193,8 +221,12 @@ namespace EPUBRenderer3
             bool Valid = false;
             if (CurrBook != null)
             {
-                SelectionStart = ShownPage.Intersect(relPoint);
-                Valid = SelectionStart.FileIndex != -1;
+                var NewStart = ShownPage.Intersect(relPoint);
+                Valid = NewStart.FileIndex != -1;
+                if (Valid)
+                {
+                    SelectionStart = NewStart;
+                }               
             }
             return Valid;
         }
@@ -213,13 +245,7 @@ namespace EPUBRenderer3
             if (SelectionStart != PosDef.InvalidPosition && SelectionEnd != PosDef.InvalidPosition)
             {
                 CurrBook.AddSelection(SelectionStart, SelectionEnd);
-                if (SelectionEnd < SelectionStart)
-                {
-                    var x = SelectionEnd;
-                    SelectionEnd = SelectionStart;
-                    SelectionStart = x;
-                }           
-            }            
+            }
         }
 
         public string GetSelection()
