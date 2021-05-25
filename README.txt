@@ -1,0 +1,1 @@
+Make sure to install one of the two fonts in this folder, otherwise you will only see boxes instead of text.
