@@ -33,6 +33,7 @@ namespace EPUBReader2
         private readonly MouseManager MouseManager;
         public byte ColorIndex = 1;
         private const byte Alpha = 100;
+        private bool DictionaryActive = false;
         readonly Brush[] MarkingColors = new Brush[] {null,
             new SolidColorBrush(new Color() { R = 255, G = 0, B = 0, A = Alpha }),
             new SolidColorBrush( new Color() { R = 0, G = 255,B = 0,A = Alpha}),
@@ -54,7 +55,7 @@ namespace EPUBReader2
         }
 
         private void LoadSave()
-        {         
+        {
             SaveStruc Save = SaveAndLoad.LoadSave();
             ColorIndex = Save.ColorIndex != 0 && Save.ColorIndex < MarkingColors.Length ? Save.ColorIndex : (byte)1;
             ColorButton.Background = MarkingColors[ColorIndex];
@@ -69,8 +70,8 @@ namespace EPUBReader2
             }
             Dialog.InitialDirectory = Save.LastDirectory;
             if (Save.Books != null)
-            {              
-                Library.SetFromSave(Save.Books);   
+            {
+                Library.SetFromSave(Save.Books);
                 if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count && Renderer.CurrBook == null)
                 {
                     SetToBook(Save.CurrentBookIndex);
@@ -87,10 +88,11 @@ namespace EPUBReader2
                 {
                     Height = Save.WindowSize.Y;
                     Width = Save.WindowSize.X;
-                }     
+                }
 #endif
             }
             if (Save.Fullscreen) Fullscreen_Click(null, null);
+            if (Save.DictOpen) Dict_Click(null, null);
         }
 
         internal void DeleteBook(int index)
@@ -104,10 +106,21 @@ namespace EPUBReader2
             return Renderer.GetCurrentPage();
         }
 
+        internal bool MouseOverText()
+        {
+            var Pos = Mouse.GetPosition(Renderer);
+            return WindowSize.Y >= Pos.Y && WindowSize.X >= Pos.X && Pos.X >= 0 && Pos.Y >= 0;
+        }
+
         internal void SetToBook(int LibraryIndex)
         {
             LibraryBook Book = Library.GetBook(LibraryIndex);
             Renderer.LoadBook(Book.FilePath, Book.CurrPos, Book.Markings);
+        }
+
+        internal void Lookup(string Text)
+        {
+            DictControl.SelectionChanged(Text);
         }
 
         internal int GetPageCount()
@@ -117,12 +130,13 @@ namespace EPUBReader2
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            DictControl.Init(this);
             var Args = Environment.GetCommandLineArgs();
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
                 Renderer.LoadBook(Args[1]);
-            }           
-            LoadSave();          
+            }
+            LoadSave();
         }
 
         private void Right_Click(object sender, RoutedEventArgs e)
@@ -257,6 +271,7 @@ namespace EPUBReader2
             Save.ColorIndex = ColorIndex;
             Save.LastDirectory = Dialog.InitialDirectory;
             Save.WindowSize = WindowSize;
+            Save.DictOpen = DictionaryActive;
             return Save;
         }
 
@@ -267,12 +282,35 @@ namespace EPUBReader2
             {
                 WindowSize.X = ActualWidth;
                 WindowSize.Y = ActualHeight;
-            }           
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveAndLoad.Save(GetSave());
+        }
+
+        private void Dict_Click(object sender, RoutedEventArgs e)
+        {
+            if (DictionaryActive)
+            {
+                DictColumn.Width = new GridLength(0, GridUnitType.Pixel);
+
+            }
+            else
+            {
+                DictColumn.Width = new GridLength(1, GridUnitType.Auto);
+            }
+            DictionaryActive = !DictionaryActive;
+            DictControl.ActiveSet(DictionaryActive);
+            MouseManager.DictActive = DictionaryActive;
+            Renderer.DeactivateSelection();
+        }
+
+        internal void DictSelectionMoved(int front, int end)
+        {
+            Renderer.MoveSelection(front, end);
+            DictControl.SelectionChanged(Renderer.GetSelection());
         }
     }
 }

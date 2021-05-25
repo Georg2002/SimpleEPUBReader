@@ -17,7 +17,9 @@ namespace EPUBRenderer3
         RenderPage ShownPage = null;
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
-        public Brush[] MarkingColors;   
+        public Brush[] MarkingColors;
+        private PosDef SelectionEnd = PosDef.InvalidPosition;
+        private PosDef SelectionStart = PosDef.InvalidPosition;
 
         public Renderer()
         {
@@ -26,13 +28,61 @@ namespace EPUBRenderer3
             MinWidth = 100;
         }
 
+        public void MoveSelection(int front, int end)
+        {
+            RemoveSelection();
+            var EndOld = SelectionEnd;
+            var StartOld = SelectionStart;
+            var Lines = CurrBook.PageFiles[CurrBook.CurrPos.FileIndex].Lines;
+            MoveSelectionPoints(front, end, Lines);
+            //revert if overtook
+            if (SelectionStart > SelectionEnd)
+            {
+                SelectionStart = StartOld;
+                SelectionEnd = EndOld;
+            }
+            CurrBook.AddSelection(SelectionStart, SelectionEnd);
+            InvalidateVisual();
+        }
+
+        private void MoveSelectionPoints(int front, int end, List<Line> Lines)
+        {
+            var EndOld = SelectionEnd;
+            var StartOld = SelectionStart;
+            if (front > 0) SelectionStart.Increment(Lines);
+            else if (front < 0) SelectionStart.Decrement(Lines);
+            if (SelectionStart.FileIndex == -1) SelectionStart = StartOld;
+            if (end > 0) SelectionEnd.Increment(Lines);
+            else if (end < 0) SelectionEnd.Decrement(Lines);
+            if (SelectionEnd.FileIndex == -1) SelectionEnd = EndOld;
+
+            Letter StartLetter = CurrBook.GetLetter(SelectionStart);
+            Letter EndLetter = CurrBook.GetLetter(SelectionEnd);
+            if (StartLetter == null ||EndLetter == null)
+            {
+                SelectionEnd = EndOld;
+                SelectionStart = StartOld;
+                return;
+            }
+            if (StartLetter.Type == LetterTypes.Letter && EndLetter.Type == LetterTypes.Letter)
+            {
+                var StartTL = (TextLetter)StartLetter;
+                var EndTL = (TextLetter)EndLetter;
+                if (StartTL.FontSize == TextLetter.StandardFontSize && EndTL.FontSize == TextLetter.StandardFontSize)
+                {
+                    return;
+                }
+            }           
+                MoveSelectionPoints(front, end, Lines);            
+        }
+
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             PageSize = new Vector(ActualWidth, ActualHeight);
             if (CurrBook != null)
             {
                 CurrBook.Position(PageSize);
-                OpenPage(CurrBook.CurrPos);     
+                OpenPage(CurrBook.CurrPos);
             }
         }
 
@@ -113,7 +163,7 @@ namespace EPUBRenderer3
         public void DrawTempMarking(Point relPoint, byte ColorIndex)
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
-            SecondHit = ShownPage.Intersect(relPoint);           
+            SecondHit = ShownPage.Intersect(relPoint);
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
             InvalidateVisual();
         }
@@ -136,6 +186,45 @@ namespace EPUBRenderer3
                 CurrBook.RemoveMarking(A, B);
             }
             InvalidateVisual();
+        }
+
+        public bool StartSelection(Point relPoint)
+        {
+            bool Valid = false;
+            if (CurrBook != null)
+            {
+                SelectionStart = ShownPage.Intersect(relPoint);
+                Valid = SelectionStart.FileIndex != -1;
+            }
+            return Valid;
+        }
+
+        public void RemoveSelection()
+        {
+            CurrBook.RemoveSelection(SelectionStart, SelectionEnd);
+        }
+
+        public void ContinueSelection(Point relPoint)
+        {
+            InvalidateVisual();
+
+            RemoveSelection();
+            SelectionEnd = ShownPage.Intersect(relPoint);
+            if (SelectionStart != PosDef.InvalidPosition && SelectionEnd != PosDef.InvalidPosition)
+            {
+                CurrBook.AddSelection(SelectionStart, SelectionEnd);
+                if (SelectionEnd < SelectionStart)
+                {
+                    var x = SelectionEnd;
+                    SelectionEnd = SelectionStart;
+                    SelectionStart = x;
+                }           
+            }            
+        }
+
+        public string GetSelection()
+        {
+            return CurrBook.GetSelection(SelectionStart, SelectionEnd);
         }
 
         public int GetPageCount()

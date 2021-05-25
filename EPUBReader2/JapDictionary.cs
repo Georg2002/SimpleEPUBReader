@@ -8,7 +8,7 @@ using Wacton.Desu.Japanese;
 using Wacton.Desu.Kanji;
 using Wacton.Desu.Names;
 
-namespace TestApp
+namespace EPUBReader2
 {
     public class JapDictionary
     {
@@ -70,7 +70,7 @@ namespace TestApp
                 JEntries = (IJapaneseEntry[])await DictTasks[0];
                 KEntries = (IKanjiEntry[])await DictTasks[1];
                 NEntries = (INameEntry[])await DictTasks[2];
-            }
+            }         
 
             text = text.Trim();
             string[] Searchwords = GetSearchwords(text);
@@ -78,7 +78,7 @@ namespace TestApp
             List<DictWord> Results = new List<DictWord>();
             var J = JLookup(Searchwords);
             var K = KLookup(text);
-            var N = NLookup(Hiragana);
+            var N = NLookup(Hiragana);            
             Results.AddRange(await J);
             Results.AddRange(await K);
             Results.AddRange(await N);
@@ -192,11 +192,12 @@ namespace TestApp
         private string[] GetSearchwords(string text)
         {
             var BaseForm = LanguageResources.GetPossibleBaseForms(text);
-            string[] res = new string[BaseForm.Count + 1];
+            string[] res = new string[BaseForm.Count + 2];
             res[0] = text;
+            res[1] = LanguageResources.GetKatakana(text);
             for (int i = 0; i < BaseForm.Count; i++)
             {
-                res[1 + i] = BaseForm[i];
+                res[2 + i] = BaseForm[i];
             }
             return res;
         }

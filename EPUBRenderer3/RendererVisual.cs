@@ -22,29 +22,33 @@ namespace EPUBRenderer3
             {
                 foreach (var Word in Line.Words)
                 {
-                    foreach (var Letter in Word.Letters)
+                    foreach (var Let in Word.Letters)
                     {           
-                        switch (Letter.Type)
+                        switch (Let.Type)
                         {
                             case LetterTypes.Letter:
-                                var Text = (FormattedText)Letter.GetRenderElement();
-                                var TxtLetter = (TextLetter)Letter;
-                                var DrawPos = Letter.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
+                                var Text = (FormattedText)Let.GetRenderElement();
+                                var TxtLetter = (TextLetter)Let;
+                                var DrawPos = Let.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
                                 DrawPos.Y -= TxtLetter.FontSize * CharInfo.FontOffset;
-                                drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));                               
-                              
+                                drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));
+                                if (TxtLetter.DictSelected && TxtLetter.FontSize == TextLetter.StandardFontSize)
+                                {
+                                    var Rect = Let.GetMarkingRect();
+                                    drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
+                                }
                                 break;
                             case LetterTypes.Image:
-                                var ImgLetter = (ImageLetter)Letter;
-                                var Img = (ImageSource)Letter.GetRenderElement();                               
+                                var ImgLetter = (ImageLetter)Let;
+                                var Img = (ImageSource)Let.GetRenderElement();                               
                                 if (SingleImage)
                                 {
                                     Vector RenderSize = ImgLetter.GetMaxRenderSize(PageSize);
                                     ImgLetter.StartPosition = (PageSize - RenderSize) / 2;
                                     ImgLetter.EndPosition = ImgLetter.StartPosition + RenderSize;                                    
                                 }
-                                var StartPoint = new Point(Letter.StartPosition.X, Letter.StartPosition.Y);
-                                var EndPoint = new Point(Letter.EndPosition.X, Letter.EndPosition.Y);
+                                var StartPoint = new Point(Let.StartPosition.X, Let.StartPosition.Y);
+                                var EndPoint = new Point(Let.EndPosition.X, Let.EndPosition.Y);
                                 drawingContext.DrawImage(Img, new Rect(StartPoint, EndPoint));
                                
                                 break;
@@ -53,11 +57,11 @@ namespace EPUBRenderer3
                             default:
                                 throw new NotImplementedException();
                         }
-                        if (Letter.MarkingColorIndex != 0)
+                        if (Let.MarkingColorIndex != 0)
                         {
-                            var Rect = Letter.GetMarkingRect();
-                            drawingContext.DrawRectangle(MarkingColors[Letter.MarkingColorIndex], null,Rect );
-                        }
+                            var Rect = Let.GetMarkingRect();
+                            drawingContext.DrawRectangle(MarkingColors[Let.MarkingColorIndex], null,Rect );
+                        }                       
                     }
                 }
             }
@@ -67,6 +71,13 @@ namespace EPUBRenderer3
                 FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black,1);
             double Width = PageText.Width;
             drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
-        }      
+        }
+
+        public void DeactivateSelection()
+        {
+            RemoveSelection();
+            SelectionStart = PosDef.InvalidPosition;
+            SelectionEnd = PosDef.InvalidPosition;
+        }
     }
 }

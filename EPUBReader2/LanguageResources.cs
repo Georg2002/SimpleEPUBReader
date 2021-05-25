@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestApp
+namespace EPUBReader2
 {
     public static class LanguageResources
     {
@@ -45,6 +45,24 @@ namespace TestApp
                 }
             }
             return Hira;
+        }
+
+        internal static string GetKatakana(string text)
+        {
+            string Kata = "";
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (HiraganaDict.ContainsValue(c))
+                {
+                    Kata += HiraganaDict.First(a=>a.Value==c).Key;
+                }
+                else
+                {
+                    Kata += c;
+                }
+            }
+            return Kata;
         }
 
         private struct Inflection
@@ -174,7 +192,7 @@ namespace TestApp
         private static string ReplaceEnd(string text, string Old, string New)
         {
             return text.Remove(text.Length - Old.Length) + New;
-        }
+        }       
     }
 }
 

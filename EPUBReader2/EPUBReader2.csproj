@@ -58,12 +58,19 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictControl.xaml.cs">
+      <DependentUpon>DictControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="JapDictionary.cs" />
     <Compile Include="LanguageResources.cs" />
     <Compile Include="SaveAndLoad.cs" />
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DictControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -34,6 +34,7 @@ namespace EPUBRenderer3
         public const float RubyOffset = 0.93f * LineDist;
         public static readonly Vector OutsideVector = new Vector(-100000, -100000);
 
+        public bool DictSelected;
         public Vector StartPosition;
         public Vector EndPosition;
         public virtual Vector HitboxStart { get => StartPosition; }
@@ -41,6 +42,8 @@ namespace EPUBRenderer3
         public Vector NextWritePos;
         public LetterTypes Type;
         public byte MarkingColorIndex;
+        internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R=50 });
+
         public virtual bool Position(LetterPlacementInfo Info)
         {
             return false;

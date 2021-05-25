@@ -126,6 +126,7 @@ namespace EPUBRenderer3
 
         internal void Increment(List<Line> lines)
         {
+            if (this == InvalidPosition) return;
             if (Letter < lines[Line].Words[Word].Letters.Count - 1)
             {
                 Letter++;
@@ -158,6 +159,7 @@ namespace EPUBRenderer3
 
         internal void Decrement(List<Line> lines)
         {
+            if (this == InvalidPosition) return;
             if (Letter > 0)
             {
                 Letter--;
@@ -178,7 +180,7 @@ namespace EPUBRenderer3
                         Letter = lines[Line].Words[Word].Letters.Count - 1;
                     }
                     else
-                    {
+                    {                         
                         Line = -1;
                         Word = -1;
                         Letter = -1;

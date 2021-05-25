@@ -66,6 +66,11 @@ namespace EPUBRenderer3
             }
         }
 
+        internal Letter GetLetter(PosDef Pos)
+        {
+            return PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters[Pos.Letter];
+        }
+
         private void Iterate(PosDef A, PosDef B, Action<Letter> Action)
         {
             if (A.FileIndex == -1 || B.FileIndex == -1) return;
@@ -194,6 +199,37 @@ namespace EPUBRenderer3
                 }
             }
             return Markings;
+        }
+
+        internal string GetSelection(PosDef selectionStart, PosDef selectionEnd)
+        {
+            string Text = "";
+            if (selectionStart == PosDef.InvalidPosition ||selectionEnd== PosDef.InvalidPosition)
+            {
+                return Text;
+            }
+            Iterate(selectionStart, selectionEnd, a =>
+            {
+                if (a.Type == LetterTypes.Letter)
+                {
+                    var TL = (TextLetter)a;
+                    if (TL.FontSize == Letter.StandardFontSize)
+                    {
+                        Text += TL.Character;
+                    }                   
+                }
+            });
+            return Text;
+        }
+
+        internal void AddSelection(PosDef selectionStart, PosDef selectionEnd)
+        {
+            Iterate(selectionStart, selectionEnd, a => a.DictSelected = true);
+        }
+
+        internal void RemoveSelection(PosDef selectionStart, PosDef selectionEnd)
+        {
+            Iterate(selectionStart, selectionEnd, a => a.DictSelected = false);
         }
 
         internal PosDef GetChapterPos(int chapterIndex)

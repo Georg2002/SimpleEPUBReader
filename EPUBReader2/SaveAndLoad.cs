@@ -66,5 +66,6 @@ namespace EPUBReader2
         public Vector WindowSize;
         public string LastDirectory;
         public byte ColorIndex;
+        public bool DictOpen;
     }
 }
