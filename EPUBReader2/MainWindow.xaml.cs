@@ -255,11 +255,6 @@ namespace EPUBReader2
             }
         }
 
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
         private SaveStruc GetSave()
         {
             var Save = new SaveStruc();
@@ -311,6 +306,23 @@ namespace EPUBReader2
         {
             Renderer.MoveSelection(front, end);
             DictControl.SelectionChanged(Renderer.GetSelection());
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {           
+            txtClose.Text = "Double\nclick";
+            ResetCloseText();
+        }
+
+        private async void ResetCloseText()
+        {
+            await Task.Delay(2000);
+            txtClose.Text = "Close";
+        }
+
+        private void Close_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

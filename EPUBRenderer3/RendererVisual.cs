@@ -14,7 +14,7 @@ namespace EPUBRenderer3
     {
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (ShownPage == null) return;
+            if (ShownPage == null ||!Rerender) return;
 
             bool SingleImage = ShownPage.IsSingleImage();
 
@@ -71,13 +71,7 @@ namespace EPUBRenderer3
                 FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black,1);
             double Width = PageText.Width;
             drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
-        }
-
-        public void DeactivateSelection()
-        {
-            RemoveSelection();
-            SelectionStart = PosDef.InvalidPosition;
-            SelectionEnd = PosDef.InvalidPosition;
+            Rerender = false;
         }
     }
 }

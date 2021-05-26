@@ -86,9 +86,9 @@
                         <TextBlock Text="Dictionary"/>
                     </Border>
                 </Button>
-                <Button Click="Close_Click" Grid.Column="7" Style="{StaticResource MenuButtonStyle}">
+                <Button Click="Close_Click" MouseDoubleClick="Close_MouseDoubleClick" Grid.Column="7" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Close"/>
+                        <TextBlock Text="Close" x:Name="txtClose" TextAlignment="Center"/>
                     </Border>
                 </Button>
             </Grid>

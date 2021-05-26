@@ -22,7 +22,7 @@ namespace EPUBReader2
     {
         JapDictionary Dict;
         MainWindow main;
-        bool Active = false;     
+        bool Active = false;
 
         public DictControl()
         {
@@ -41,8 +41,11 @@ namespace EPUBReader2
 
         public void ActiveSet(bool Set)
         {
-            SelectionChanged("");
             Active = Set;
+            if (txtSelection.Text != "")
+            {
+                SelectionChanged("");
+            }
         }
 
         public async void SelectionChanged(string Text)

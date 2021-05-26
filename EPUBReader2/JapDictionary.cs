@@ -67,9 +67,13 @@ namespace EPUBReader2
             LookupActive = true;
             if (JEntries == null)
             {
-                JEntries = (IJapaneseEntry[])await DictTasks[0];
+                JEntries = (IJapaneseEntry[])await DictTasks[0];                
                 KEntries = (IKanjiEntry[])await DictTasks[1];
                 NEntries = (INameEntry[])await DictTasks[2];
+                foreach (var DictTask in DictTasks)
+                {
+                    DictTask.Dispose();
+                }
             }
 
             text = text.Trim();

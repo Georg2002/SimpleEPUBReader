@@ -20,6 +20,7 @@ namespace EPUBRenderer3
         public Brush[] MarkingColors;
         private PosDef SelectionEnd = PosDef.InvalidPosition;       
         private PosDef SelectionStart = PosDef.InvalidPosition;
+        private bool Rerender = false;
 
 
         public Renderer()
@@ -61,7 +62,7 @@ namespace EPUBRenderer3
                 SelectionEnd = EndOld;
             }
             CurrBook.AddSelection(SelectionStart, SelectionEnd);
-            InvalidateVisual();
+            Refresh();
         }
 
         private void MoveSelectionPoints(int front, int end, List<Line> Lines)
@@ -110,6 +111,7 @@ namespace EPUBRenderer3
                 CurrBook.Position(PageSize);
                 OpenPage(CurrBook.CurrPos);
             }
+            Rerender = true;
         }
 
         public void LoadBook(string Path, PosDef Position = new PosDef(), List<MrkDef> Markings = null)
@@ -140,7 +142,7 @@ namespace EPUBRenderer3
             CurrBook.CurrPos = Position;
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
             ShownPage = PageFile.Pages.Find(a => a.Within(Position));
-            InvalidateVisual();
+            Refresh(); ;
         }
 
         public void Switch(int Dir)
@@ -193,7 +195,7 @@ namespace EPUBRenderer3
             CurrBook.RemoveMarking(FirstHit, SecondHit);
             SecondHit = ShownPage.Intersect(relPoint);
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
-            InvalidateVisual();
+            Refresh();
         }
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
@@ -213,7 +215,7 @@ namespace EPUBRenderer3
                 (A, B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
                 CurrBook.RemoveMarking(A, B);
             }
-            InvalidateVisual();
+            Refresh();
         }
 
         public bool StartSelection(Point relPoint)
@@ -238,8 +240,7 @@ namespace EPUBRenderer3
 
         public void ContinueSelection(Point relPoint)
         {
-            InvalidateVisual();
-
+            Refresh();
             RemoveSelection();
             SelectionEnd = ShownPage.Intersect(relPoint);
             if (SelectionStart != PosDef.InvalidPosition && SelectionEnd != PosDef.InvalidPosition)
@@ -281,6 +282,19 @@ namespace EPUBRenderer3
         {
             if (CurrBook == null) return new LibraryBook() { CurrPos = PosDef.InvalidPosition };
             return CurrBook.GetLibraryBook();
+        }
+
+        public void DeactivateSelection()
+        {
+            RemoveSelection();
+            SelectionStart = PosDef.InvalidPosition;
+            SelectionEnd = PosDef.InvalidPosition;
+        }
+
+        private void Refresh()
+        {
+            Rerender = true;
+            InvalidateVisual();
         }
     }
 }
