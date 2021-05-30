@@ -31,7 +31,8 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="txtSelection" Grid.ColumnSpan="2" Background="WhiteSmoke" Text="" FontSize="20" TextAlignment="Center" Padding="0,5,0,5"/>
+        <TextBox x:Name="txtSelection" Grid.ColumnSpan="2" Background="WhiteSmoke" IsReadOnly="True"
+                   Text="" FontSize="20" TextAlignment="Center" Padding="0,5,0,5" />
         <Button Grid.Column="0" Grid.Row="1" Content="⇑" Style="{StaticResource DictButtonStyle}" x:Name="clrBtn" Click="clrBtn_Click"/>
         <Button Grid.Column="1" Grid.Row="1" Content="⇑" Style="{StaticResource DictButtonStyle}" Click="Button_Click"/>
         <Button Grid.Column="0" Grid.Row="2" Content="⇓" Style="{StaticResource DictButtonStyle}" Click="Button_Click_1"/>

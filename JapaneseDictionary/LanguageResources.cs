@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPUBReader2
+namespace WatconWrapper
 {
     public static class LanguageResources
     {
@@ -55,7 +55,7 @@ namespace EPUBReader2
                 char c = text[i];
                 if (HiraganaDict.ContainsValue(c))
                 {
-                    Kata += HiraganaDict.First(a=>a.Value==c).Key;
+                    Kata += HiraganaDict.First(a => a.Value == c).Key;
                 }
                 else
                 {
@@ -91,7 +91,7 @@ namespace EPUBReader2
            new Inflection("ければ","い"),
 
            //random, sort later
-             new Inflection("された","される"),new Inflection("てる","ている"),
+           new Inflection("された","される"),new Inflection("てる","ている"),
            new Inflection("される","す"), new Inflection("される","する"),
 
            //present-negative
@@ -111,10 +111,10 @@ namespace EPUBReader2
            new Inflection("った","う"), new Inflection("た","る"),
 
            //past-negative
-            new Inflection("かった","い"),
+           new Inflection("かった","い"),
 
-            //keigo-masu-inflections
-             new Inflection("ました","ます"), new Inflection("ません","ます"),
+           //keigo-masu-inflections
+           new Inflection("ました","ます"), new Inflection("ません","ます"),
            new Inflection("ませんでした","ます"),new Inflection("ましょう","ます"),
            //keigo-masu-stem-backtransformations
            new Inflection("ます","る"), new Inflection("ぎます","ぐ"),
@@ -131,20 +131,20 @@ namespace EPUBReader2
            new Inflection("り","る"),
 
            //te-form
-           new Inflection("て","た"), new Inflection("で","だ"), 
+           new Inflection("て","た"), new Inflection("で","だ"),
            new Inflection("くて","い"),new Inflection("いる",""),  
 
            //potential form
            new Inflection("られる","る"), new Inflection("える","う"),
            new Inflection("ける","く"), new Inflection("せる","す"),
-            new Inflection("てる","つ"), new Inflection("ねる","ぬ"),
+           new Inflection("てる","つ"), new Inflection("ねる","ぬ"),
            new Inflection("べる","ぶ"), new Inflection("める","む"),
            new Inflection("できる","する"), new Inflection("こられる","くる"),
 
            //volitional form
            new Inflection("よう","る"), new Inflection("そう","す"),
            new Inflection("こう","く"), new Inflection("ごう","ぐ"),
-            new Inflection("ぼう","ぶ"), new Inflection("とう","つ"),
+           new Inflection("ぼう","ぶ"), new Inflection("とう","つ"),
            new Inflection("もう","む"), new Inflection("ろう","る"),
            new Inflection("のう","ぬ"), new Inflection("おう","う"),
            new Inflection("しよう","する"), new Inflection("こよう","くる"),
@@ -153,24 +153,21 @@ namespace EPUBReader2
            new Inflection("しまう",""),
 
            //imperative
-            new Inflection("ろ","る"), new Inflection("せ","す"),
+           new Inflection("ろ","る"), new Inflection("せ","す"),
            new Inflection("け","く"), new Inflection("げ","ぐ"),
-            new Inflection("べ","ぶ"), new Inflection("て","つ"),
-              new Inflection("め","む"), new Inflection("れ","る"),
+           new Inflection("べ","ぶ"), new Inflection("て","つ"),
+           new Inflection("め","む"), new Inflection("れ","る"),
            new Inflection("ね","ぬ"), new Inflection("え","う"),
-            new Inflection("しろ","する"), new Inflection("こい","くる"),
-             new Inflection("くれる","くれ"),
+           new Inflection("しろ","する"), new Inflection("こい","くる"),
+           new Inflection("くれる","くれ"),
 
-               //ba-form
-            new Inflection("せば","す"),
+           //ba-form            
            new Inflection("けば","く"), new Inflection("げば","ぐ"),
-            new Inflection("べば","ぶ"), new Inflection("てば","つ"),
-              new Inflection("めば","む"), new Inflection("れば","る"),
+           new Inflection("べば","ぶ"), new Inflection("てば","つ"),
+           new Inflection("めば","む"), new Inflection("れば","る"),
            new Inflection("ねば","ぬ"), new Inflection("えば","う"),
-           
+           new Inflection("せば","す"),                 
        };
-
-        //思われます 思われる　思う
 
         internal static List<string> GetPossibleBaseForms(string text)
         {
@@ -189,7 +186,7 @@ namespace EPUBReader2
             GetBaseFormRecursive(Res, text, 0);
             for (int i = 0; i < Res.Count - 1; i++)
             {
-                if (Res.Count(a => a==Res[i]) > 1)
+                if (Res.Count(a => a == Res[i]) > 1)
                 {
                     Res.RemoveAt(i);
                 }
@@ -218,7 +215,7 @@ namespace EPUBReader2
         private static string ReplaceEnd(string text, string Old, string New)
         {
             return text.Remove(text.Length - Old.Length) + New;
-        }       
+        }
     }
 }
 

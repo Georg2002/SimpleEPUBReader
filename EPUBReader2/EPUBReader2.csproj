@@ -50,9 +50,6 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Wacton.Desu, Version=5.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Wacton.Desu.5.1.0\lib\netstandard2.0\Wacton.Desu.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -61,8 +58,6 @@
     <Compile Include="DictControl.xaml.cs">
       <DependentUpon>DictControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="JapDictionary.cs" />
-    <Compile Include="LanguageResources.cs" />
     <Compile Include="SaveAndLoad.cs" />
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -132,6 +127,10 @@
     <ProjectReference Include="..\EPUBRenderer3\EPUBRenderer3.csproj">
       <Project>{f36dc9db-5567-42cb-8407-da6773dabff2}</Project>
       <Name>EPUBRenderer3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JapaneseDictionary\WactonWrapper.csproj">
+      <Project>{356498d6-0231-4f1e-a7f8-f08de75f4965}</Project>
+      <Name>WactonWrapper</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

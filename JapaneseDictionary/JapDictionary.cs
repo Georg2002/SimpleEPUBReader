@@ -8,7 +8,7 @@ using Wacton.Desu.Japanese;
 using Wacton.Desu.Kanji;
 using Wacton.Desu.Names;
 
-namespace EPUBReader2
+namespace WatconWrapper
 {
     public class JapDictionary
     {
@@ -48,6 +48,7 @@ namespace EPUBReader2
 
         public async Task<List<DictWord>> Lookup(string text)
         {
+            if (text == "") return new List<DictWord>();         
             if (LookupActive)
             {
                 Abort = true;
