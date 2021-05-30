@@ -13,20 +13,35 @@ namespace WatconWrapper
             { 'ア','あ' },{ 'ァ','ぁ' },{ 'カ','か' },{ 'サ','さ' },{ 'タ','た' },
             { 'ナ','な' },{ 'ハ','は' },{ 'マ','ま' },{ 'ヤ','や' },{ 'ャ','ゃ' },
             { 'ラ','ら' },{ 'ワ','わ' },{ 'ガ','が' },{ 'ザ','ざ' },{ 'ダ','だ' },
-            { 'バ','ば' },{ 'パ','ぱ' },{ 'イ','い' },{ 'ィ','ぃ' },{ 'キ','き' },
+            { 'バ','ば' },{ 'パ','ぱ' },
+
+            { 'イ','い' },{ 'ィ','ぃ' },{ 'キ','き' },
             { 'シ','し' },{ 'チ','ち' },{ 'ニ','に' },{ 'ヒ','ひ' },{ 'ミ','み' },
             { 'リ','り' },{ 'ヰ','ゐ' },{ 'ギ','ぎ' },{ 'ジ','じ' },{ 'ヂ','ぢ' },
-            { 'ビ','び' },{ 'ピ','ぴ' },{ 'ウ','う' },{ 'ゥ','ぅ' },{ 'ク','く' },
+            { 'ビ','び' },{ 'ピ','ぴ' },
+
+            { 'ウ','う' },{ 'ゥ','ぅ' },{ 'ク','く' },
             { 'ス','す' },{ 'ツ','つ' },{ 'ヌ','ぬ' },{ 'フ','ふ' },{ 'ム','む' },
             { 'ユ','ゆ' },{ 'ュ','ゅ' },{ 'ル','る' },{ 'グ','ぐ' },{ 'ズ','ず' },
-            { 'ヅ','づ' },{ 'ブ','ぶ' },{ 'プ','ぷ' },{ 'エ','え' },{ 'ェ','ぇ' },
+            { 'ヅ','づ' },{ 'ブ','ぶ' },{ 'プ','ぷ' },
+
+            { 'エ','え' },{ 'ェ','ぇ' },
             { 'ケ','け' },{ 'セ','せ' },{ 'テ','て' },{ 'ネ','ね' },{ 'ヘ','へ' },
             { 'メ','め' },{ 'レ','れ' },{ 'ヱ','ゑ' },{ 'ゲ','げ' },{ 'ゼ','ぜ' },
-            { 'デ','で' },{ 'ベ','べ' },{ 'ペ','ぺ' },{ 'オ','お' },{ 'ォ','ぉ' },
+            { 'デ','で' },{ 'ベ','べ' },{ 'ペ','ぺ' },
+
+            { 'オ','お' },{ 'ォ','ぉ' },
             { 'コ','こ' },{ 'ソ','そ' },{ 'ト','と' },{ 'ノ','の' },{ 'ホ','ほ' },
             { 'モ','も' },{ 'ヨ','よ' },{ 'ョ','ょ' },{ 'ロ','ろ' },{ 'ヲ','を' },
             { 'ゴ','ご' },{ 'ゾ','ぞ' },{ 'ド','ど' },{ 'ボ','ぼ' },{ 'ポ','ぽ' },
             { 'ヴ','ゔ' },{ 'ッ','っ' },{ 'ン','ん' },{ 'ヽ','ゝ' },{ 'ヾ','ゞ' }
+        };
+
+        //hiragana with the vowels e or i
+        public static char[] RuVerbVowelsHiragana = new char[]
+        {
+             'い','ぃ','き','し','ち','に','ひ','み','り','ゐ','ぎ','じ','ぢ','び','ぴ',
+             'え','ぇ','け','せ','て','ね','へ','め','れ','ゑ','げ','ぜ','で','べ','ぺ',
         };
 
         public static string GetHiragana(string text)
@@ -65,17 +80,6 @@ namespace WatconWrapper
             return Kata;
         }
 
-        private struct Inflection
-        {
-            public string BaseForm;
-            public string InflectedForm;
-            public Inflection(string Inflection, string Base)
-            {
-                InflectedForm = Inflection;
-                BaseForm = Base;
-            }
-        }
-
         //eg adjectives, will not be applied recursively
         private static Inflection[] NormalInflections = new Inflection[]
         {
@@ -91,8 +95,7 @@ namespace WatconWrapper
            new Inflection("ければ","い"),
 
            //random, sort later
-           new Inflection("された","される"),new Inflection("てる","ている"),
-           new Inflection("される","す"), new Inflection("される","する"),
+           new Inflection("てる","ている"),           
 
            //present-negative
            new Inflection("ない","る"), new Inflection("さない","す"),
@@ -103,12 +106,13 @@ namespace WatconWrapper
            new Inflection("らない","る"), new Inflection("なない","ぬ"),
 
            //past
-           new Inflection("した","す"), new Inflection("いた","く"),
+           new Inflection("した","す"), new Inflection("た","る"),
+           new Inflection("いた","く"), new Inflection("した","する"),
            new Inflection("きた","くる"), new Inflection("った","く"),
            new Inflection("いだ","ぐ"), new Inflection("んだ","む"),
            new Inflection("んだ","ぬ"), new Inflection("んだ","ぶ"),
            new Inflection("った","る"), new Inflection("った","つ"),
-           new Inflection("った","う"), new Inflection("た","る"),
+           new Inflection("った","う"),
 
            //past-negative
            new Inflection("かった","い"),
@@ -116,6 +120,7 @@ namespace WatconWrapper
            //keigo-masu-inflections
            new Inflection("ました","ます"), new Inflection("ません","ます"),
            new Inflection("ませんでした","ます"),new Inflection("ましょう","ます"),
+
            //keigo-masu-stem-backtransformations
            new Inflection("ます","る"), new Inflection("ぎます","ぐ"),
            new Inflection("します","す"), new Inflection("ちます","つ"),
@@ -141,6 +146,13 @@ namespace WatconWrapper
            new Inflection("べる","ぶ"), new Inflection("める","む"),
            new Inflection("できる","する"), new Inflection("こられる","くる"),
 
+           //passive form
+           new Inflection("される","す"), new Inflection("される","する"),
+           new Inflection("かれる","く"), new Inflection("まれる","む"),
+           new Inflection("がれる","ぐ"), new Inflection("ばれる","ぶ"),
+           new Inflection("たれる","つ"), new Inflection("なれる","ぬ"),
+           new Inflection("われる","う"),
+
            //volitional form
            new Inflection("よう","る"), new Inflection("そう","す"),
            new Inflection("こう","く"), new Inflection("ごう","ぐ"),
@@ -150,7 +162,7 @@ namespace WatconWrapper
            new Inflection("しよう","する"), new Inflection("こよう","くる"),
 
            //shimau-chau
-           new Inflection("しまう",""),
+           new Inflection("しまう",""), new Inflection("ちゃう",""),
 
            //imperative
            new Inflection("ろ","る"), new Inflection("せ","す"),
@@ -166,7 +178,7 @@ namespace WatconWrapper
            new Inflection("べば","ぶ"), new Inflection("てば","つ"),
            new Inflection("めば","む"), new Inflection("れば","る"),
            new Inflection("ねば","ぬ"), new Inflection("えば","う"),
-           new Inflection("せば","す"),                 
+           new Inflection("せば","す"),
        };
 
         internal static List<string> GetPossibleBaseForms(string text)
@@ -174,6 +186,14 @@ namespace WatconWrapper
             var Res = new List<string>();
             text = GetHiragana(text);
             Res.Add(text);
+
+            //ru verbs with check for last verb, as it would otherwise be added every time
+            if (RuVerbVowelsHiragana.Contains(text.Last()))
+            {
+                string RuVerb = text + "る";
+                Res.Add(RuVerb);
+                GetBaseFormRecursive(Res, RuVerb, 0);
+            }
 
             foreach (var Inf in NormalInflections)
             {
@@ -215,6 +235,17 @@ namespace WatconWrapper
         private static string ReplaceEnd(string text, string Old, string New)
         {
             return text.Remove(text.Length - Old.Length) + New;
+        }
+
+        private struct Inflection
+        {
+            public string BaseForm;
+            public string InflectedForm;
+            public Inflection(string Inflection, string Base)
+            {
+                InflectedForm = Inflection;
+                BaseForm = Base;
+            }
         }
     }
 }

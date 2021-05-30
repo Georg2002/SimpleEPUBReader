@@ -18,9 +18,20 @@ namespace EPUBReader2
         public static void Main()
         {
             KeepAlive();
-            var application = new App();
-            application.InitializeComponent();
-            application.Run();
+#if !DEBUG
+            try
+            {
+#endif
+                var application = new App();
+                application.InitializeComponent();
+                application.Run();
+#if !DEBUG
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+#endif
         }
 
         [Flags]

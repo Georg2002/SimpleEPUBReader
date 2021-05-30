@@ -23,7 +23,7 @@ namespace EPUBReader2
                     return;
                 }                
             }
-            Books.Add(NewBook);
+            Books.Insert(0,NewBook);
         }
 
         public List<string> GetTitles()
