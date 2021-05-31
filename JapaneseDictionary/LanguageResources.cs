@@ -179,6 +179,14 @@ namespace WatconWrapper
            new Inflection("めば","む"), new Inflection("れば","る"),
            new Inflection("ねば","ぬ"), new Inflection("えば","う"),
            new Inflection("せば","す"),
+
+           //causative         
+           new Inflection("かせる","く"), new Inflection("がせる","ぐ"),
+           new Inflection("ばせる","ぶ"), new Inflection("たせる","つ"),
+           new Inflection("ませる","む"), new Inflection("らせる","る"),
+           new Inflection("なせる","ぬ"), new Inflection("わせる","う"),
+           new Inflection("させる","す"),new Inflection("させる","る"),
+           new Inflection("させる","する"),new Inflection("こさせる","くる"),
        };
 
         internal static List<string> GetPossibleBaseForms(string text)
