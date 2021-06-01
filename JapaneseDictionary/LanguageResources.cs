@@ -127,13 +127,14 @@ namespace WatconWrapper
            new Inflection("びます","ぶ"), new Inflection("にます","ぬ"),
            new Inflection("みます","む"), new Inflection("きます","く"),
            new Inflection("ります","る"),new Inflection("います","う"),
+           new Inflection("します","する"),
 
            //stem-backtransformations
            new Inflection("ぎ","ぐ"),new Inflection("い","う"),
            new Inflection("し","す"), new Inflection("ち","つ"),
            new Inflection("び","ぶ"), new Inflection("に","ぬ"),
            new Inflection("み","む"), new Inflection("き","く"),
-           new Inflection("り","る"),
+           new Inflection("り","る"),new Inflection("し","する"),
 
            //te-form
            new Inflection("て","た"), new Inflection("で","だ"),
