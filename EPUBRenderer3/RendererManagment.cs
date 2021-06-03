@@ -235,6 +235,7 @@ namespace EPUBRenderer3
 
         public void RemoveSelection()
         {
+            if (CurrBook == null) return;         
             CurrBook.RemoveSelection(SelectionStart, SelectionEnd);
         }
 

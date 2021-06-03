@@ -48,7 +48,7 @@ namespace WatconWrapper
 
         public async Task<List<DictWord>> Lookup(string text)
         {
-            if (text == "") return new List<DictWord>();         
+            if (string.IsNullOrWhiteSpace(text)) return new List<DictWord>();         
             if (LookupActive)
             {
                 Abort = true;

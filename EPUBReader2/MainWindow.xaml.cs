@@ -64,9 +64,12 @@ namespace EPUBReader2
             {
                 Save.LastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             }
-            while (!Directory.Exists(Save.LastDirectory))
+            else
             {
-                Save.LastDirectory = Path.Combine(Save.LastDirectory, @"\..");
+                while (!Directory.Exists(Save.LastDirectory))
+                {
+                    Save.LastDirectory = Path.Combine(Save.LastDirectory, @"\..");
+                }
             }
             Dialog.InitialDirectory = Save.LastDirectory;
             if (Save.Books != null)
@@ -309,7 +312,7 @@ namespace EPUBReader2
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
-        {           
+        {
             txtClose.Text = "Double\nclick";
             ResetCloseText();
         }
