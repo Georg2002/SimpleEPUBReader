@@ -48,7 +48,7 @@ namespace WatconWrapper
 
         public async Task<List<DictWord>> Lookup(string text)
         {
-            if (string.IsNullOrWhiteSpace(text)) return new List<DictWord>();         
+            if (string.IsNullOrWhiteSpace(text)) return new List<DictWord>();
             if (LookupActive)
             {
                 Abort = true;
@@ -68,7 +68,7 @@ namespace WatconWrapper
             LookupActive = true;
             if (JEntries == null)
             {
-                JEntries = (IJapaneseEntry[])await DictTasks[0];                
+                JEntries = (IJapaneseEntry[])await DictTasks[0];
                 KEntries = (IKanjiEntry[])await DictTasks[1];
                 NEntries = (INameEntry[])await DictTasks[2];
                 foreach (var DictTask in DictTasks)
@@ -199,7 +199,7 @@ namespace WatconWrapper
         {
             var BaseForm = LanguageResources.GetPossibleBaseForms(text);
 
-            string Katakana = LanguageResources.GetKatakana(text);      
+            string Katakana = LanguageResources.GetKatakana(text);
             List<string> res = new List<string>();
             res.Add(text);
             if (Katakana != text)

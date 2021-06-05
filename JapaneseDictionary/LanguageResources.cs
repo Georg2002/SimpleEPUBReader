@@ -8,78 +8,6 @@ namespace WatconWrapper
 {
     public static class LanguageResources
     {
-        public static Dictionary<char, char> HiraganaDict = new Dictionary<char, char>()
-        {
-            { 'ア','あ' },{ 'ァ','ぁ' },{ 'カ','か' },{ 'サ','さ' },{ 'タ','た' },
-            { 'ナ','な' },{ 'ハ','は' },{ 'マ','ま' },{ 'ヤ','や' },{ 'ャ','ゃ' },
-            { 'ラ','ら' },{ 'ワ','わ' },{ 'ガ','が' },{ 'ザ','ざ' },{ 'ダ','だ' },
-            { 'バ','ば' },{ 'パ','ぱ' },
-
-            { 'イ','い' },{ 'ィ','ぃ' },{ 'キ','き' },
-            { 'シ','し' },{ 'チ','ち' },{ 'ニ','に' },{ 'ヒ','ひ' },{ 'ミ','み' },
-            { 'リ','り' },{ 'ヰ','ゐ' },{ 'ギ','ぎ' },{ 'ジ','じ' },{ 'ヂ','ぢ' },
-            { 'ビ','び' },{ 'ピ','ぴ' },
-
-            { 'ウ','う' },{ 'ゥ','ぅ' },{ 'ク','く' },
-            { 'ス','す' },{ 'ツ','つ' },{ 'ヌ','ぬ' },{ 'フ','ふ' },{ 'ム','む' },
-            { 'ユ','ゆ' },{ 'ュ','ゅ' },{ 'ル','る' },{ 'グ','ぐ' },{ 'ズ','ず' },
-            { 'ヅ','づ' },{ 'ブ','ぶ' },{ 'プ','ぷ' },
-
-            { 'エ','え' },{ 'ェ','ぇ' },
-            { 'ケ','け' },{ 'セ','せ' },{ 'テ','て' },{ 'ネ','ね' },{ 'ヘ','へ' },
-            { 'メ','め' },{ 'レ','れ' },{ 'ヱ','ゑ' },{ 'ゲ','げ' },{ 'ゼ','ぜ' },
-            { 'デ','で' },{ 'ベ','べ' },{ 'ペ','ぺ' },
-
-            { 'オ','お' },{ 'ォ','ぉ' },
-            { 'コ','こ' },{ 'ソ','そ' },{ 'ト','と' },{ 'ノ','の' },{ 'ホ','ほ' },
-            { 'モ','も' },{ 'ヨ','よ' },{ 'ョ','ょ' },{ 'ロ','ろ' },{ 'ヲ','を' },
-            { 'ゴ','ご' },{ 'ゾ','ぞ' },{ 'ド','ど' },{ 'ボ','ぼ' },{ 'ポ','ぽ' },
-            { 'ヴ','ゔ' },{ 'ッ','っ' },{ 'ン','ん' },{ 'ヽ','ゝ' },{ 'ヾ','ゞ' }
-        };
-
-        //hiragana with the vowels e or i
-        public static char[] RuVerbVowelsHiragana = new char[]
-        {
-             'い','ぃ','き','し','ち','に','ひ','み','り','ゐ','ぎ','じ','ぢ','び','ぴ',
-             'え','ぇ','け','せ','て','ね','へ','め','れ','ゑ','げ','ぜ','で','べ','ぺ',
-        };
-
-        public static string GetHiragana(string text)
-        {
-            string Hira = "";
-            for (int i = 0; i < text.Length; i++)
-            {
-                char c = text[i];
-                if (LanguageResources.HiraganaDict.ContainsKey(c))
-                {
-                    Hira += LanguageResources.HiraganaDict[c];
-                }
-                else
-                {
-                    Hira += c;
-                }
-            }
-            return Hira;
-        }
-
-        internal static string GetKatakana(string text)
-        {
-            string Kata = "";
-            for (int i = 0; i < text.Length; i++)
-            {
-                char c = text[i];
-                if (HiraganaDict.ContainsValue(c))
-                {
-                    Kata += HiraganaDict.First(a => a.Value == c).Key;
-                }
-                else
-                {
-                    Kata += c;
-                }
-            }
-            return Kata;
-        }
-
         //eg adjectives, will not be applied recursively
         private static Inflection[] NormalInflections = new Inflection[]
         {
@@ -189,6 +117,81 @@ namespace WatconWrapper
            new Inflection("させる","す"),new Inflection("させる","る"),
            new Inflection("させる","する"),new Inflection("こさせる","くる"),
        };
+
+        public static readonly Dictionary<char, char> HiraganaDict = new Dictionary<char, char>()
+        {
+            { 'ア','あ' },{ 'ァ','ぁ' },{ 'カ','か' },{ 'サ','さ' },{ 'タ','た' },
+            { 'ナ','な' },{ 'ハ','は' },{ 'マ','ま' },{ 'ヤ','や' },{ 'ャ','ゃ' },
+            { 'ラ','ら' },{ 'ワ','わ' },{ 'ガ','が' },{ 'ザ','ざ' },{ 'ダ','だ' },
+            { 'バ','ば' },{ 'パ','ぱ' },
+
+            { 'イ','い' },{ 'ィ','ぃ' },{ 'キ','き' },
+            { 'シ','し' },{ 'チ','ち' },{ 'ニ','に' },{ 'ヒ','ひ' },{ 'ミ','み' },
+            { 'リ','り' },{ 'ヰ','ゐ' },{ 'ギ','ぎ' },{ 'ジ','じ' },{ 'ヂ','ぢ' },
+            { 'ビ','び' },{ 'ピ','ぴ' },
+
+            { 'ウ','う' },{ 'ゥ','ぅ' },{ 'ク','く' },
+            { 'ス','す' },{ 'ツ','つ' },{ 'ヌ','ぬ' },{ 'フ','ふ' },{ 'ム','む' },
+            { 'ユ','ゆ' },{ 'ュ','ゅ' },{ 'ル','る' },{ 'グ','ぐ' },{ 'ズ','ず' },
+            { 'ヅ','づ' },{ 'ブ','ぶ' },{ 'プ','ぷ' },
+
+            { 'エ','え' },{ 'ェ','ぇ' },
+            { 'ケ','け' },{ 'セ','せ' },{ 'テ','て' },{ 'ネ','ね' },{ 'ヘ','へ' },
+            { 'メ','め' },{ 'レ','れ' },{ 'ヱ','ゑ' },{ 'ゲ','げ' },{ 'ゼ','ぜ' },
+            { 'デ','で' },{ 'ベ','べ' },{ 'ペ','ぺ' },
+
+            { 'オ','お' },{ 'ォ','ぉ' },
+            { 'コ','こ' },{ 'ソ','そ' },{ 'ト','と' },{ 'ノ','の' },{ 'ホ','ほ' },
+            { 'モ','も' },{ 'ヨ','よ' },{ 'ョ','ょ' },{ 'ロ','ろ' },{ 'ヲ','を' },
+            { 'ゴ','ご' },{ 'ゾ','ぞ' },{ 'ド','ど' },{ 'ボ','ぼ' },{ 'ポ','ぽ' },
+            { 'ヴ','ゔ' },{ 'ッ','っ' },{ 'ン','ん' },{ 'ヽ','ゝ' },{ 'ヾ','ゞ' }
+        };
+
+        public static readonly Dictionary<char, char> KatakanaDict;
+
+        //hiragana with the vowels e or i
+        public static char[] RuVerbVowelsHiragana = new char[]
+        {
+             'い','ぃ','き','し','ち','に','ひ','み','り','ゐ','ぎ','じ','ぢ','び','ぴ',
+             'え','ぇ','け','せ','て','ね','へ','め','れ','ゑ','げ','ぜ','で','べ','ぺ',
+        };
+
+        static LanguageResources()
+        {
+            KatakanaDict = new Dictionary<char, char>(HiraganaDict.Count);
+            foreach (var Entry in HiraganaDict)
+            {
+                KatakanaDict.Add(Entry.Value, Entry.Key);
+            }
+        }
+
+        public static string GetHiragana(string text)
+        {
+            return SwitchKana(text, HiraganaDict);
+        }
+
+        internal static string GetKatakana(string text)
+        {
+            return SwitchKana(text, KatakanaDict);
+        }
+
+        private static string SwitchKana(string text, Dictionary<char, char> Dict)
+        {
+            string Switched = "";
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (Dict.ContainsKey(c))
+                {
+                    Switched += Dict[c];
+                }
+                else
+                {
+                    Switched += c;
+                }
+            }
+            return Switched;
+        }             
 
         internal static List<string> GetPossibleBaseForms(string text)
         {
