@@ -96,9 +96,9 @@ namespace EPUBReader2
         public string Type { get; set; }
         public DictResultStruct(DictWord word)
         {
-            Writing = string.IsNullOrEmpty(word.WrittenForm) ? word.Readings : word.WrittenForm;
-            Reading = word.Readings;
-            Meaning = string.IsNullOrEmpty(word.Meanings) ? "/" : word.Meanings;
+            Writing = string.IsNullOrEmpty(word.WrittenForm) ? word.Reading : word.WrittenForm;
+            Reading = word.Reading;
+            Meaning = string.IsNullOrEmpty(word.Meaning) ? "/" : word.Meaning;
             Color Color;
             switch (word.Type)
             {

@@ -12,13 +12,9 @@ namespace WatconWrapper
 {
     public class JapDictionary
     {
-        JapaneseDictionary JDict = new JapaneseDictionary();
-        IJapaneseEntry[] JEntries;
-        KanjiDictionary KDict = new KanjiDictionary();
-        IKanjiEntry[] KEntries;
-        NameDictionary NDict = new NameDictionary();
-        INameEntry[] NEntries;
-        Task<object[]>[] DictTasks;
+
+        Task DictTask;
+        Dictionary<char, List<DictWord>> Dict;
 
         bool LookupActive;
         bool Abort;
@@ -28,12 +24,36 @@ namespace WatconWrapper
             GetAllEntries();
         }
 
-        private async void GetAllEntries()
+        private void GetAllEntries()
         {
-            DictTasks = new Task<object[]>[3];
-            DictTasks[0] = GetEntries(() => JDict.GetEntries().ToArray());
-            DictTasks[1] = GetEntries(() => KDict.GetEntries().ToArray());
-            DictTasks[2] = GetEntries(() => NDict.GetEntries().ToArray());
+            DictTask = Task.Run(async () =>
+            {
+                JapaneseDictionary JDict = new JapaneseDictionary();
+                IJapaneseEntry[] JEntries;
+                KanjiDictionary KDict = new KanjiDictionary();
+                IKanjiEntry[] KEntries;
+                NameDictionary NDict = new NameDictionary();
+                INameEntry[] NEntries;
+                var JTask = GetEntries(() => JDict.GetEntries().ToArray());
+                var KTask = GetEntries(() => KDict.GetEntries().ToArray());
+                var NTask = GetEntries(() => NDict.GetEntries().ToArray());
+                JEntries = (IJapaneseEntry[])await JTask;
+                NEntries = (INameEntry[])await NTask;
+                KEntries = (IKanjiEntry[])await KTask;
+                JTask.Dispose();
+                KTask.Dispose();
+                NTask.Dispose();
+                var TDict = new Dictionary<char, List<DictWord>>();
+                IncludeDict(JEntries, TDict);
+                JEntries = null;
+                IncludeDict(NEntries, TDict);
+                NEntries = null;
+                IncludeDict(KEntries, TDict);
+                KEntries = null;
+                Dict = TDict;
+
+                GC.Collect();
+            });
         }
 
         private async Task<object[]> GetEntries(Func<object[]> func)
@@ -66,133 +86,78 @@ namespace WatconWrapper
             }
 
             LookupActive = true;
-            if (JEntries == null)
+            if (Dict == null)
             {
-                JEntries = (IJapaneseEntry[])await DictTasks[0];
-                KEntries = (IKanjiEntry[])await DictTasks[1];
-                NEntries = (INameEntry[])await DictTasks[2];
-                foreach (var DictTask in DictTasks)
-                {
-                    DictTask.Dispose();
-                }
+                await DictTask;
             }
 
             text = text.Trim();
             string[] Searchwords = GetSearchwords(text);
-            string Hiragana = LanguageResources.GetHiragana(text);
-            Console.WriteLine(Searchwords.Length.ToString());
-            List<DictWord> Results = new List<DictWord>();
-            var J = JLookup(Searchwords);
-            var K = KLookup(text);
-            var N = NLookup(Hiragana);
-            Results.AddRange(await J);
-            Results.AddRange(await K);
-            Results.AddRange(await N);
+            List<DictWord> Results = await DictLookup(Searchwords);
+            Results = GetSortedResults(Results);
             LookupActive = false;
             return Results;
         }
-        private async Task<IEnumerable<DictWord>> NLookup(string text)
+
+        private List<DictWord> GetSortedResults(List<DictWord> results)
         {
-            List<DictWord> Results = new List<DictWord>();
-            await Task.Run(() =>
+            List<DictWord> SortedRes = new List<DictWord>();
+            foreach (var Word in results)
             {
-                foreach (var Entry in NEntries)
+                if (!SortedRes.Contains(Word))
                 {
-                    if (Abort) break;
-                    if (Entry.Kanjis.Any(a => a.Text == text) || Entry.Readings.Any(a => a.Text == text))
-                    {
-                        DictWord NewRes = new DictWord();
-                        NewRes.Type = VocabType.Name;
-                        foreach (var IKanji in Entry.Kanjis)
-                        {
-                            NewRes.WrittenForm = Accumulate(NewRes.WrittenForm, IKanji.Text);
-                        }
-                        foreach (var Reading in Entry.Readings)
-                        {
-                            NewRes.Readings = Accumulate(NewRes.Readings, Reading.Text);
-                        }
-                        Results.Add(NewRes);
-                    }
+                    SortedRes.Add(Word);
                 }
-            });
-            return Results;
-        }
-
-        private async Task<IEnumerable<DictWord>> KLookup(string text)
-        {
-            List<DictWord> Results = new List<DictWord>();
-            if (text.Length == 1)
-            {
-                await Task.Run(() =>
-                {
-                    foreach (var Entry in KEntries)
-                    {
-                        if (Abort) break;
-                        if (Entry.Literal == text)
-                        {
-                            DictWord NewRes = new DictWord();
-                            NewRes.Type = VocabType.Kanji;
-                            NewRes.WrittenForm = text;
-
-                            foreach (var meaning in Entry.Meanings)
-                            {
-                                if (meaning.Language == Wacton.Desu.Enums.Language.English)
-                                {
-                                    NewRes.Meanings = Accumulate(NewRes.Meanings, meaning.Term);
-                                }
-                            }
-                            foreach (var Reading in Entry.Readings)
-                            {
-                                //code ja_on value 3, ja_kun value 4
-                                if (Reading.Type.Value == 3 || Reading.Type.Value == 4)
-                                {
-                                    NewRes.Readings = Accumulate(NewRes.Readings, Reading.Value);
-                                }
-                            }
-                            Results.Add(NewRes);
-                        }
-                    }
-                });
             }
-            return Results;
+            return SortedRes.OrderBy(a => (int)a.Type).ToList();
         }
 
-        private async Task<IEnumerable<DictWord>> JLookup(string[] searchwords)
+        private async Task<List<DictWord>> DictLookup(string[] searchwords)
         {
-            List<DictWord> Results = new List<DictWord>();
+            List<DictWord> Res = new List<DictWord>();
             await Task.Run(() =>
-            {
-                foreach (var Entry in JEntries)
-                {
-                    if (Abort) break;
+             {
+                 if (searchwords.Length == 0) return;
+                 foreach (var Searchword in searchwords)
+                 {
+                     if (Abort) break;
+                     if (Searchword.Length == 0) continue;
+                     char FirstLetter = Searchword[0];
+                     if (!Dict.ContainsKey(FirstLetter)) continue;
+                     var PartialDict = Dict[FirstLetter];
+                     var NewResults = PartialDict.Where(a => a.Readings.Any(b => b == Searchword) || a.WrittenForms.Any(c => c == Searchword)).ToList();
+                     Res.AddRange(NewResults);
+                 }
+             });
+            return Res;
+        }
 
-                    if (Entry.Kanjis.Any(a => searchwords.Contains(a.Text)) || Entry.Readings.Any(a => searchwords.Contains(a.Text)))
-                    {
-                        DictWord NewRes = new DictWord();
-                        NewRes.Type = VocabType.Word;
-                        foreach (var IKanji in Entry.Kanjis)
-                        {
-                            NewRes.WrittenForm = Accumulate(NewRes.WrittenForm, IKanji.Text);
-                        }
-                        foreach (var Sense in Entry.Senses)
-                        {
-                            if (Sense.Glosses.First().Language == Wacton.Desu.Enums.Language.English)
-                            {
-                                foreach (var Gloss in Sense.Glosses)
-                                {
-                                    NewRes.Meanings = Accumulate(NewRes.Meanings, Gloss.Term);
-                                }
-                            }
-                        }
-                        foreach (var Reading in Entry.Readings)
-                        {
-                            NewRes.Readings = Accumulate(NewRes.Readings, Reading.Text);
-                        }
-                        Results.Add(NewRes);
-                    }
+        private void IncludeDict(object[] Entries, Dictionary<Char, List<DictWord>> Dict)
+        {
+            foreach (var Entry in Entries)
+            {
+                DictWord NewWord = new DictWord(Entry);
+
+                string StartingLetters = "";
+                foreach (var Word in NewWord.Readings)
+                {
+                    char StartingLetter = Word[0];
+                    if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
                 }
-            });
-            return Results;
+                foreach (var Word in NewWord.WrittenForms)
+                {
+                    char StartingLetter = Word[0];
+                    if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
+                }
+                foreach (var C in StartingLetters)
+                {
+                    if (!Dict.ContainsKey(C))
+                    {
+                        Dict.Add(C, new List<DictWord>());
+                    }
+                    Dict[C].Add(NewWord);
+                }
+            }
         }
 
         private string[] GetSearchwords(string text)
@@ -215,35 +180,6 @@ namespace WatconWrapper
                 }
             }
             return res.ToArray();
-        }
-
-        private string Accumulate(string Sum, string New)
-        {
-            if (string.IsNullOrEmpty(Sum))
-            {
-                return New;
-            }
-            else
-            {
-                return Sum + "; " + New;
-            }
-        }
-    }
-
-    public enum VocabType
-    {
-        Word, Kanji, Name
-    }
-
-    public struct DictWord
-    {
-        public string WrittenForm;
-        public string Readings;
-        public string Meanings;
-        public VocabType Type;
-        public override string ToString()
-        {
-            return WrittenForm.Split(';').FirstOrDefault().TrimEnd() + " " + Readings.Split(';').FirstOrDefault().TrimEnd();
         }
     }
 }
