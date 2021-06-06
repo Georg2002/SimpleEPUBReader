@@ -37,8 +37,7 @@ namespace WatconWrapper
 
         public DictWord(StreamReader Reader)
         {
-            string Line = Reader.ReadLine();
-            Type = (VocabType)Convert.ToInt32(Line.Last());
+            Type = (VocabType)Convert.ToInt32(Reader.ReadLine());
             var TempList = new List<string>();           
             WrittenForms = GetWordArray(Reader,TempList);
             Readings = GetWordArray(Reader,TempList);

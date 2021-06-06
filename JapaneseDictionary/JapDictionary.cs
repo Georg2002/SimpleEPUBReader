@@ -27,12 +27,9 @@ namespace WatconWrapper
             DictTask = Task.Run(() =>
             {
                 var assembly = Assembly.GetExecutingAssembly();                
-                var resourcePath = Path.Combine(assembly.Location, @"..\Resources\Dict.txt");
-                var N = assembly.GetManifestResourceNames();
-              
+                var resourcePath = Path.Combine(assembly.Location, @"..\Resources\Dict.txt");              
                 var TDict = new Dictionary<char, List<DictWord>>();
-                using (Stream stream = assembly.GetManifestResourceStream(N[0]))
-                using (StreamReader reader = new StreamReader(stream,Encoding.UTF8))
+                using (StreamReader reader = new StreamReader(resourcePath))
                 {
                     while (!reader.EndOfStream)
                     {
