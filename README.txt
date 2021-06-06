@@ -6,7 +6,7 @@ Main features:
 -Vertical Japanese text: Also displays ruby/furigana correctly
 -Fast: No waiting times when changing reader size
 -Ability to mark text
--Tense-sensitive dictionary: Takes up to 30 seconds to load ~400000 words, the reader is slower than usual during this time, also takes up 1GB of memory (base programm is ~300MB)
+-Tense-sensitive dictionary: Takes a few seconds to load (<5)
 
 Additional features:
 -Library function
