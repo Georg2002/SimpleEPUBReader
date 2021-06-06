@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Wacton.Desu;
-using Wacton.Desu.Japanese;
-using Wacton.Desu.Kanji;
-using Wacton.Desu.Names;
+using System.IO;
+using System.Reflection;
 
 namespace WatconWrapper
 {
@@ -26,44 +24,24 @@ namespace WatconWrapper
 
         private void GetAllEntries()
         {
-            DictTask = Task.Run(async () =>
+            DictTask = Task.Run(() =>
             {
-                JapaneseDictionary JDict = new JapaneseDictionary();
-                IJapaneseEntry[] JEntries;
-                KanjiDictionary KDict = new KanjiDictionary();
-                IKanjiEntry[] KEntries;
-                NameDictionary NDict = new NameDictionary();
-                INameEntry[] NEntries;
-                var JTask = GetEntries(() => JDict.GetEntries().ToArray());
-                var KTask = GetEntries(() => KDict.GetEntries().ToArray());
-                var NTask = GetEntries(() => NDict.GetEntries().ToArray());
-                JEntries = (IJapaneseEntry[])await JTask;
-                NEntries = (INameEntry[])await NTask;
-                KEntries = (IKanjiEntry[])await KTask;
-                JTask.Dispose();
-                KTask.Dispose();
-                NTask.Dispose();
+                var assembly = Assembly.GetExecutingAssembly();                
+                var resourcePath = Path.Combine(assembly.Location, @"..\Resources\Dict.txt");
+                var N = assembly.GetManifestResourceNames();
+              
                 var TDict = new Dictionary<char, List<DictWord>>();
-                IncludeDict(JEntries, TDict);
-                JEntries = null;
-                IncludeDict(NEntries, TDict);
-                NEntries = null;
-                IncludeDict(KEntries, TDict);
-                KEntries = null;
+                using (Stream stream = assembly.GetManifestResourceStream(N[0]))
+                using (StreamReader reader = new StreamReader(stream,Encoding.UTF8))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        var NewWord = new DictWord(reader);
+                        IncludeDict(NewWord, TDict);
+                    }
+                }
                 Dict = TDict;
-
-                GC.Collect();
             });
-        }
-
-        private async Task<object[]> GetEntries(Func<object[]> func)
-        {
-            object[] Res = null;
-            await Task.Run(() =>
-            {
-                Res = func.Invoke();
-            });
-            return Res;
         }
 
         public async Task<List<DictWord>> Lookup(string text)
@@ -132,31 +110,26 @@ namespace WatconWrapper
             return Res;
         }
 
-        private void IncludeDict(object[] Entries, Dictionary<Char, List<DictWord>> Dict)
+        private void IncludeDict(DictWord NewWord, Dictionary<Char, List<DictWord>> Dict)
         {
-            foreach (var Entry in Entries)
+            string StartingLetters = "";
+            foreach (var Word in NewWord.Readings)
             {
-                DictWord NewWord = new DictWord(Entry);
-
-                string StartingLetters = "";
-                foreach (var Word in NewWord.Readings)
+                char StartingLetter = Word[0];
+                if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
+            }
+            foreach (var Word in NewWord.WrittenForms)
+            {
+                char StartingLetter = Word[0];
+                if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
+            }
+            foreach (var C in StartingLetters)
+            {
+                if (!Dict.ContainsKey(C))
                 {
-                    char StartingLetter = Word[0];
-                    if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
+                    Dict.Add(C, new List<DictWord>());
                 }
-                foreach (var Word in NewWord.WrittenForms)
-                {
-                    char StartingLetter = Word[0];
-                    if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
-                }
-                foreach (var C in StartingLetters)
-                {
-                    if (!Dict.ContainsKey(C))
-                    {
-                        Dict.Add(C, new List<DictWord>());
-                    }
-                    Dict[C].Add(NewWord);
-                }
+                Dict[C].Add(NewWord);
             }
         }
 

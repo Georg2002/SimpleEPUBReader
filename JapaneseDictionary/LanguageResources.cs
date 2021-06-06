@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WatconWrapper
 {
     public static class LanguageResources
     {
         //eg adjectives, will not be applied recursively
-        private static Inflection[] NormalInflections = new Inflection[]
+        private static readonly Inflection[] NormalInflections = new Inflection[]
         {
             new Inflection("き","い")
         };
 
         //eg verbs, will be applied recursively
-        private static Inflection[] OverwriteInflections = new Inflection[]
+        private static readonly Inflection[] OverwriteInflections = new Inflection[]
        {
            //adjective
            new Inflection("かった","い"),new Inflection("くない","い"),
