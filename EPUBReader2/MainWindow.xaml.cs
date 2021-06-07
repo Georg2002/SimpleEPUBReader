@@ -71,7 +71,7 @@ namespace EPUBReader2
                     Save.LastDirectory = Path.Combine(Save.LastDirectory, @"\..");
                 }
             }
-            Dialog.InitialDirectory = Save.LastDirectory;
+            Dialog.InitialDirectory = Path.GetFullPath(Save.LastDirectory);
             if (Save.Books != null)
             {
                 Library.SetFromSave(Save.Books);
@@ -119,6 +119,10 @@ namespace EPUBReader2
         {
             LibraryBook Book = Library.GetBook(LibraryIndex);
             Renderer.LoadBook(Book.FilePath, Book.CurrPos, Book.Markings);
+            if (Menu.Visibility == Visibility.Visible)
+            {
+                Library_Click(null, null);
+            }
         }
 
         internal void Lookup(string Text)
@@ -213,6 +217,10 @@ namespace EPUBReader2
         public void SetChapter(int ChapterIndex)
         {
             Renderer.SetChapter(ChapterIndex);
+            if (Menu.Visibility == Visibility.Visible)
+            {
+                Chapter_Click(null, null);
+            }
         }
 
         private void Pages_Click(object sender, RoutedEventArgs e)
