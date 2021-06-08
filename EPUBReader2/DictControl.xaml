@@ -11,7 +11,12 @@
             <Setter Property="Height" Value="50"/>
             <Setter Property="FontSize" Value="30"/>
             <Setter Property="Margin" Value="2"/>
-            <Setter Property="FontFamily" Value="Hiragino Sans GB W3"/>
+            <Setter Property="FontFamily" Value="Hiragino Sans GB W3"/>   
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightColorKey}}"/>
+                    </Trigger>
+                </Style.Triggers>
         </Style>
         <Style TargetType="TextBlock" x:Key="TextStyle">
             <Setter Property="FontSize" Value="15"/>

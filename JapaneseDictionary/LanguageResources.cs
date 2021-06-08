@@ -17,7 +17,7 @@ namespace WatconWrapper
            //adjective
            new Inflection("かった","い"),new Inflection("くない","い"),
            new Inflection("く","い"),new Inflection("くある","い"),
-           new Inflection("ければ","い"),
+           new Inflection("ければ","い"), new Inflection("さ","い"),
 
            //random, sort later
            new Inflection("てる","ている"),           
