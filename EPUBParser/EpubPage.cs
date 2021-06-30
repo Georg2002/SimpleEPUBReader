@@ -139,21 +139,34 @@ namespace EPUBParser
                     if (Node.ChildNodes.Count >= 2)
                     {
                         string Ruby = "";
+                        bool Broken = false;
                         foreach (var Child in Node.ChildNodes)
                         {
-                            if (Child.Name == "rt")
+                            if (Broken) break;
+                            void SwitchName(HtmlNode ChildNode)
                             {
-                                Ruby += Child.InnerText;
+                                switch (ChildNode.Name)
+                                {
+                                    case "rt":
+                                        Ruby += Child.InnerText;
+                                        break;
+                                    case "#text":
+                                    case "rb":
+                                        Text += Child.InnerText;
+                                        break;
+                                    case "span":
+                                        foreach (var SubChild in Child.ChildNodes)
+                                        {
+                                            SwitchName(SubChild);
+                                        }
+                                        break;
+                                    default:
+                                        Logger.Report("Broken ruby found, ignoring", LogType.Error);
+                                        Broken = true;
+                                        break;
+                                }
                             }
-                            else if (Child.Name == "#text" || Child.Name == "rb")
-                            {
-                                Text += Child.InnerText;
-                            }
-                            else
-                            {
-                                Logger.Report("Broken ruby found, ignoring", LogType.Error);
-                                break;
-                            }
+                            SwitchName(Child);
                         }
                         Parts.Add(new TextLinePart(Text, Ruby));
                     }
