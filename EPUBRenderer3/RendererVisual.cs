@@ -82,5 +82,11 @@ namespace EPUBRenderer3
             drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
             Rerender = false;
         }
+
+        public void ResetSelection()
+        {
+            SelectionStart = PosDef.InvalidPosition;
+            SelectionEnd = PosDef.InvalidPosition;
+        }
     }
 }

@@ -126,7 +126,7 @@ namespace EPUBReader2
         }
 
         internal void Lookup(string Text)
-        {
+        {          
             DictControl.SelectionChanged(Text);
         }
 

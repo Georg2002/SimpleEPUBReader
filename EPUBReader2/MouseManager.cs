@@ -185,6 +185,8 @@ namespace EPUBReader2
                     Switched = true;
                     AverageSpeed = new Vector();
                     MarkingInProgress = false;
+                    Renderer.ResetSelection();
+                    MainWindow.Lookup("");
                 }
             }
             else
