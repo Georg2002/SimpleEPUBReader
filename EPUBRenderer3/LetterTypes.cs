@@ -42,7 +42,7 @@ namespace EPUBRenderer3
         public Vector NextWritePos;
         public LetterTypes Type;
         public byte MarkingColorIndex;
-        internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R=50 });
+        internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
 
         public virtual bool Position(LetterPlacementInfo Info)
         {
@@ -92,7 +92,7 @@ namespace EPUBRenderer3
         public float FontSize;
         public char Character;
         public Vector Offset;
-      
+
         private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2, 0);
         private Vector _HitboxStart;
         public override Vector HitboxStart { get => _HitboxStart; }
@@ -165,7 +165,7 @@ namespace EPUBRenderer3
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize + 2 * VertSpacing.Y);
                 if (((TextLetter)PrevLetter).FontSize == StandardFontSize)
                 {
-                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, - 0.5 * (TextLength + RubyLength));
+                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset, -0.5 * (TextLength + RubyLength));
                 }
                 else
                 {
@@ -220,19 +220,30 @@ namespace EPUBRenderer3
             this.Image = Image;
         }
 
+        private double Width;
+        private double Height;
+
         public override bool Position(LetterPlacementInfo Info)
         {
             var PrevLetter = Info.PrevLetter;
             var PageSize = Info.PageSize;
             var PrevWord = Info.PrevWord;
+            if (Image == null)
+            {
+                Width = Height = 300;
+            }
+            else
+            {
+                Width = Image.Width; Height = Image.Height;
+            }
 
-            bool MustScale = PageSize.X < Image.Width || PageSize.Y < Image.Height;
-            bool Inline = Image.Width <= LineDist * 2 && Image.Height <= 2 * LineDist;
+            bool MustScale = PageSize.X < Width || PageSize.Y < Height;
+            bool Inline = Width <= LineDist * 2 && Height <= 2 * LineDist;
             StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);
-            Vector RenderSize = new Vector(-Image.Width, Image.Height);
+            Vector RenderSize = new Vector(-Width, Height);
             if (Inline)
             {
-                double Scale = LineDist <= Image.Width ? LineDist / Image.Width : 1;
+                double Scale = LineDist <= Width ? LineDist / Width : 1;
                 RenderSize *= Scale;
                 StartPosition = PrevLetter == null ? StartPosition : PrevLetter.NextWritePos;
                 if (Info.NewLine)
@@ -257,7 +268,7 @@ namespace EPUBRenderer3
                 }
                 else
                 {
-                    StartPosition.Y = (PageSize.Y - Image.Height) / 2;
+                    StartPosition.Y = (PageSize.Y - Height) / 2;
                 }
 
                 EndPosition = StartPosition + RenderSize;
@@ -267,10 +278,25 @@ namespace EPUBRenderer3
             return InsidePage(PageSize);
         }
 
+        public Point GetStartPoint()
+        {
+            return new Point(StartPosition.X, StartPosition.Y);
+        }
+
+        public Point GetEndPoint()
+        {
+            return new Point(EndPosition.X, EndPosition.Y);
+        }
+
+        public Rect GetImageRect()
+        {
+            return new Rect(GetStartPoint(), GetEndPoint());
+        }
+
         public Vector GetMaxRenderSize(Vector PageSize)
         {
             double PRatio = PageSize.X / PageSize.Y;
-            double IRatio = Image.Width / Image.Height;
+            double IRatio = Width / Height;
             return PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
         }
 

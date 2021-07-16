@@ -3,6 +3,7 @@ using HtmlAgilityPack;
 using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Design;
 using System.IO;
 using System.Linq;
@@ -236,6 +237,7 @@ namespace EPUBParser
             switch (classAttribute)
             {
                 case "sesame":
+                    if (node.ChildNodes.Count == 0) return;                  
                     var NewSesamePart = new TextLinePart
                     {
                         Text = node.ChildNodes[0].InnerHtml,
@@ -293,11 +295,11 @@ namespace EPUBParser
         private byte[] ImageData;
 
         public ImageSource GetImage()
-        {
+        {            
             if (ImageData == null)
             {
-                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
-                return null;
+                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);          
+                return  null;
             }
             BitmapImage Image = null;
             try

@@ -40,17 +40,26 @@ namespace EPUBRenderer3
                                 break;
                             case LetterTypes.Image:
                                 var ImgLetter = (ImageLetter)Let;
-                                var Img = (ImageSource)Let.GetRenderElement();                               
-                                if (SingleImage)
+                                var Img = (ImageSource)ImgLetter.GetRenderElement();
+                                var StartPoint = ImgLetter.GetStartPoint();
+                                var EndPoint = ImgLetter.GetEndPoint();
+                                if (Img == null)
                                 {
-                                    Vector RenderSize = ImgLetter.GetMaxRenderSize(PageSize);
-                                    ImgLetter.StartPosition = (PageSize - RenderSize) / 2;
-                                    ImgLetter.EndPosition = ImgLetter.StartPosition + RenderSize;                                    
+                                    var RedPen = new Pen(Brushes.Red, 1);
+                                    drawingContext.DrawRectangle(Brushes.Transparent, RedPen, ImgLetter.GetImageRect());
+                                    drawingContext.DrawLine(RedPen, StartPoint, EndPoint);
+                                    drawingContext.DrawLine(RedPen, new Point(StartPoint.X, EndPoint.Y), new Point(EndPoint.X, StartPoint.Y));
                                 }
-                                var StartPoint = new Point(Let.StartPosition.X, Let.StartPosition.Y);
-                                var EndPoint = new Point(Let.EndPosition.X, Let.EndPosition.Y);
-                                drawingContext.DrawImage(Img, new Rect(StartPoint, EndPoint));
-                               
+                                else
+                                {
+                                    if (SingleImage)
+                                    {
+                                        Vector RenderSize = ImgLetter.GetMaxRenderSize(PageSize);
+                                        ImgLetter.StartPosition = (PageSize - RenderSize) / 2;
+                                        ImgLetter.EndPosition = ImgLetter.StartPosition + RenderSize;
+                                    }
+                                    drawingContext.DrawImage(Img, ImgLetter.GetImageRect());
+                                }
                                 break;
                             case LetterTypes.Break:
                                 break;

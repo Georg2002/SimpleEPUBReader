@@ -132,6 +132,8 @@ namespace WatconWrapper
 
         private string[] GetSearchwords(string text)
         {
+            text = LanguageResources.Trim(text);
+            if (string.IsNullOrWhiteSpace(text)) return new string[0];         
             var BaseForm = LanguageResources.GetPossibleBaseForms(text);
 
             string Katakana = LanguageResources.GetKatakana(text);

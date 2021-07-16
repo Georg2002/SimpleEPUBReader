@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace WatconWrapper
 {
     public static class LanguageResources
     {
+        private static readonly char[] IgnoreChars = "︒.︑!？︻︼﹁﹂﹃﹄".ToCharArray();
+
         //eg adjectives, will not be applied recursively
         private static readonly Inflection[] NormalInflections = new Inflection[]
         {
@@ -115,6 +118,11 @@ namespace WatconWrapper
            new Inflection("させる","する"),new Inflection("こさせる","くる"),
        };
 
+        internal static string Trim(string text)
+        {
+            return text.Trim(IgnoreChars);
+        }
+
         public static readonly Dictionary<char, char> HiraganaDict = new Dictionary<char, char>()
         {
             { 'ア','あ' },{ 'ァ','ぁ' },{ 'カ','か' },{ 'サ','さ' },{ 'タ','た' },
@@ -193,9 +201,9 @@ namespace WatconWrapper
         internal static List<string> GetPossibleBaseForms(string text)
         {
             var Res = new List<string>();
+            if (string.IsNullOrWhiteSpace(text)) return Res;       
             text = GetHiragana(text);
-            Res.Add(text);
-
+            Res.Add(text);          
             //ru verbs with check for last verb, as it would otherwise be added every time
             if (RuVerbVowelsHiragana.Contains(text.Last()))
             {
