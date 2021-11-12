@@ -156,6 +156,21 @@ namespace EPUBReader2
             JumpPages(1);
         }
 
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+                {
+                case Key.Right:
+                    Right_Click(null, null);
+                    break;
+                case Key.Left:
+                    Left_Click(null, null);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             MouseManager.MouseMove(Mouse.GetPosition(this), Mouse.LeftButton == MouseButtonState.Pressed, Mouse.RightButton == MouseButtonState.Pressed);
@@ -334,6 +349,6 @@ namespace EPUBReader2
         private void Close_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             Application.Current.Shutdown();
-        }
+        }      
     }
 }

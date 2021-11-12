@@ -137,11 +137,6 @@ namespace EPUBRenderer3
                 var Word = Words[i];
                 NextWord = i == Words.Count - 1 ? null : Words[i + 1];
                 LetterFit = Word.Position(Prev,NextWord, PageSize);
-            //    if (!Word.Letters.Last().InsidePage(PageSize) && NextWord!=null && NextWord.Type == WordTypes.Ruby)
-            //    {
-            //        ;
-            //    }
-                //     if (LetterFit<Word.Letters.Count || !Word.Letters.Last().InsidePage(PageSize))
                 if (LetterFit < Word.Letters.Count)
                    {
                     break;

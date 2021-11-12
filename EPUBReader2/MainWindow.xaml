@@ -14,7 +14,8 @@
         WindowStyle="ToolWindow"
         Title="EPUBReader 3" Height="400" Width="500" MinHeight="400" MinWidth="400"
         SizeChanged="Window_SizeChanged"
-        Closing="Window_Closing">   
+        Closing="Window_Closing"
+        KeyDown="Window_KeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -25,7 +26,7 @@
             <RowDefinition x:Name="DictRow" Height="0"/>
         </Grid.RowDefinitions>
         <local:DictControl x:Name="DictControl" Grid.Column="1"/>
-        
+
         <Grid x:Name="ContentGrid" Margin="0,30,0,30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MinWidth="10" MaxWidth="40"/>
@@ -37,7 +38,7 @@
             <Render:Renderer x:Name="Renderer" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10"/>
             <local:MenuControl x:Name="Menu" Visibility="Collapsed" Grid.ColumnSpan="3"/>
         </Grid>
-        <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="10"/>       
+        <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="10"/>
         <Border x:Name="Bar" VerticalAlignment="Top" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="0">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -92,6 +93,6 @@
                     </Border>
                 </Button>
             </Grid>
-        </Border>        
+        </Border>
     </Grid>
 </Window>

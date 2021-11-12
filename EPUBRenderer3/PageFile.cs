@@ -179,7 +179,7 @@ namespace EPUBRenderer3
                             break;
                         case LinePartTypes.image:
                             var ImagePart = (ImageLinePart)Part;
-                            Word.Letters.Add(new ImageLetter(ImagePart.GetImage()));
+                            Word.Letters.Add(new ImageLetter(ImagePart.GetImage(), ImagePart.Inline));
                             Line.Words.Add(Word);
                             Word = new Word();
                             break;

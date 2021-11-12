@@ -100,7 +100,7 @@ namespace WatconWrapper
                      char FirstLetter = Searchword[0];
                      if (!Dict.ContainsKey(FirstLetter)) continue;
                      var PartialDict = Dict[FirstLetter];
-                     var NewResults = PartialDict.Where(a => a.Readings.Any(b => b == Searchword) || a.WrittenForms.Any(c => c == Searchword)).ToList();
+                     var NewResults = PartialDict.Where(a => a.Readings.Any(b => b == Searchword) || a.WrittenForms.Any(c => c == Searchword)).Take(10).ToList();
                      Res.AddRange(NewResults);
                  }
              });

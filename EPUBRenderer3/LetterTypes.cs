@@ -213,10 +213,12 @@ namespace EPUBRenderer3
     internal class ImageLetter : Letter
     {
         public ImageSource Image;
+        public bool Inline;
 
-        public ImageLetter(ImageSource Image)
+        public ImageLetter(ImageSource Image, bool Inline)
         {
             Type = LetterTypes.Image;
+            this.Inline = Inline;
             this.Image = Image;
         }
 
@@ -237,8 +239,7 @@ namespace EPUBRenderer3
                 Width = Image.Width; Height = Image.Height;
             }
 
-            bool MustScale = PageSize.X < Width || PageSize.Y < Height;
-            bool Inline = Width <= LineDist * 2 && Height <= 2 * LineDist;
+            bool MustScale = PageSize.X < Width || PageSize.Y < Height;         
             StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);
             Vector RenderSize = new Vector(-Width, Height);
             if (Inline)

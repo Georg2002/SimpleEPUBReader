@@ -212,7 +212,9 @@ namespace EPUBParser
                         Logger.Report("can't find link to image: " + Node.OuterHtml, LogType.Error);
                         break;
                     }
-                    var Image = new ImageLinePart(Link);
+                    var Parent = Node.ParentNode;
+                    var Inline = Parent.Name == "p" && !string.IsNullOrWhiteSpace(Parent.InnerText);
+                    var Image = new ImageLinePart(Link,Inline);
                     //Set later to allow parallelization
                     Parts.Add(Image);
                     break;
@@ -293,6 +295,7 @@ namespace EPUBParser
     public class ImageLinePart : LinePart
     {
         private byte[] ImageData;
+        public bool Inline;
 
         public ImageSource GetImage()
         {            
@@ -326,10 +329,11 @@ namespace EPUBParser
             return Image;
         }
 
-        public ImageLinePart(string Path)
+        public ImageLinePart(string Path, bool Inline)
         {
             this.Text = Path;
             this.Type = LinePartTypes.image;
+            this.Inline = Inline;
         }
 
         public void SetImage(List<ZipEntry> Entries, ZipEntry PageEntry)
