@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{8A194257-D63F-46D9-A889-B822E0C58D91}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPUBParser", "EPUBParser\EPUBParser.csproj", "{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPUBRenderer3", "EPUBRenderer3\EPUBRenderer3.csproj", "{F36DC9DB-5567-42CB-8407-DA6773DABFF2}"
@@ -23,14 +21,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|x64.ActiveCfg = Debug|x64
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Debug|x64.Build.0 = Debug|x64
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Release|x64.ActiveCfg = Release|Any CPU
-		{8A194257-D63F-46D9-A889-B822E0C58D91}.Release|x64.Build.0 = Release|Any CPU
 		{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11C25E01-CA30-47A6-8E32-D77FA35BC9DD}.Debug|x64.ActiveCfg = Debug|x64

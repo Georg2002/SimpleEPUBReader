@@ -172,23 +172,27 @@ namespace WatconWrapper
 
         public static string GetHiragana(string text)
         {
-            return SwitchKana(text, HiraganaDict);
+            return ExchangeKana(text, HiraganaDict);
         }
 
-        internal static string GetKatakana(string text)
+        public static string GetKatakana(string text)
         {
-            return SwitchKana(text, KatakanaDict);
+            return ExchangeKana(text, KatakanaDict);
         }
 
-        private static string SwitchKana(string text, Dictionary<char, char> Dict)
+        public static string SwitchKana(string Text)
         {
             string Switched = "";
-            for (int i = 0; i < text.Length; i++)
+            for (int i = 0; i < Text.Length; i++)
             {
-                char c = text[i];
-                if (Dict.ContainsKey(c))
+                char c = Text[i];
+                if (KatakanaDict.ContainsKey(c))
                 {
-                    Switched += Dict[c];
+                    Switched += KatakanaDict[c];
+                }
+                else if (HiraganaDict.ContainsKey(c))
+                {
+                    Switched += HiraganaDict[c];
                 }
                 else
                 {
@@ -196,6 +200,24 @@ namespace WatconWrapper
                 }
             }
             return Switched;
+        }
+
+        private static string ExchangeKana(string text, Dictionary<char, char> Dict)
+        {
+            string Res = "";
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (Dict.ContainsKey(c))
+                {
+                    Res += Dict[c];
+                }
+                else
+                {
+                    Res += c;
+                }
+            }
+            return Res;
         }             
 
         internal static List<string> GetPossibleBaseForms(string text)

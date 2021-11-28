@@ -59,6 +59,7 @@ namespace EPUBReader2
             SaveStruc Save = SaveAndLoad.LoadSave();
             ColorIndex = Save.ColorIndex != 0 && Save.ColorIndex < MarkingColors.Length ? Save.ColorIndex : (byte)1;
             ColorButton.Background = MarkingColors[ColorIndex];
+            Renderer.KatakanaLearningMode = Save.KatakanaLearningMode;
             string Root = Path.GetPathRoot(Save.LastDirectory);
             if (!Directory.Exists(Root) || Root == "\\")
             {
@@ -165,10 +166,11 @@ namespace EPUBReader2
                     break;
                 case Key.Left:
                     Left_Click(null, null);
-                    break;
+                    break;     
                 default:
                     break;
             }
+            e.Handled = true;
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -293,6 +295,7 @@ namespace EPUBReader2
             Save.LastDirectory = Dialog.InitialDirectory;
             Save.WindowSize = WindowSize;
             Save.DictOpen = DictionaryActive;
+            Save.KatakanaLearningMode = Renderer.KatakanaLearningMode;
             return Save;
         }
 

@@ -60,12 +60,13 @@ namespace EPUBReader2
 
     public struct SaveStruc
     {
-        public List<LibraryBook> Books;
-        public int CurrentBookIndex;
+        public bool KatakanaLearningMode;
+  public int CurrentBookIndex;
         public bool Fullscreen;
         public Vector WindowSize;
         public string LastDirectory;
         public byte ColorIndex;
         public bool DictOpen;
+        public List<LibraryBook> Books;      
     }
 }

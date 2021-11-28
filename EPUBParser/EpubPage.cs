@@ -212,9 +212,15 @@ namespace EPUBParser
                         Logger.Report("can't find link to image: " + Node.OuterHtml, LogType.Error);
                         break;
                     }
+                    var Inline = false;
                     var Parent = Node.ParentNode;
-                    var Inline = Parent.Name == "p" && !string.IsNullOrWhiteSpace(Parent.InnerText);
-                    var Image = new ImageLinePart(Link,Inline);
+                    for (int i = 0; i < 20; i++)
+                    {
+                        Inline = Parent.Name == "p" && !string.IsNullOrWhiteSpace(Parent.InnerText);
+                        if (Inline || Parent.ParentNode == null) break;                       
+                        Parent = Parent.ParentNode;                         
+                    }
+                    var Image = new ImageLinePart(Link, Inline);
                     //Set later to allow parallelization
                     Parts.Add(Image);
                     break;
@@ -239,7 +245,7 @@ namespace EPUBParser
             switch (classAttribute)
             {
                 case "sesame":
-                    if (node.ChildNodes.Count == 0) return;                  
+                    if (node.ChildNodes.Count == 0) return;
                     var NewSesamePart = new TextLinePart
                     {
                         Text = node.ChildNodes[0].InnerHtml,
@@ -298,11 +304,11 @@ namespace EPUBParser
         public bool Inline;
 
         public ImageSource GetImage()
-        {            
+        {
             if (ImageData == null)
             {
-                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);          
-                return  null;
+                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
+                return null;
             }
             BitmapImage Image = null;
             try

@@ -12,6 +12,8 @@ namespace EPUBRenderer3
 
     public partial class Renderer : FrameworkElement
     {
+        public bool KatakanaLearningMode;
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (ShownPage == null ||!Rerender) return;
@@ -27,7 +29,7 @@ namespace EPUBRenderer3
                         switch (Let.Type)
                         {
                             case LetterTypes.Letter:
-                                var Text = (FormattedText)Let.GetRenderElement();
+                                var Text = (FormattedText)Let.GetRenderElement(KatakanaLearningMode);                               
                                 var TxtLetter = (TextLetter)Let;
                                 var DrawPos = Let.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
                                 DrawPos.Y -= TxtLetter.FontSize * CharInfo.FontOffset;
@@ -40,7 +42,7 @@ namespace EPUBRenderer3
                                 break;
                             case LetterTypes.Image:
                                 var ImgLetter = (ImageLetter)Let;
-                                var Img = (ImageSource)ImgLetter.GetRenderElement();
+                                var Img = (ImageSource)ImgLetter.GetRenderElement(KatakanaLearningMode);
                                 var StartPoint = ImgLetter.GetStartPoint();
                                 var EndPoint = ImgLetter.GetEndPoint();
                                 if (Img == null)

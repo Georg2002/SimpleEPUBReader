@@ -63,6 +63,10 @@
       <Project>{11c25e01-ca30-47a6-8e32-d77fa35bc9dd}</Project>
       <Name>EPUBParser</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JapaneseDictionary\WactonWrapper.csproj">
+      <Project>{356498d6-0231-4f1e-a7f8-f08de75f4965}</Project>
+      <Name>WactonWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="NOTES_READ_ME.txt" />

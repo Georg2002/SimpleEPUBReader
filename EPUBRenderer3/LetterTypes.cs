@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using WatconWrapper;
 
 namespace EPUBRenderer3
 {
@@ -54,7 +55,7 @@ namespace EPUBRenderer3
             return relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
         }
 
-        public virtual object GetRenderElement()
+        public virtual object GetRenderElement(bool katakanaLearningMode)
         {
             return null;
         }
@@ -197,9 +198,10 @@ namespace EPUBRenderer3
             return MarkingRect;
         }
 
-        public override object GetRenderElement()
+        public override object GetRenderElement(bool KatakanaLearningMode)
         {
-            return new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture,
+            string DisplayedText = KatakanaLearningMode ? LanguageResources.SwitchKana(Character.ToString()) : Character.ToString();
+            return new FormattedText(DisplayedText, System.Globalization.CultureInfo.InvariantCulture,
                 FlowDirection.RightToLeft, CharInfo.StandardTypeface, FontSize * RelScale, Brushes.Black, 1)
             { TextAlignment = TextAlignment.Center };
         }
@@ -301,7 +303,7 @@ namespace EPUBRenderer3
             return PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
         }
 
-        public override object GetRenderElement()
+        public override object GetRenderElement(bool KatakanaLearningMode)
         {
             return Image;
         }
@@ -341,7 +343,7 @@ namespace EPUBRenderer3
             return true;
         }
 
-        public override object GetRenderElement()
+        public override object GetRenderElement(bool KatakanaLearningMode)
         {
             return null;
         }
