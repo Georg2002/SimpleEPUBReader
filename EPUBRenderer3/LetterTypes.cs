@@ -11,7 +11,7 @@ namespace EPUBRenderer3
 {
     internal enum LetterTypes
     {
-        Letter, Image, Break
+        Letter, Image, Break, Marker
     }
 
     internal struct LetterPlacementInfo
@@ -84,6 +84,26 @@ namespace EPUBRenderer3
         public bool InsidePage(Vector PageSize)
         {
             return InsidePageHor(PageSize) && InsidePageVert(PageSize);
+        }
+
+        public (Vector, Vector) GetNeutralStartingPosition(LetterPlacementInfo Info)
+        {
+            Vector StartPosition;
+            Vector EndPosition;
+            var PrevLetter = Info.PrevLetter;
+            var PageSize = Info.PageSize;
+            if (PrevLetter == null)
+            {
+                StartPosition = new Vector(PageSize.X - LineDist + StandardFontSize, 0);
+                EndPosition = new Vector(PageSize.X - LineDist, 0);
+            }
+            else
+            {
+                StartPosition = PrevLetter.NextWritePos;
+                EndPosition = StartPosition + new Vector(-StandardFontSize, 0);
+            }
+
+            return (StartPosition, EndPosition);
         }
     }
 
@@ -241,7 +261,7 @@ namespace EPUBRenderer3
                 Width = Image.Width; Height = Image.Height;
             }
 
-            bool MustScale = PageSize.X < Width || PageSize.Y < Height;         
+            bool MustScale = PageSize.X < Width || PageSize.Y < Height;
             StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);
             Vector RenderSize = new Vector(-Width, Height);
             if (Inline)
@@ -346,6 +366,23 @@ namespace EPUBRenderer3
         public override object GetRenderElement(bool KatakanaLearningMode)
         {
             return null;
+        }
+    }
+
+    internal class MarkerLetter : Letter
+    {
+        public string Id;
+        public MarkerLetter(string Id)
+        {
+            this.Id = Id;
+            Type = LetterTypes.Marker;
+        }
+
+        public override bool Position(LetterPlacementInfo Info)
+        {
+            (StartPosition, EndPosition) = GetNeutralStartingPosition(Info);
+            NextWritePos = EndPosition;
+            return true;
         }
     }
 }

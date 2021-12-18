@@ -258,7 +258,29 @@ namespace EPUBRenderer3
         internal PosDef GetChapterPos(int chapterIndex)
         {
             var Chapter = epub.toc.Chapters[chapterIndex];
-            return new PosDef(epub.Pages.FindIndex(a => a.FullName == Chapter.Source), 0, 0, 0);
+            var Index = epub.Pages.FindIndex(a => a.FullName == Chapter.Source);
+            var Pos = new PosDef(Index, 0, 0, 0);
+            if (string.IsNullOrEmpty(Chapter.Jumppoint)) return Pos;
+            var Page = PageFiles[Index];
+            for (int Li = 0; Li < Page.Lines.Count; Li++)
+            {
+                var Line = Page.Lines[Li];
+                for (int W = 0; W < Line.Words.Count; W++)
+                {
+                    var Word = Line.Words[W];
+                    if (Word.Letters[0].Type == LetterTypes.Marker)
+                    {
+                        var Marker = (MarkerLetter)Word.Letters[0];
+                        if (Marker.Id ==Chapter.Jumppoint)
+                        {
+                            Pos.Line = Li;
+                            Pos.Word = W;
+                            Pos.Letter = 0;
+                        }
+                    }
+                }
+            }
+            return Pos;
         }
     }
 }

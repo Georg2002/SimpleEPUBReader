@@ -186,12 +186,14 @@ namespace EPUBParser
                 case "a":
                 case "svg":
                 case "div":
+                    AddChapterMarker(Node);
                     foreach (var ChildNode in Node.ChildNodes)
                     {
                         AddAppropriatePart(ChildNode, Entries, File);
                     }
                     break;
                 case "p":
+                    AddChapterMarker(Node);
                     foreach (var ChildNode in Node.ChildNodes)
                     {
                         AddAppropriatePart(ChildNode, Entries, File);
@@ -236,8 +238,15 @@ namespace EPUBParser
             }
         }
 
+        private void AddChapterMarker(HtmlNode Node)
+        {
+            string Id = HTMLParser.SafeAttributeGet(Node, "id", true);
+            if (!String.IsNullOrEmpty(Id)) Parts.Add(new ChapterMarkerLinePart(Id));
+        }
+
         private void AddSpanElement(HtmlNode node, List<ZipEntry> Entries, ZipEntry File)
         {
+            AddChapterMarker(node);
             var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
             var IgnoreAttribute = HTMLParser.SafeAttributeGet(node, "data-amznremoved-m8", true);
             if (IgnoreAttribute == "true") return;
@@ -276,6 +285,16 @@ namespace EPUBParser
                     }
                     return;
             }
+        }
+    }
+
+    public class ChapterMarkerLinePart : LinePart
+    {
+        public string Id;
+        public ChapterMarkerLinePart(string Id)
+        {
+            this.Id = Id;
+            this.Type = LinePartTypes.marker;
         }
     }
 
@@ -396,6 +415,6 @@ namespace EPUBParser
 
     public enum LinePartTypes
     {
-        normal, sesame, image, paragraph
+        normal, sesame, image, paragraph, marker
     }
 }

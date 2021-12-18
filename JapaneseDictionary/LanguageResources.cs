@@ -109,6 +109,14 @@ namespace WatconWrapper
            new Inflection("ねば","ぬ"), new Inflection("えば","う"),
            new Inflection("せば","す"),
 
+           //zu-negation
+           new Inflection("ず","ない"), new Inflection("せず","する"),
+           new Inflection("こず","くる"),
+
+           //nu-negation
+            new Inflection("ぬ","ない"), new Inflection("せぬ","する"),
+           new Inflection("こぬ","くる"),
+
            //causative         
            new Inflection("かせる","く"), new Inflection("がせる","ぐ"),
            new Inflection("ばせる","ぶ"), new Inflection("たせる","つ"),

@@ -116,6 +116,12 @@ namespace EPUBRenderer3
                 {                  
                     switch (Part.Type)
                     {
+                        case LinePartTypes.marker:
+                            var MarkerPart = (ChapterMarkerLinePart)Part;
+                            Word.Letters.Add(new MarkerLetter(MarkerPart.Id));
+                            Line.Words.Add(Word);
+                            Word = new Word();
+                            break;
                         case LinePartTypes.sesame:
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;

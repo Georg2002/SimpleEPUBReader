@@ -80,7 +80,9 @@ namespace EPUBParser
                 }
 
                 string Source = HTMLParser.SafeAttributeGet(SourceNode, "src");
-                Source = Source.Split('#')[0];
+                var Split = Source.Split('#');
+                string Jumppoint = Split.Length == 1 ? "" : Split[1];
+                Source = Split[0];              
                 string FullSource = "";
                 ZipEntry Page = ZipEntry.GetEntryByPath(files, Source, file);
                 if (Page != null)
@@ -94,6 +96,7 @@ namespace EPUBParser
                     continue;
                 }
                 NewChapter.Source = FullSource;
+                NewChapter.Jumppoint = Jumppoint;
 
                 var OrderAttribute = navPointNode.Attributes.FirstOrDefault(a => a.Name == "playorder");
                 if (OrderAttribute == null)
@@ -136,5 +139,6 @@ namespace EPUBParser
     {
         public string Source;
         public string Title;
+        public string Jumppoint;
     }
 }

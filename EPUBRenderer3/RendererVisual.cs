@@ -16,7 +16,7 @@ namespace EPUBRenderer3
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (ShownPage == null ||!Rerender) return;
+            if (ShownPage == null || !Rerender) return;
 
             bool SingleImage = ShownPage.IsSingleImage();
 
@@ -25,11 +25,11 @@ namespace EPUBRenderer3
                 foreach (var Word in Line.Words)
                 {
                     foreach (var Let in Word.Letters)
-                    {           
+                    {
                         switch (Let.Type)
                         {
                             case LetterTypes.Letter:
-                                var Text = (FormattedText)Let.GetRenderElement(KatakanaLearningMode);                               
+                                var Text = (FormattedText)Let.GetRenderElement(KatakanaLearningMode);
                                 var TxtLetter = (TextLetter)Let;
                                 var DrawPos = Let.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
                                 DrawPos.Y -= TxtLetter.FontSize * CharInfo.FontOffset;
@@ -64,6 +64,7 @@ namespace EPUBRenderer3
                                 }
                                 break;
                             case LetterTypes.Break:
+                            case LetterTypes.Marker:
                                 break;
                             default:
                                 throw new NotImplementedException();
@@ -71,15 +72,15 @@ namespace EPUBRenderer3
                         if (Let.MarkingColorIndex != 0)
                         {
                             var Rect = Let.GetMarkingRect();
-                            drawingContext.DrawRectangle(MarkingColors[Let.MarkingColorIndex], null,Rect );
-                        }                       
+                            drawingContext.DrawRectangle(MarkingColors[Let.MarkingColorIndex], null, Rect);
+                        }
                     }
                 }
             }
             int Total = GetPageCount();
             int Current = GetCurrentPage();
             FormattedText PageText = new FormattedText($"{Current}/{Total}", CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black,1);
+                FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black, 1);
             double Width = PageText.Width;
             drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
             Rerender = false;
