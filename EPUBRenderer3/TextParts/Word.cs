@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Media;
+using System.Linq;
 
 namespace EPUBRenderer3
 {
@@ -13,10 +9,22 @@ namespace EPUBRenderer3
         Normal, Ruby
     }
 
+    internal class WordStyle
+    {
+        public FontWeight Weight;
+        public float RelativeFontSize;
+        public WordStyle()
+        {
+            Weight = FontWeights.Normal;
+            RelativeFontSize = 1;
+        }
+    }
+
     internal class Word
     {
         public List<Letter> Letters;
         public WordTypes Type;
+        public WordStyle Style;
         public int Position(Word PrevWord, Word NextWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
         {
             Letter PrevLetter = null;
@@ -97,10 +105,11 @@ namespace EPUBRenderer3
             return false;
         }
 
-        public Word(List<Letter> Letters, WordTypes Type)
+        public Word(List<Letter> Letters, WordTypes Type, WordStyle Style)
         {
             this.Letters = Letters;
             this.Type = Type;
+            this.Style = Style;
         }
 
         public override string ToString()
@@ -115,79 +124,5 @@ namespace EPUBRenderer3
             return Letters.Last().EndPosition.Y - Letters.First().StartPosition.Y;
         }
 
-    }
-
-    internal class Line
-    {
-        public List<Word> Words;
-        public Tuple<int, int> Position(Line Previous, Vector PageSize)
-        {
-            Word Prev = null;
-            if (Previous != null)
-            {
-                Prev = Previous.Words.Last();
-            }
-
-            int WordFit = 0;
-            int LetterFit = 0;
-            Word NextWord = null;
-            for (int i = 0; i < Words.Count; i++)
-            {
-                var Word = Words[i];
-                NextWord = i == Words.Count - 1 ? null : Words[i + 1];
-                LetterFit = Word.Position(Prev, NextWord, PageSize);
-                if (LetterFit < Word.Letters.Count)
-                {
-                    break;
-                }
-                WordFit++;
-                Prev = Word;
-            }
-            return new Tuple<int, int>(WordFit, LetterFit);
-        }
-
-        public Tuple<Line, Line> Split(int WordCount, int LetterCount)
-        {
-            if (WordCount == 0)
-            {
-                return new Tuple<Line, Line>(new Line(), new Line(Words));
-            }
-            var Front = new List<Word>();
-            if (LetterCount == 0)
-            {
-                Front = Words.Take(WordCount).ToList();
-            }
-            else
-            {
-                Front = Words.Take(WordCount + 1).ToList();
-                Front[Front.Count - 1] = new Word(Front.Last().Letters.Take(LetterCount).ToList(), Front.Last().Type);
-            }
-
-            int k = Words[WordCount].Letters.Count == LetterCount ? 1 : 0;
-            var Rear = Words.GetRange(WordCount + k, Words.Count - WordCount - k).ToList();
-            if (k == 0)
-            {
-                Rear[0] = new Word(Rear.First().Letters.GetRange(LetterCount, Rear.First().Letters.Count - LetterCount), Rear.First().Type);
-            }
-
-            return new Tuple<Line, Line>(new Line(Front), new Line(Rear));
-        }
-
-
-        public Line()
-        {
-            Words = new List<Word>();
-        }
-        public Line(List<Word> Words)
-        {
-            this.Words = Words;
-        }
-
-        public override string ToString()
-        {
-            string Text = "";
-            Words.ForEach(a => Text += a);
-            return Text;
-        }
     }
 }

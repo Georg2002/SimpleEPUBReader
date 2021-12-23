@@ -11,12 +11,12 @@ namespace EPUBRenderer3
     public static class CharInfo
     {
         public readonly static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
-   FontWeights.Normal, new FontStretch(), new FontFamily("MS Mincho"));
+   FontWeights.Normal, new FontStretch(), new FontFamily("Global User Interface"));
 
         public static char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟".ToCharArray();
         public static char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
 
-        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0, -1), 2.3f, '≀');
+        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0, -1.1), 2.1f, '≀');//-1
         private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');
 
         public const float FontOffset = 0.24f;//0.24
@@ -43,7 +43,8 @@ namespace EPUBRenderer3
             {'〕',new SpecialCharacter(new Vector(),1,'︺')}, {'_',new SpecialCharacter(new Vector(),1,'∣')},            
             {'~',Wiggle},{'∼',Wiggle},{'～',Wiggle},{'\u0027',new SpecialCharacter(new Vector(),1,'︑')},
             {'゠',new SpecialCharacter(new Vector(),1,'║')},{'＝',new SpecialCharacter(new Vector(),1,'║')}
-            ,{'〟',new SpecialCharacter(new Vector(0,-0.8),1.3f,'〟')},{'〝',new SpecialCharacter(new Vector(0,0.5),1.3f,'〝') }
+            ,{'〟',new SpecialCharacter(new Vector(0,-0.8),1.3f,'〟')},{'〝',new SpecialCharacter(new Vector(0,0.5),1.3f,'〝') },
+            {'．',new SpecialCharacter(new Vector(1,-1.9),2f,'．') }
         };
 
     }

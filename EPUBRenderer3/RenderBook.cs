@@ -20,7 +20,7 @@ namespace EPUBRenderer3
             PageFiles = new List<PageFile>();
             foreach (var Page in epub.Pages)
             {
-                PageFiles.Add(new PageFile(Page));
+                PageFiles.Add(new PageFile(Page, epub.CSSExtract));
             }
         }
 
@@ -46,7 +46,7 @@ namespace EPUBRenderer3
             Iterate(firstHit, secondHit, a => a.MarkingColorIndex = ColorIndex);
         }
 
-        private bool valid(PosDef Pos)
+        private bool Valid(PosDef Pos)
         {
             return Pos.FileIndex >= 0 && Pos.Line >= 0 && Pos.Word >= 0 && Pos.Letter >= 0 &&
                 Pos.FileIndex < PageFiles.Count && Pos.Line < PageFiles[Pos.FileIndex].Lines.Count &&
@@ -59,7 +59,7 @@ namespace EPUBRenderer3
             foreach (var Marking in markings)
             {
                 var Pos = Marking.Pos;
-                if (valid(Pos))
+                if (Valid(Pos))
                 {
                     PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
                 }
@@ -184,11 +184,13 @@ namespace EPUBRenderer3
 
         internal LibraryBook GetLibraryBook()
         {
-            var Book = new LibraryBook();
-            Book.CurrPos = CurrPos;
-            Book.FilePath = epub.FilePath;
-            Book.Title = epub.Settings.Title;
-            Book.Markings = GetMarkings();
+            var Book = new LibraryBook
+            {
+                CurrPos = CurrPos,
+                FilePath = epub.FilePath,
+                Title = epub.Settings.Title,
+                Markings = GetMarkings()
+            };
             return Book;
         }
 
@@ -236,7 +238,7 @@ namespace EPUBRenderer3
                 if (a.Type == LetterTypes.Letter)
                 {
                     var TL = (TextLetter)a;
-                    if (TL.FontSize == Letter.StandardFontSize)
+                    if (!TL.IsRuby)
                     {
                         Text += TL.Character;
                     }                   

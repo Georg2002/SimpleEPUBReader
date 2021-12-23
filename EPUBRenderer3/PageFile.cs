@@ -13,9 +13,9 @@ namespace EPUBRenderer3
         public List<Line> Lines;
         public List<RenderPage> Pages;
 
-        public PageFile(EpubPage page)
+        public PageFile(EpubPage page, CSSExtract CSS)
         {
-            Lines = SplitAndOrder(page);
+            Lines = PreparePage(page,CSS);
         }
 
         public void PositionText(Vector PageSize, int Index)
@@ -97,13 +97,42 @@ namespace EPUBRenderer3
         public override string ToString()
         {
             string Text = "";
-            Lines.ForEach(a => Text = Text + a);
+            Lines.ForEach(a => Text += a);
             return Text;
         }
 
+        private WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
+        {
+            var NewStyle = new WordStyle();
+            if (Part.ActiveClasses == null) return NewStyle;
+            foreach (string SelectorText in Part.ActiveClasses)
+            {
+                var Style = CSS.Styles.FirstOrDefault(a => a.SelectorText == SelectorText);
+                if (Style != null)
+                {
 
+                    NewStyle.RelativeFontSize = Style.FontSize;
+                    switch (Style.FontWeight)
+                    {
+                        case EPUBParser.FontWeights.bold:
+                            NewStyle.Weight = System.Windows.FontWeights.Black;
+                            break;
+                        case EPUBParser.FontWeights.bolder:
+                            NewStyle.Weight = System.Windows.FontWeights.ExtraBold;
+                            break;
+                        case EPUBParser.FontWeights.lighter:
+                            NewStyle.Weight = System.Windows.FontWeights.Light;
+                            break;
+                        case EPUBParser.FontWeights.normal:
+                            NewStyle.Weight = System.Windows.FontWeights.Normal;
+                            break;
+                    }                 
+                }
+            }
+            return NewStyle;
+        }
 
-        private List<Line> SplitAndOrder(EpubPage page)
+        private List<Line> PreparePage(EpubPage page, CSSExtract CSS)
         {
             var Lines = new List<Line>();
 
@@ -111,45 +140,44 @@ namespace EPUBRenderer3
             {
                 var Line = new Line();
                 var Word = new Word();
+                Word.Style = GetStyle(RawLine.Parts.FirstOrDefault(), CSS);
+
+                void AddWordToList(BaseLinePart Part)
+                {
+                    Line.Words.Add(Word);                   
+                    Word = new Word();
+                    Word.Style = GetStyle(Part, CSS);
+                }
 
                 foreach (var Part in RawLine.Parts)
-                {                  
+                {
+                    Word.Style = GetStyle(Part, CSS);
                     switch (Part.Type)
                     {
                         case LinePartTypes.marker:
                             var MarkerPart = (ChapterMarkerLinePart)Part;
                             Word.Letters.Add(new MarkerLetter(MarkerPart.Id));
-                            Line.Words.Add(Word);
-                            Word = new Word();
+                            AddWordToList(Part);
                             break;
                         case LinePartTypes.sesame:
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
                             bool NoRuby = string.IsNullOrEmpty(TextPart.Ruby) && TextPart.Type != LinePartTypes.sesame;
-                            char Prev = 'a';                        
+                            char Prev = 'a';   
                             foreach (var Character in TextPart.Text)
                             {
                                 bool NewWordBefore = NoRuby && CharInfo.PossibleLineBreaksBefore.Contains(Character);
                                 bool NewWordAfter = NoRuby && CharInfo.PossibleLineBreaksAfter.Contains(Prev) && !CharInfo.PossibleLineBreaksAfter.Contains(Character);
 
-
                                 if (NewWordBefore)
                                 {
-                                    if (Word.Letters.Count != 0)
-                                    {
-                                        Line.Words.Add(Word);
-                                        Word = new Word();
-                                    }
-                                    Word.Letters.Add(new TextLetter(Character));
+                                    if (Word.Letters.Count != 0) AddWordToList(Part);
+                                    Word.Letters.Add(new TextLetter(Character, Word.Style));
                                 }
                                 else
                                 {
-                                    if (NewWordAfter)
-                                    {                                                                 
-                                        Line.Words.Add(Word);
-                                        Word = new Word();
-                                    }
-                                    Word.Letters.Add(new TextLetter(Character));
+                                    if (NewWordAfter) AddWordToList(Part);
+                                    Word.Letters.Add(new TextLetter(Character, Word.Style));
                                 }
                                
                                 Prev = Character;
@@ -158,15 +186,16 @@ namespace EPUBRenderer3
                             {
                                 break;
                             }
-                            Line.Words.Add(Word);
-                            Word = new Word();
+                            AddWordToList(Part);
+                         
                             if (!NoRuby)
                             {
                                 if (!string.IsNullOrEmpty(TextPart.Ruby))
                                 {
                                     foreach (var Character in TextPart.Ruby)
                                     {
-                                        Word.Letters.Add(new TextLetter(Character));
+                                       
+                                        Word.Letters.Add(new TextLetter(Character, Word.Style));
                                     }
                                     Word.Type = WordTypes.Ruby;
                                 }
@@ -175,24 +204,21 @@ namespace EPUBRenderer3
                                     int Length = Line.Words.Last().Letters.Count;
                                     for (int i = 0; i < Length; i++)
                                     {
-                                        Word.Letters.Add(new TextLetter('﹅'));
+                                        Word.Letters.Add(new TextLetter('﹅', Word.Style));
                                     }
 
                                 }
-                                Line.Words.Add(Word);
-                                Word = new Word();
+                                AddWordToList(Part);
                             }
                             break;
                         case LinePartTypes.image:
                             var ImagePart = (ImageLinePart)Part;
                             Word.Letters.Add(new ImageLetter(ImagePart.GetImage(), ImagePart.Inline));
-                            Line.Words.Add(Word);
-                            Word = new Word();
+                            AddWordToList(Part);
                             break;
                         case LinePartTypes.paragraph:
                             Word.Letters.Add(new BreakLetter());
-                            Line.Words.Add(Word);
-                            Word = new Word();
+                            AddWordToList(Part);
                             break;
                         default:
                             throw new NotImplementedException();

@@ -12,10 +12,12 @@ namespace EPUBParser
     {
         public static HtmlDocument Parse(ZipEntry File)
         {
-            var Doc = new HtmlDocument();
-            Doc.OptionAutoCloseOnEnd = false;
-            Doc.OptionOutputAsXml = true;
-            Doc.OptionFixNestedTags = true;
+            var Doc = new HtmlDocument
+            {
+                OptionAutoCloseOnEnd = false,
+                OptionOutputAsXml = true,
+                OptionFixNestedTags = true
+            };
             if (File == null)
             {
                 Logger.Report("file is null, can't parse HTML", LogType.Error);

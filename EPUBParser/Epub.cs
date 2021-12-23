@@ -15,7 +15,8 @@ namespace EPUBParser
         public List<EpubPage> Pages;        
         public PackageInfo Package;
         public TocInfo toc;
-        public EpubSettings Settings;     
+        public EpubSettings Settings;
+        public CSSExtract CSSExtract;
 
         public Epub(string FilePath)
         {
@@ -61,6 +62,8 @@ namespace EPUBParser
                             toc = new TocInfo(File, Files);
                             break;
                         case MediaType.css:
+                            if (CSSExtract == null) CSSExtract = new CSSExtract();                          
+                            CSSExtract.AddRules(File);
                             break;
                         case MediaType.image:
                             break;

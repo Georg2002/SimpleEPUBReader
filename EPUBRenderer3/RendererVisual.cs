@@ -34,7 +34,7 @@ namespace EPUBRenderer3
                                 var DrawPos = Let.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
                                 DrawPos.Y -= TxtLetter.FontSize * CharInfo.FontOffset;
                                 drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));
-                                if (TxtLetter.DictSelected && TxtLetter.FontSize == TextLetter.StandardFontSize)
+                                if (TxtLetter.DictSelected && !TxtLetter.IsRuby)
                                 {
                                     var Rect = Let.GetMarkingRect();
                                     drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
