@@ -13,6 +13,14 @@ namespace EPUBRenderer3
         readonly private Epub epub;
         internal List<PageFile> PageFiles;
         public PosDef CurrPos;
+        public string Title
+        {
+            get
+            {
+                return epub == null ? "" : epub.Settings.Title;
+            }
+        }
+
 
         public RenderBook(Epub epub)
         {
@@ -26,14 +34,14 @@ namespace EPUBRenderer3
 
         internal void Position(Vector pageSize)
         {
-        #if (DEBUG)
+#if (DEBUG)
                  for (int i = 0; i < PageFiles.Count; i++)
                  {                
                      PageFiles[i].PositionText(pageSize, i);
                  }
-        #else
+#else
             Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
-        #endif
+#endif
         }
 
         internal void RemoveMarking(PosDef firstHit, PosDef secondHit)
@@ -69,7 +77,7 @@ namespace EPUBRenderer3
         internal Letter GetLetter(PosDef Pos)
         {
             if (Pos == PosDef.InvalidPosition) return null;
-            if (Pos.FileIndex < PageFiles.Count && Pos.FileIndex >=0)
+            if (Pos.FileIndex < PageFiles.Count && Pos.FileIndex >= 0)
             {
                 var Page = PageFiles[Pos.FileIndex];
                 if (Pos.Line < Page.Lines.Count && Pos.Line >= 0)
@@ -143,7 +151,7 @@ namespace EPUBRenderer3
             int Count = 0;
             foreach (var File in PageFiles)
             {
-                Count += File.Pages.Count;                     
+                Count += File.Pages.Count;
             }
             return Count;
         }
@@ -167,7 +175,7 @@ namespace EPUBRenderer3
                         }
                         Count++;
                     }
-                }               
+                }
             }
             return Count;
         }
@@ -223,7 +231,7 @@ namespace EPUBRenderer3
         internal string GetSelection(PosDef selectionStart, PosDef selectionEnd)
         {
             string Text = "";
-            if (selectionStart == PosDef.InvalidPosition ||selectionEnd== PosDef.InvalidPosition)
+            if (selectionStart == PosDef.InvalidPosition || selectionEnd == PosDef.InvalidPosition)
             {
                 return Text;
             }
@@ -241,7 +249,7 @@ namespace EPUBRenderer3
                     if (!TL.IsRuby)
                     {
                         Text += TL.Character;
-                    }                   
+                    }
                 }
             });
             return Text;
@@ -273,7 +281,7 @@ namespace EPUBRenderer3
                     if (Word.Letters[0].Type == LetterTypes.Marker)
                     {
                         var Marker = (MarkerLetter)Word.Letters[0];
-                        if (Marker.Id ==Chapter.Jumppoint)
+                        if (Marker.Id == Chapter.Jumppoint)
                         {
                             Pos.Line = Li;
                             Pos.Word = W;

@@ -86,7 +86,6 @@ namespace EPUBReader2
 #if DEBUG
                 Height = 750;
                 Width = 1170;
-                Title = "Debug mode active, start window size preset";
 #else
                 if (Save.WindowSize.Y >= MinHeight && Save.WindowSize.X >= MinWidth)
                 {
@@ -120,6 +119,7 @@ namespace EPUBReader2
         {
             LibraryBook Book = Library.GetBook(LibraryIndex);
             Renderer.LoadBook(Book.FilePath, Book.CurrPos, Book.Markings);
+            SetTitle();
             if (Menu.Visibility == Visibility.Visible)
             {
                 Library_Click(null, null);
@@ -127,7 +127,7 @@ namespace EPUBReader2
         }
 
         internal void Lookup(string Text)
-        {          
+        {
             DictControl.SelectionChanged(Text);
         }
 
@@ -143,6 +143,7 @@ namespace EPUBReader2
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
                 Renderer.LoadBook(Args[1]);
+                SetTitle();
             }
             LoadSave();
         }
@@ -160,13 +161,13 @@ namespace EPUBReader2
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
-                {
+            {
                 case Key.Right:
                     Right_Click(null, null);
                     break;
                 case Key.Left:
                     Left_Click(null, null);
-                    break;     
+                    break;
                 default:
                     break;
             }
@@ -185,8 +186,18 @@ namespace EPUBReader2
             {
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
                 Renderer.LoadBook(Dialog.FileName);
+                SetTitle();
                 Dialog.InitialDirectory = Path.GetDirectoryName(Dialog.FileName);
             }
+        }
+
+        private void SetTitle()
+        {
+#if DEBUG
+                Title =Renderer.CurrBook.Title + "; Debug mode active, start window size preset";
+#else
+            Title = Renderer.CurrBook.Title;
+#endif
         }
 
         private void Library_Click(object sender, RoutedEventArgs e)
@@ -352,6 +363,6 @@ namespace EPUBReader2
         private void Close_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             Application.Current.Shutdown();
-        }      
+        }
     }
 }
