@@ -193,10 +193,14 @@ namespace EPUBReader2
 
         private void SetTitle()
         {
+
 #if DEBUG
-                Title =Renderer.CurrBook.Title + "; Debug mode active, start window size preset";
+            const string PresetText = "Debug mode active, start window size preset";
+            if (Renderer.CurrBook == null) Title = PresetText;
+            else Title = Renderer.CurrBook.Title + "; " + PresetText;
+
 #else
-            Title = Renderer.CurrBook.Title;
+            Title = Renderer.CurrBook.Title ?? "Epub Reader 2";
 #endif
         }
 
