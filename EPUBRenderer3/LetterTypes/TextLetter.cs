@@ -28,7 +28,7 @@ namespace EPUBRenderer3
             this.Character = Character;
             Type = LetterTypes.Letter;
             this.Weight = Style.Weight;
-            Typeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
+            Typeface = new Typeface(new FontFamily("Hiragino Sans GB"), FontStyles.Normal,
             Weight, new FontStretch(), new FontFamily("Global User Interface"));
 
             if (CharInfo.SpecialCharacters.ContainsKey(Character))
@@ -130,6 +130,7 @@ namespace EPUBRenderer3
 
         public override object GetRenderElement(bool KatakanaLearningMode)
         {
+            if (Typeface.Weight != FontWeights.Normal) ;
             string DisplayedText = KatakanaLearningMode ? LanguageResources.SwitchKana(Character.ToString()) : Character.ToString();
             return new FormattedText(DisplayedText, System.Globalization.CultureInfo.InvariantCulture,
                 FlowDirection.RightToLeft, Typeface, FontSize * RelScale, Brushes.Black, 1)

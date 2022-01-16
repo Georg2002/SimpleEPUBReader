@@ -113,12 +113,12 @@ namespace EPUBRenderer3
 
                     NewStyle.RelativeFontSize = Style.FontSize;
                     switch (Style.FontWeight)
-                    {
+                    {//main font only supports up to W6, aka semi bold, or maybe none at all
                         case EPUBParser.FontWeights.bold:
-                            NewStyle.Weight = System.Windows.FontWeights.Black;
+                            NewStyle.Weight = System.Windows.FontWeights.SemiBold;
                             break;
                         case EPUBParser.FontWeights.bolder:
-                            NewStyle.Weight = System.Windows.FontWeights.ExtraBold;
+                            NewStyle.Weight = System.Windows.FontWeights.Medium;
                             break;
                         case EPUBParser.FontWeights.lighter:
                             NewStyle.Weight = System.Windows.FontWeights.Light;
