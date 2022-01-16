@@ -50,8 +50,11 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
+                <Border VerticalAlignment="Center"  Grid.Column="9">
+                    <TextBlock  x:Name="txtTitle" TextWrapping="NoWrap" HorizontalAlignment="Center"/>
+                </Border>               
                 <Button Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" x:Name="OpenButton">
                     <Border Style="{StaticResource BorderStyle}">
                         <TextBlock Text="Open"/>

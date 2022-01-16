@@ -202,6 +202,7 @@ namespace EPUBReader2
 #else
             Title = Renderer.CurrBook.Title ?? "Epub Reader 2";
 #endif
+            txtTitle.Text = Title;
         }
 
         private void Library_Click(object sender, RoutedEventArgs e)
