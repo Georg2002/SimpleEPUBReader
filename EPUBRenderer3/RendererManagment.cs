@@ -114,7 +114,7 @@ namespace EPUBRenderer3
             Rerender = true;
         }
 
-        public void LoadBook(string Path, PosDef Position = new PosDef(), List<MrkDef> Markings = null)
+        public void LoadBook(string Path, DateTime DateAdded, PosDef Position = new PosDef(), List<MrkDef> Markings = null)
         {
             if (string.IsNullOrEmpty(Path) || !File.Exists(Path) || !Path.ToLower().EndsWith(".epub"))
             {
@@ -125,7 +125,7 @@ namespace EPUBRenderer3
             SelectionEnd = PosDef.InvalidPosition;
             Markings = Markings ?? new List<MrkDef>();
             Epub epub = new Epub(Path);
-            CurrBook = new RenderBook(epub);
+            CurrBook = new RenderBook(epub, DateAdded);
             SetMarkings(Markings);
             CurrBook.Position(PageSize);
             OpenPage(Position);

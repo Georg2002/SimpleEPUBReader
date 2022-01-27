@@ -118,7 +118,7 @@ namespace EPUBReader2
         internal void SetToBook(int LibraryIndex)
         {
             LibraryBook Book = Library.GetBook(LibraryIndex);
-            Renderer.LoadBook(Book.FilePath, Book.CurrPos, Book.Markings);
+            Renderer.LoadBook(Book.FilePath, Book.DateAdded, Book.CurrPos, Book.Markings);
             SetTitle();
             if (Menu.Visibility == Visibility.Visible)
             {
@@ -142,7 +142,7 @@ namespace EPUBReader2
             var Args = Environment.GetCommandLineArgs();
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
-                Renderer.LoadBook(Args[1]);
+                Renderer.LoadBook(Args[1],DateTime.Now);
                 SetTitle();
             }
             LoadSave();
@@ -185,7 +185,7 @@ namespace EPUBReader2
             if (Dialog.ShowDialog() == true)
             {
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
-                Renderer.LoadBook(Dialog.FileName);
+                Renderer.LoadBook(Dialog.FileName,DateTime.Now);
                 SetTitle();
                 Dialog.InitialDirectory = Path.GetDirectoryName(Dialog.FileName);
             }

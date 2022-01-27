@@ -10,6 +10,7 @@ namespace EPUBRenderer3
 {
     public class RenderBook
     {
+        public DateTime DateAdded;
         readonly private Epub epub;
         internal List<PageFile> PageFiles;
         public PosDef CurrPos;
@@ -22,9 +23,10 @@ namespace EPUBRenderer3
         }
 
 
-        public RenderBook(Epub epub)
+        public RenderBook(Epub epub,DateTime DateAdded)
         {
             this.epub = epub;
+            this.DateAdded = DateAdded;
             PageFiles = new List<PageFile>();
             foreach (var Page in epub.Pages)
             {
@@ -198,7 +200,7 @@ namespace EPUBRenderer3
                 FilePath = epub.FilePath,
                 Title = epub.Settings.Title,
                 Markings = GetMarkings(),
-                DateAdded = DateTime.Now
+                DateAdded = DateAdded
             };
             return Book;
         }

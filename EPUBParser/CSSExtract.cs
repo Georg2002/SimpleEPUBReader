@@ -34,6 +34,7 @@ namespace EPUBParser
                 if (!string.IsNullOrEmpty(FontString))
                 {
                     FontString = FontString.Replace("em", "");
+                    FontString = FontString.Replace("%", "");
                     if (System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator==",")
                     {
                         FontString = FontString.Replace(".", ",");
