@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using EPUBRenderer3;
 
 namespace EPUBReader2
 {
@@ -31,27 +32,26 @@ namespace EPUBReader2
 
         public void SetToChapters(List<string> Chapters)
         {
-            ShowingChapters = true;
-            ListBox.ItemsSource = GetItems(Chapters, false);
+            ShowingChapters = true; var Items = new List<ListItemStruct>();
+            for (int i = 0; i < Chapters.Count; i++)
+            {
+                var Chapter = Chapters[i];
+                Items.Add(new ListItemStruct(Chapter, i, false, DateTime.Now));
+            }
+            ListBox.ItemsSource = Items;
         }
 
-        public void SetToLibrary(List<string> Titles)
+        public void SetToLibrary(List<LibraryBook> Books)
         {
             ShowingChapters = false;
-            ListBox.ItemsSource = GetItems(Titles, true);
-        }
-
-
-        private List<ListItemStruct> GetItems(List<string> TextList, bool Visible)
-        {
-            var Res = new List<ListItemStruct>();
-            for (int i = 0; i < TextList.Count; i++)
+            var Items = new List<ListItemStruct>();
+            for (int i = 0; i < Books.Count; i++)
             {
-                var Text = TextList[i];
-                Res.Add(new ListItemStruct(Text, Visible, i));
+                var Book = Books[i];
+                Items.Add(new ListItemStruct(Book.Title, i, true, Book.DateAdded));
             }
-            return Res;
-        }
+            ListBox.ItemsSource = Items;
+        }     
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -78,15 +78,17 @@ namespace EPUBReader2
     struct ListItemStruct
     {
         public string Text { get; set; }
-        public Visibility Vis { get; set; }
+        public string Date { get; set; }
         public int Number { get; set; }
         public int Index;
-        public ListItemStruct(string Text, bool Visible, int Index)
+        public Visibility visibility { get; set; }
+        public ListItemStruct(string Text, int Index, bool IsBook,DateTime Date)
         {
             this.Text = Text;
-            Vis = Visible ? Visibility.Visible : Visibility.Collapsed;
             Number = Index + 1;
             this.Index = Index;
+            visibility = IsBook ? Visibility.Visible : Visibility.Collapsed;
+            this.Date = Date.ToString("dd.MM.yyyy");
         }
     }
 }

@@ -12,5 +12,6 @@ namespace EPUBRenderer3
         public string Title;
         public PosDef CurrPos;
         public List<MrkDef> Markings;
+        public DateTime DateAdded;
     }
 }

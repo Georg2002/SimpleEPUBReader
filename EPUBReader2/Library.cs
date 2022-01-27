@@ -25,17 +25,7 @@ namespace EPUBReader2
             }
             Books.Insert(0,NewBook);
         }
-
-        public List<string> GetTitles()
-        {
-            var Res = new List<string>();
-            foreach (var Book in Books)
-            {
-                Res.Add(Book.Title);
-            }
-            return Res;
-        }
-
+            
         public void DeleteBook(int Index)
         {
             Books.RemoveAt(Index);

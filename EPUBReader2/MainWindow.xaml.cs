@@ -101,7 +101,7 @@ namespace EPUBReader2
         internal void DeleteBook(int index)
         {
             Library.DeleteBook(index);
-            Menu.SetToLibrary(Library.GetTitles());
+            Menu.SetToLibrary(Library.GetBooks());
         }
 
         internal int GetCurrentPage()
@@ -222,7 +222,7 @@ namespace EPUBReader2
                 FunctionsLocked = true;
                 Menu.Visibility = Visibility.Visible;
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
-                Menu.SetToLibrary(Library.GetTitles());
+                Menu.SetToLibrary(Library.GetBooks());
             }
 
         }

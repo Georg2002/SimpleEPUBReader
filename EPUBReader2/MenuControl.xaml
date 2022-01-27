@@ -13,27 +13,31 @@
             <ListBox.Resources>
                 <Style TargetType="ScrollBar">
                     <Setter Property="Width" Value="30"/>
-                </Style>
+                </Style>     
             </ListBox.Resources>
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="string">
+                <DataTemplate>
                     <Grid Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" Height="40">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="50"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding Number}" Grid.Column="2"  Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" TextAlignment="Center" VerticalAlignment="Center"/>
-                        <Button Grid.Column="1" Style="{StaticResource MenuButtonStyle}" MouseDoubleClick="Select_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
-                            <Border Style="{StaticResource BorderStyle}" HorizontalAlignment="Left">
-                                <TextBlock Text="{Binding Text}" TextAlignment="Left" HorizontalAlignment="Left"/>
-                            </Border>
-                        </Button>
                         <Button x:Name="DeleteButton" Grid.Column="0" Style="{StaticResource MenuButtonStyle}" Visibility="{Binding Vis}" Click="DeleteButton_Click">
                             <Border Style="{StaticResource BorderStyle}">
                                 <TextBlock Text="Delete"/>
                             </Border>
                         </Button>
+                        <Button Grid.Column="1" Style="{StaticResource MenuButtonStyle}" MouseDoubleClick="Select_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                            <Border Style="{StaticResource BorderStyle}" HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding Text}" TextAlignment="Left" HorizontalAlignment="Left"/>
+                            </Border>
+                        </Button>
+                        <TextBlock Text="{Binding Date}" Grid.Column="2" Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}" 
+                                   TextAlignment="Center" VerticalAlignment="Center" Visibility="{Binding visibility}"/>
+                        <TextBlock Text="{Binding Number}" Grid.Column="3"  Background="{Binding ElementName=DeleteButton,Path=Background, Mode=OneWay}"
+                                   TextAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

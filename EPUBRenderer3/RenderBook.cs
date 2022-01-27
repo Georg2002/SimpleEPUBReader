@@ -197,7 +197,8 @@ namespace EPUBRenderer3
                 CurrPos = CurrPos,
                 FilePath = epub.FilePath,
                 Title = epub.Settings.Title,
-                Markings = GetMarkings()
+                Markings = GetMarkings(),
+                DateAdded = DateTime.Now
             };
             return Book;
         }
