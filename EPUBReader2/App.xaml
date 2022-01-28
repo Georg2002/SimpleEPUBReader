@@ -4,6 +4,15 @@
              xmlns:local="clr-namespace:EPUBReader2"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <Style TargetType="FrameworkElement">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+
+        <!-- turns off tab stops -->
+        <Style TargetType="Control">
+            <Setter Property="IsTabStop" Value="False" />
+        </Style>
+        
         <Style x:Key="SwitchButtonStyle" TargetType="Button">
             <Setter Property="Background"  Value="WhiteSmoke"/>
             <Setter Property="Template">

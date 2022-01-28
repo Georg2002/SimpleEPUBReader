@@ -95,7 +95,7 @@ namespace EPUBRenderer3
             {
                 var StartTL = (TextLetter)StartLetter;
                 var EndTL = (TextLetter)EndLetter;
-                if (StartTL.FontSize == TextLetter.StandardFontSize && EndTL.FontSize == TextLetter.StandardFontSize)
+                if (!StartTL.IsRuby && !EndTL.IsRuby)
                 {
                     return;
                 }

@@ -51,11 +51,17 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <Border VerticalAlignment="Center"  Grid.Column="9" Margin="5">
+                <Border VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="8" Margin="5">
                     <TextBlock  x:Name="txtTitle" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" 
                                 FontFamily="Hiragino Sans GB" FontSize="15"/>
-                </Border>               
+                </Border>
+                <Border VerticalAlignment="Center"  Grid.Column="9" HorizontalAlignment="Center" Margin="15">
+                    <TextBlock  x:Name="txtTimer" TextWrapping="NoWrap" HorizontalAlignment="Center" 
+                                FontSize="20"/>
+                </Border>
+
                 <Button Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" x:Name="OpenButton">
                     <Border Style="{StaticResource BorderStyle}">
                         <TextBlock Text="Open"/>

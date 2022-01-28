@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -41,6 +42,7 @@ namespace EPUBReader2
             new SolidColorBrush(new Color() {R = 0, G = 0,B = 255,A = Alpha})
         };
         private Vector WindowSize;
+        private DispatcherTimer Timer = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -52,6 +54,14 @@ namespace EPUBReader2
             Bar.Height = MouseManager.BarHeight;
             PagesControl.Main = this;
             Menu.Main = this;
+            Timer.Interval = TimeSpan.FromSeconds(1);
+            Timer.Tick += timer_tick;
+            Timer.Start();
+        }
+
+        private void timer_tick(object sender, EventArgs e)
+        {
+            txtTimer.Text = DateTime.Now.ToString("HH:mm");
         }
 
         private void LoadSave()
@@ -168,10 +178,12 @@ namespace EPUBReader2
                 case Key.Left:
                     Left_Click(null, null);
                     break;
+                case Key.Tab:
+                    e.Handled = true;
+                    break;
                 default:
                     break;
-            }
-            e.Handled = true;
+            } 
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
