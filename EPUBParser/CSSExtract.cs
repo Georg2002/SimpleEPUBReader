@@ -33,13 +33,35 @@ namespace EPUBParser
                 string FontString = Style.Style.FontSize;
                 if (!string.IsNullOrEmpty(FontString))
                 {
-                    FontString = FontString.Replace("em", "");
-                    FontString = FontString.Replace("%", "");
-                    if (System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator==",")
+                    bool ContainsDigit = false;
+                    foreach (var c in FontString)
                     {
-                        FontString = FontString.Replace(".", ",");
+                        if (char.IsDigit(c)) 
+                        {
+                            ContainsDigit = true;
+                            break;
+                        }
                     }
-                    NewStyle.FontSize = Convert.ToSingle(FontString);
+                    if (ContainsDigit)
+                    {
+                        FontString = FontString.Replace("em", "");
+                        FontString = FontString.Replace("%", "");
+                        if (System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator == ",")
+                        {
+                            FontString = FontString.Replace(".", ",");
+                        }
+
+                        NewStyle.FontSize = Convert.ToSingle(FontString);
+                    }
+                    else
+                    {
+                        switch (FontString)
+                        {
+                            case "small":
+                                NewStyle.FontSize = 0.8f;
+                                break;
+                        }
+                    }
                     Set = true;
                 }
                 if (!string.IsNullOrEmpty(Style.Style.FontWeight))

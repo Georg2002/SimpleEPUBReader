@@ -185,6 +185,7 @@ namespace EPUBRenderer3
         internal List<string> GetChapters()
         {
             var Res = new List<string>();
+            if (epub.toc == null) return Res;          
             foreach (var Chapter in epub.toc.Chapters)
             {
                 Res.Add(Chapter.Title);
