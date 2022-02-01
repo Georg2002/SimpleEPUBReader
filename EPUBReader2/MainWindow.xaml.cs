@@ -152,7 +152,7 @@ namespace EPUBReader2
             var Args = Environment.GetCommandLineArgs();
             if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
             {
-                Renderer.LoadBook(Args[1],DateTime.Now);
+                Renderer.LoadBook(Args[1], DateTime.Now);
                 SetTitle();
             }
             LoadSave();
@@ -183,7 +183,7 @@ namespace EPUBReader2
                     break;
                 default:
                     break;
-            } 
+            }
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -197,7 +197,7 @@ namespace EPUBReader2
             if (Dialog.ShowDialog() == true)
             {
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
-                Renderer.LoadBook(Dialog.FileName,DateTime.Now);
+                Renderer.LoadBook(Dialog.FileName, DateTime.Now);
                 SetTitle();
                 Dialog.InitialDirectory = Path.GetDirectoryName(Dialog.FileName);
             }
@@ -212,7 +212,7 @@ namespace EPUBReader2
             else Title = Renderer.CurrBook.Title + "; " + PresetText;
 
 #else
-            Title = Renderer.CurrBook.Title ?? "Epub Reader 2";
+            Title = Renderer.CurrBook == null ? "Epub Reader 2" : Renderer.CurrBook.Title;
 #endif
             txtTitle.Text = Title;
         }
