@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -75,7 +76,7 @@ namespace EPUBReader2
             LastMove = DateTime.Now;
             MousePos = Pos;
             Touchdown = false;
-            Liftup = false;
+            Liftup = false;                     
 
             if (MouseDown != Down)
             {
@@ -85,12 +86,19 @@ namespace EPUBReader2
                 if (MouseDown)
                 {
                     MouseDownPos = Pos;
-                    TouchdownTime = DateTime.Now;
+                    TouchdownTime = DateTime.Now;                  
+                }
+                if (Liftup)//data collection
+                {
+                    SaveMovement();
+                    LoggedPositions.Clear();
+                    LoggedTimes.Clear();
                 }
             }
             SSinceTouchdown = DateTime.Now.Subtract(TouchdownTime).TotalSeconds;
             if (Delta != 0)
             {
+                if (Down) LogMovement(Pos);//data collection
                 AverageSpeed = new Vector(MousePos.X - LastMousePos.X, MousePos.Y - LastMousePos.Y) / Delta;
             }
             if (DictActive) HandleSelection();
@@ -222,6 +230,51 @@ namespace EPUBReader2
             ContentGrid.BeginAnimation(Grid.MarginProperty, null);
             Bar.Margin = BarDownMarg;
             ContentGrid.Margin = GridShrinkMarg;
+        }
+
+
+        private List<Point> LoggedPositions = new List<Point>();
+        private List<DateTime> LoggedTimes = new List<DateTime>();
+        private bool Failed = false;
+        private void LogMovement(Point RelPos)
+        {
+            LoggedPositions.Add(RelPos);
+            LoggedTimes.Add(DateTime.Now);
+            if (LoggedPositions.Count > 1000) 
+            {
+                LoggedPositions.Clear();
+                LoggedTimes.Clear();
+            }
+        }
+
+        private void SaveMovement()
+        {
+            if (LoggedPositions.Count <= 1||Failed) return;
+            double ReverseX = LoggedPositions.First().X > LoggedPositions.Last().X ? -1 : 1;        
+            string SaveString = LoggedPositions.Count.ToString() + "\n";
+            var Base = LoggedPositions.First();
+            var StartTime = LoggedTimes.First();
+            if (LoggedTimes.Last().Subtract(StartTime).TotalSeconds > 1.5) return;          
+            for (int i = 0; i < LoggedPositions.Count; i++)
+            {
+                var Pos = LoggedPositions[i];
+                var Time = LoggedTimes[i];
+                var NewPoint = new Point((Pos.X - Base.X) * ReverseX, (Pos.Y - Base.Y));
+                var Delay = Time.Subtract(StartTime).TotalMilliseconds;
+                SaveString += NewPoint.X +"\t" +NewPoint.Y+"\t"+Delay +"\n";
+            }          
+            string SaveFile = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            SaveFile = Path.Combine(SaveFile, "MovementLog.txt");
+            try
+            {               
+                if (!File.Exists(SaveFile)) File.Create(SaveFile).Close();
+                File.AppendAllText(SaveFile, SaveString);               
+            }
+            catch (Exception ex)
+            {
+                Failed = true;
+                MessageBox.Show(ex.Message,"Failed to log mouse movements");
+            }           
         }
     }
 }

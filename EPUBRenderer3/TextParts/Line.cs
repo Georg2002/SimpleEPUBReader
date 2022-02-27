@@ -15,28 +15,17 @@ namespace EPUBRenderer3
         public List<Word> Words;
         public Tuple<int, int> Position(Line Previous, Vector PageSize)
         {
-            Word Prev = null;
-            if (Previous != null)
-            {
-                Prev = Previous.Words.Last();
-            }
-
+            Word Prev = Previous?.Words.Last();
+            
             int WordFit = 0;
             int LetterFit = 0;
             Word NextWord = null;
             for (int i = 0; i < Words.Count; i++)
             {
-                var Word = Words[i];
-                if (Word.Style.RelativeFontSize != 1)
-                {
-                    ;
-                }
+                var Word = Words[i];               
                 NextWord = i == Words.Count - 1 ? null : Words[i + 1];
                 LetterFit = Word.Position(Prev, NextWord, PageSize);
-                if (LetterFit < Word.Letters.Count)
-                {
-                    break;
-                }
+                if (LetterFit < Word.Letters.Count) break;              
                 WordFit++;
                 Prev = Word;
             }
@@ -45,15 +34,9 @@ namespace EPUBRenderer3
 
         public Tuple<Line, Line> Split(int WordCount, int LetterCount)
         {
-            if (WordCount == 0)
-            {
-                return new Tuple<Line, Line>(new Line(), new Line(Words));
-            }
+            if (WordCount == 0) return new Tuple<Line, Line>(new Line(), new Line(Words));       
             List<Word> Front;
-            if (LetterCount == 0)
-            {
-                Front = Words.Take(WordCount).ToList();
-            }
+            if (LetterCount == 0)                        Front = Words.Take(WordCount).ToList();
             else
             {
                 Front = Words.Take(WordCount + 1).ToList();

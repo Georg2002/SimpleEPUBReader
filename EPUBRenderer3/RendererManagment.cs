@@ -142,7 +142,7 @@ namespace EPUBRenderer3
             CurrBook.CurrPos = Position;
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
             ShownPage = PageFile.Pages.Find(a => a.Within(Position));
-            Refresh(); ;
+            Refresh();
         }
 
         public void Switch(int Dir)
@@ -185,6 +185,7 @@ namespace EPUBRenderer3
             if (CurrBook != null)
             {
                 FirstHit = ShownPage.Intersect(relPoint);
+                CurrBook.CurrPos = FirstHit;
                 Valid = FirstHit.FileIndex != -1;
             }
             return Valid;
@@ -194,6 +195,7 @@ namespace EPUBRenderer3
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
             SecondHit = ShownPage.Intersect(relPoint);
+            CurrBook.CurrPos = SecondHit;
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
             Refresh();
         }
@@ -209,6 +211,7 @@ namespace EPUBRenderer3
             if (CurrBook != null)
             {
                 PosDef Hit = ShownPage.Intersect(relPoint);
+                CurrBook.CurrPos =Hit;
                 if (Hit.FileIndex == -1) return;
                 PosDef A;
                 PosDef B;
@@ -225,10 +228,7 @@ namespace EPUBRenderer3
             {
                 var NewStart = ShownPage.Intersect(relPoint);
                 Valid = NewStart.FileIndex != -1;
-                if (Valid)
-                {
-                    SelectionStart = NewStart;
-                }               
+                if (Valid) SelectionStart = NewStart;                          
             }
             return Valid;
         }
@@ -244,17 +244,15 @@ namespace EPUBRenderer3
             Refresh();
             RemoveSelection();
             SelectionEnd = ShownPage.Intersect(relPoint);
+            CurrBook.CurrPos = SelectionEnd;
             if (SelectionStart != PosDef.InvalidPosition && SelectionEnd != PosDef.InvalidPosition)
             {
                 CurrBook.AddSelection(SelectionStart, SelectionEnd);
             }
         }
 
-        public string GetSelection()
-        {
-            return CurrBook.GetSelection(SelectionStart, SelectionEnd);
-        }
-
+        public string GetSelection() => CurrBook.GetSelection(SelectionStart, SelectionEnd);
+      
         public int GetPageCount()
         {
             if (CurrBook == null) return 0;

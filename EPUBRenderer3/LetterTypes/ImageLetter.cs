@@ -23,14 +23,9 @@ namespace EPUBRenderer3
             var PrevLetter = Info.PrevLetter;
             var PageSize = Info.PageSize;
             var PrevWord = Info.PrevWord;
-            if (Image == null)
-            {
-                Width = Height = 300;
-            }
-            else
-            {
-                Width = Image.Width; Height = Image.Height;
-            }
+            if (Image == null) Width = Height = 300;
+            else Width = Image.Width; Height = Image.Height;
+
 
             bool MustScale = PageSize.X < Width || PageSize.Y < Height;
             StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);
@@ -49,7 +44,7 @@ namespace EPUBRenderer3
                 float FS = StandardFontSize;
                 if (PrevLetter != null && PrevLetter.Type == LetterTypes.Letter) FS = ((TextLetter)PrevLetter).FontSize;
                 StartPosition += new Vector(-(FS + RenderSize.X) / 2, 0);
-                EndPosition = StartPosition + RenderSize;           
+                EndPosition = StartPosition + RenderSize;
                 NextWritePos = PrevLetter == null ? new Vector(StartPosition.X + (FS + RenderSize.X) / 2, EndPosition.Y) : PrevLetter.NextWritePos + new Vector(0, RenderSize.Y);
             }
             else
@@ -65,10 +60,9 @@ namespace EPUBRenderer3
                 else
                 {
                     StartPosition.Y = (PageSize.Y - Height) / 2;
+                    NextWritePos = new Vector(EndPosition.X - LineDist, 0);
                 }
-
                 EndPosition = StartPosition + RenderSize;
-                NextWritePos = new Vector(EndPosition.X - LineDist, 0);
             }
 
             return InsidePage(PageSize);
