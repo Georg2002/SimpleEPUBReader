@@ -11,6 +11,13 @@ namespace EPUBParser
         public CSSExtract()
         {
             Styles = new List<CSSStyle>();
+            //headers
+            Styles.Add(new CSSStyle() { FontSize=2f ,FontWeight=FontWeights.bold,SelectorText="h1"});
+            Styles.Add(new CSSStyle() { FontSize=1.5f,FontWeight=FontWeights.bold,SelectorText="h2"});
+            Styles.Add(new CSSStyle() { FontSize=1.17f,FontWeight=FontWeights.bold,SelectorText="h3"});
+            Styles.Add(new CSSStyle() { FontSize=1f,FontWeight=FontWeights.bold,SelectorText="h4"});
+            Styles.Add(new CSSStyle() { FontSize=0.83f,FontWeight=FontWeights.bold,SelectorText="h5"});
+            Styles.Add(new CSSStyle() { FontSize=0.67f,FontWeight=FontWeights.bold,SelectorText="h6"});
         }
 
         public void AddRules(ZipEntry file)

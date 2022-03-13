@@ -189,5 +189,7 @@ namespace EPUBRenderer3
                 }
             }
         }
+
+        internal static bool IsInvalid(PosDef pos) => pos.FileIndex == -1 || pos.Letter == -1 || pos.Line == -1 || pos.Word == -1;     
     }
 }

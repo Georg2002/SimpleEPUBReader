@@ -130,7 +130,6 @@ namespace EPUBRenderer3
 
         public override object GetRenderElement(bool KatakanaLearningMode)
         {
-            if (Typeface.Weight != FontWeights.Normal) ;
             string DisplayedText = KatakanaLearningMode ? LanguageResources.SwitchKana(Character.ToString()) : Character.ToString();
             return new FormattedText(DisplayedText, System.Globalization.CultureInfo.InvariantCulture,
                 FlowDirection.RightToLeft, Typeface, FontSize * RelScale, Brushes.Black, 1)

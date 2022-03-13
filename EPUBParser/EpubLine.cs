@@ -31,7 +31,7 @@ namespace EPUBParser
                 return;
             }
             var ActiveClasses = new List<string>();
-            AddAppropriatePart(HtmlLine, Entries, File,ActiveClasses);
+            AddAppropriatePart(HtmlLine, Entries, File, ActiveClasses);
         }
 
         private void AddAppropriatePart(HtmlNode Node, List<ZipEntry> Entries, ZipEntry File, List<string> ActiveClasses)
@@ -46,13 +46,21 @@ namespace EPUBParser
             }
             switch (Node.Name)
             {
+                case "h1":
+                case "h2":
+                case "h3":
+                case "h4":
+                case "h5":
+                case "h6":
+                    ActiveClasses.Add(Node.Name);
+                    foreach (var c in Node.ChildNodes) AddAppropriatePart(c, Entries, File, ActiveClasses);
+                    Parts.Add(new BreakLinePart());
+                    ActiveClasses.Remove(Node.Name);
+                    break;
                 case "#text":
                 case "nav":
                     Text = Node.InnerText;
-                    if (!string.IsNullOrWhiteSpace(Text))
-                    {
-                        Parts.Add(new TextLinePart(Text, "",ActiveClasses));
-                    }
+                    if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text, "", ActiveClasses));
                     break;
                 case "ruby":
                     if (Node.ChildNodes.Count >= 2)
@@ -105,16 +113,13 @@ namespace EPUBParser
                 case "svg":
                 case "div":
                     AddChapterMarker(Node);
-                    foreach (var ChildNode in Node.ChildNodes)
-                    {
-                        AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
-                    }
+                    foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
                     break;
                 case "p":
                     AddChapterMarker(Node);
-                    foreach (var ChildNode in Node.ChildNodes)
+                    if (Node.ChildNodes.Count > 1 || Node.FirstChild.Name != "br")
                     {
-                        AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
+                        foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
                     }
                     Parts.Add(new BreakLinePart());
                     break;
@@ -137,8 +142,8 @@ namespace EPUBParser
                     for (int i = 0; i < 20; i++)
                     {
                         Inline = Parent.Name == "p" && !string.IsNullOrWhiteSpace(Parent.InnerText);
-                        if (Inline || Parent.ParentNode == null) break;                       
-                        Parent = Parent.ParentNode;                         
+                        if (Inline || Parent.ParentNode == null) break;
+                        Parent = Parent.ParentNode;
                     }
                     var Image = new ImageLinePart(Link, Inline);
                     //Set later to allow parallelization
@@ -150,12 +155,12 @@ namespace EPUBParser
                     Logger.Report("trying to force parse...", LogType.Info);
                     foreach (var ChildNode in Node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode, Entries, File,ActiveClasses);
+                        AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
                     }
                     break;
             }
 
-            if (ClassAdded) ActiveClasses.RemoveAt(ActiveClasses.Count - 1);           
+            if (ClassAdded) ActiveClasses.RemoveAt(ActiveClasses.Count - 1);
         }
 
         private void AddChapterMarker(HtmlNode Node)

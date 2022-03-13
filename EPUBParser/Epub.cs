@@ -55,11 +55,16 @@ namespace EPUBParser
                     switch (ManifestItem.Type)
                     {
                         case MediaType.xhtml:
-                            
+                            if (File.Name.StartsWith("nav"))
+                            {
+                                if (toc == null) toc = new TocInfo(File, Files, fromNav: true);
+                                else toc.AddChaptersFromNav(File, Files);
+
+                            }
                             Pages.Add(new EpubPage(File, Settings, Files));
                             break;
                         case MediaType.toc:                            
-                            toc = new TocInfo(File, Files);
+                            toc = new TocInfo(File, Files, fromNav: false);
                             break;
                         case MediaType.css:
                             if (CSSExtract == null) CSSExtract = new CSSExtract();                          

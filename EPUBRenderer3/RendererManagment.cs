@@ -18,7 +18,7 @@ namespace EPUBRenderer3
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
         public Brush[] MarkingColors;
-        private PosDef SelectionEnd = PosDef.InvalidPosition;       
+        private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private bool Rerender = false;
 
@@ -179,14 +179,19 @@ namespace EPUBRenderer3
             OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
         }
 
+        private void SetCurrPos(PosDef pos)
+        {
+            if (CurrBook != null && !PosDef.IsInvalid(pos)) CurrBook.CurrPos = pos;
+        }
+
         public bool StartMarking(Point relPoint)
         {
             bool Valid = false;
             if (CurrBook != null)
             {
                 FirstHit = ShownPage.Intersect(relPoint);
-                CurrBook.CurrPos = FirstHit;
-                Valid = FirstHit.FileIndex != -1;
+                SetCurrPos(FirstHit);
+                Valid = !PosDef.IsInvalid(FirstHit);
             }
             return Valid;
         }
@@ -195,7 +200,7 @@ namespace EPUBRenderer3
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
             SecondHit = ShownPage.Intersect(relPoint);
-            CurrBook.CurrPos = SecondHit;
+            SetCurrPos(SecondHit);
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
             Refresh();
         }
@@ -211,11 +216,9 @@ namespace EPUBRenderer3
             if (CurrBook != null)
             {
                 PosDef Hit = ShownPage.Intersect(relPoint);
-                CurrBook.CurrPos =Hit;
-                if (Hit.FileIndex == -1) return;
-                PosDef A;
-                PosDef B;
-                (A, B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
+                SetCurrPos(Hit);
+                if (PosDef.IsInvalid(Hit)) return;                 
+                (PosDef A, PosDef B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
                 CurrBook.RemoveMarking(A, B);
             }
             Refresh();
@@ -228,14 +231,14 @@ namespace EPUBRenderer3
             {
                 var NewStart = ShownPage.Intersect(relPoint);
                 Valid = NewStart.FileIndex != -1;
-                if (Valid) SelectionStart = NewStart;                          
+                if (Valid) SelectionStart = NewStart;
             }
             return Valid;
         }
 
         public void RemoveSelection()
         {
-            if (CurrBook == null) return;         
+            if (CurrBook == null) return;
             CurrBook.RemoveSelection(SelectionStart, SelectionEnd);
         }
 
@@ -244,32 +247,17 @@ namespace EPUBRenderer3
             Refresh();
             RemoveSelection();
             SelectionEnd = ShownPage.Intersect(relPoint);
-            CurrBook.CurrPos = SelectionEnd;
-            if (SelectionStart != PosDef.InvalidPosition && SelectionEnd != PosDef.InvalidPosition)
-            {
-                CurrBook.AddSelection(SelectionStart, SelectionEnd);
-            }
+            SetCurrPos(SelectionEnd);
+            if (!PosDef.IsInvalid(SelectionStart) && !PosDef.IsInvalid(SelectionEnd)) CurrBook.AddSelection(SelectionStart, SelectionEnd);
         }
 
         public string GetSelection() => CurrBook.GetSelection(SelectionStart, SelectionEnd);
-      
-        public int GetPageCount()
-        {
-            if (CurrBook == null) return 0;
-            return CurrBook.GetPageCount();
-        }
 
-        public int GetCurrentPage()
-        {
-            if (CurrBook == null) return 0;
-            return CurrBook.GetCurrentPage();
-        }
+        public int GetPageCount() => CurrBook == null ? 0 : CurrBook.GetPageCount();
 
-        public List<string> GetChapters()
-        {
-            if (CurrBook == null) return new List<string>();
-            return CurrBook.GetChapters();
-        }
+        public int GetCurrentPage() => CurrBook == null ? 0 : CurrBook.GetCurrentPage();
+
+        public List<string> GetChapters() => CurrBook == null ? new List<string>() : CurrBook.GetChapters();
 
         public void SetChapter(int chapterIndex)
         {
@@ -277,11 +265,7 @@ namespace EPUBRenderer3
             OpenPage(Pos);
         }
 
-        public LibraryBook GetCurrentBook()
-        {
-            if (CurrBook == null) return new LibraryBook() { CurrPos = PosDef.InvalidPosition };
-            return CurrBook.GetLibraryBook();
-        }
+        public LibraryBook GetCurrentBook() => CurrBook == null ? new LibraryBook() { CurrPos = PosDef.InvalidPosition } : CurrBook.GetLibraryBook();
 
         public void DeactivateSelection()
         {

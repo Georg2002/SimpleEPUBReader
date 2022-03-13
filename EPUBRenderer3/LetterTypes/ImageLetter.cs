@@ -53,16 +53,12 @@ namespace EPUBRenderer3
                 {
                     if (PrevWord != null) return false;
                     RenderSize = GetMaxRenderSize(PageSize);
-
                     StartPosition = (PageSize - RenderSize) / 2;
-                    NextWritePos = new Vector(-1, PageSize.Y + 1);
                 }
-                else
-                {
-                    StartPosition.Y = (PageSize.Y - Height) / 2;
-                    NextWritePos = new Vector(EndPosition.X - LineDist, 0);
-                }
+                else StartPosition.Y = (PageSize.Y - Height) / 2;
+             
                 EndPosition = StartPosition + RenderSize;
+                NextWritePos = MustScale ? new Vector(-1, PageSize.Y + 1) : new Vector(EndPosition.X - LineDist, 0);
             }
 
             return InsidePage(PageSize);
