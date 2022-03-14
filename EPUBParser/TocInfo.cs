@@ -161,7 +161,7 @@ namespace EPUBParser
 
         private void InsertChapter(ChapterDefinition newChapter )
         {
-            bool insert = !Chapters.Exists(a => a.Source == newChapter.Source && a.Jumppoint == newChapter.Jumppoint);
+            bool insert = !Chapters.Exists(a => a != null && a.Source == newChapter.Source && a.Jumppoint == newChapter.Jumppoint);
             if (insert)
             {
                 if (newChapter.Index==-1)

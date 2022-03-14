@@ -24,7 +24,7 @@
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="50"/>
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="DeleteButton" Grid.Column="0" Style="{StaticResource MenuButtonStyle}" Visibility="{Binding Vis}" Click="DeleteButton_Click">
+                        <Button x:Name="DeleteButton" Grid.Column="0" Style="{StaticResource MenuButtonStyle}" Visibility="{Binding visibility}" Click="DeleteButton_Click">
                             <Border Style="{StaticResource BorderStyle}">
                                 <TextBlock Text="Delete"/>
                             </Border>

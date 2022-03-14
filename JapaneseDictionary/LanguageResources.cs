@@ -124,6 +124,10 @@ namespace WatconWrapper
            new Inflection("なせる","ぬ"), new Inflection("わせる","う"),
            new Inflection("させる","す"),new Inflection("させる","る"),
            new Inflection("させる","する"),new Inflection("こさせる","くる"),
+
+           //tai
+           new Inflection("たい",""), new Inflection("たくない",""),
+           new Inflection("たかった",""), new Inflection("たくなかった",""),
        };
 
         internal static string Trim(string text)
