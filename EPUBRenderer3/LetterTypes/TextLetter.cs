@@ -63,7 +63,7 @@ namespace EPUBRenderer3
                     VertSpacing.Y = Math.Max((RubyCount * RubyScale / TextCount - 1) * StandardFontSize / 2, 0);
                 }
 
-                StartPosition = NewLine ? new Vector(StartPosition.X - LineDist, 0) : StartPosition;
+                StartPosition = NewLine ? new Vector(StartPosition.X - GetNewLineDist(), 0) : StartPosition;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);
 
@@ -72,11 +72,10 @@ namespace EPUBRenderer3
                     StartPosition.Y = 0;
                     StartPosition.X -= LineDist;
                     EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-
                 }
                 NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
                 _HitboxStart = StartPosition + HitboxExpansion - VertSpacing;
-                _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;            
+                _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;
                 return InsidePageVert(PageSize);
             }
             else
@@ -96,20 +95,11 @@ namespace EPUBRenderer3
                 {
                     StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
                 }
-                else
-                {
-                    StartPosition = PrevLetter.NextWritePos;
-                }
+                else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                if (Last)
-                {
-                    NextWritePos = PrevWord.Letters.Last().NextWritePos;
-                }
-                else
-                {
-                    NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
-                }
+                if (Last) NextWritePos = PrevWord.Letters.Last().NextWritePos;
+                else NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
                 _HitboxStart = OutsideVector;
                 _HitboxEnd = OutsideVector;
                 return true;

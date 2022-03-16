@@ -35,7 +35,7 @@ namespace EPUBParser
                                     {
                                         Logger.Report(string.Format("Reading file {0}...", entry.FullName), LogType.Info);
                                         var NewEntry = new ZipEntry
-                                        {                                            
+                                        {
                                             Name = entry.Name,
                                             FullName = entry.FullName
                                         };
@@ -62,7 +62,7 @@ namespace EPUBParser
                         Logger.Report(ex);
                         return Files;
                     }
-
+                    FileStream.Close();
                 }
             }
             catch (Exception ex)
@@ -72,6 +72,6 @@ namespace EPUBParser
                 return Files;
             }
             return Files;
-        }     
+        }
     }
 }

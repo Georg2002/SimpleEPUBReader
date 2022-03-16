@@ -57,15 +57,12 @@ namespace EPUBParser
             if (HeadNode != null)
             {
                 var ParsedTitle = HTMLParser.SafeNodeTextGet(HeadNode, "title");
-                if (ParsedTitle == "")
+                if (string.IsNullOrEmpty(ParsedTitle))
                 {
                     Logger.Report("title not found, set to standard", LogType.Info);
                     PageSettings.Title = Settings.Title;
                 }
-                else
-                {
-                    PageSettings.Title = ParsedTitle;
-                }
+                else PageSettings.Title = ParsedTitle;               
             }
 
             var BodyNode = HTMLParser.SafeNodeGet(htmlNode, "body");

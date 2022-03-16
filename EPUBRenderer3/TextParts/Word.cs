@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
+using System;
 
 namespace EPUBRenderer3
 {
@@ -28,10 +29,7 @@ namespace EPUBRenderer3
         public int Position(Word PrevWord, Word NextWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
         {
             Letter PrevLetter = null;
-            if (PrevWord != null)
-            {
-                PrevLetter = PrevWord.Letters.Last();
-            }
+            if (PrevWord != null) PrevLetter = PrevWord.Letters.Last();            
             int Fit = 0;
             LetterPlacementInfo Info = new LetterPlacementInfo()
             {
@@ -49,59 +47,41 @@ namespace EPUBRenderer3
             {
                 var Letter = Letters[i];
                 Info.Last = i == Letters.Count - 1;
+                Letter.PrevLetter = Info.PrevLetter;
                 bool LetterFit = Letter.Position(Info);
                 Info.NewLine = false;
                 Info.PrevLetter = Letter;
-                if (LetterFit)
-                {
-                    Fit++;
-                }
+                if (LetterFit) Fit++;               
                 else
                 {
                     AllFit = false;
                     break;
                 }
             }
-            if (Fit != 0 && !Letters[Fit - 1].InsidePageHor(PageSize))
-            {
-                return 0;
-            }
+            if (Fit != 0 && !Letters[Fit - 1].InsidePageHor(PageSize)) return 0;          
             if (FinalRound) return Fit;
-            if (NewLine)
-            {
-                if (!AllFit)
-                {
-                    Fit = Position(PrevWord, NextWord, PageSize, false, true);
-                }
-            }
+            if (NewLine) if (!AllFit) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true);           
             else if (!AllFit)
             {
-                if (TightFit)
-                {
-                    Fit = Position(PrevWord, NextWord, PageSize, false, true, true);
-                }
-                else
-                {
-                    Fit = Position(PrevWord, NextWord, PageSize, true);
-                }
+                if (TightFit) Fit = Position(PrevWord, NextWord, PageSize,NewLine: false,TightFit:true,FinalRound: true);             
+                else Fit = Position(PrevWord, NextWord, PageSize, true);           
             }
 
             return Fit;
         }
-        public Word()
+
+        internal Tuple<Word,Word> Split(int letterCount)
         {
-            Letters = new List<Letter>();
+            var front = new Word(this.Letters.Take(letterCount).ToList(),this.Type, this.Style);
+            var rear = new Word(this.Letters.GetRange(letterCount,this.Letters.Count - letterCount).ToList(), this.Type, this.Style);
+            return new Tuple<Word,Word>(front, rear);
         }
 
+        public Word() => Letters = new List<Letter>();
+        
         public bool Visible()
         {
-            foreach (var Letter in Letters)
-            {
-                if (Letter.Type != LetterTypes.Break)
-                {
-                    return true;
-                }
-            }
+            foreach (var Letter in Letters) if (Letter.Type != LetterTypes.Break) return true;            
             return false;
         }
 
@@ -119,10 +99,6 @@ namespace EPUBRenderer3
             return Text;
         }
 
-        public double Length()
-        {
-            return Letters.Last().EndPosition.Y - Letters.First().StartPosition.Y;
-        }
-
+        public double Length() => Letters.Last().EndPosition.Y - Letters.First().StartPosition.Y;        
     }
 }

@@ -31,6 +31,9 @@ namespace EPUBRenderer3
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
         public static readonly Vector OutsideVector = new Vector(-100000, -100000);
+        public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
+        public float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
+
 
         public bool DictSelected;
         public Vector StartPosition;
@@ -41,6 +44,7 @@ namespace EPUBRenderer3
         public LetterTypes Type;
         public byte MarkingColorIndex;
         internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
+        public Letter PrevLetter;
 
         public virtual bool Position(LetterPlacementInfo Info)
         {
@@ -101,6 +105,25 @@ namespace EPUBRenderer3
             }
 
             return (StartPosition, EndPosition);
+        }
+
+        public float GetNewLineDist()
+        {
+            float maxSize = -1;
+            Letter prev = this.PrevLetter;
+            while (true)
+            {
+                if (prev == null) break;
+                if (prev.Type == LetterTypes.Letter)
+                {
+                    var prevLetter = (TextLetter)prev;
+                    if (prevLetter.StartPosition.X != this.StartPosition.X) break;                   
+                    if (maxSize < prevLetter.FontSize) maxSize = prevLetter.FontSize;                 
+                }
+                prev = prev.PrevLetter;
+            }
+            if (maxSize < 0) maxSize = Letter.StandardFontSize;         
+            return GetLineDist(maxSize);
         }
     }
 }

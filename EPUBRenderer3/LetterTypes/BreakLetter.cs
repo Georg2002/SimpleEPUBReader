@@ -29,10 +29,7 @@ namespace EPUBRenderer3
                 //ignores the first break after an image in order to remove redundant breaks
                 NextWritePos = StartPosition;
             }
-            else
-            {
-                NextWritePos = new Vector(StartPosition.X - LineDist, 0);
-            }
+            else NextWritePos = new Vector(StartPosition.X - GetNewLineDist(), 0);          
             return true;
         }
 
