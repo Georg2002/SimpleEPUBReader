@@ -14,54 +14,35 @@ namespace EPUBRenderer3
         readonly private Epub epub;
         internal List<PageFile> PageFiles;
         public PosDef CurrPos;
-        public string Title
-        {
-            get
-            {
-                return epub == null ? "" : epub.Settings.Title;
-            }
-        }
+        public string Title => epub == null ? "" : epub.Settings.Title;
 
-
-        public RenderBook(Epub epub,DateTime DateAdded)
+        public RenderBook(Epub epub, DateTime DateAdded)
         {
             this.epub = epub;
             this.DateAdded = DateAdded;
             PageFiles = new List<PageFile>();
-            foreach (var Page in epub.Pages)
-            {
-                PageFiles.Add(new PageFile(Page, epub.CSSExtract));
-            }
+            foreach (var Page in epub.Pages) PageFiles.Add(new PageFile(Page, epub.CSSExtract));
         }
 
         internal void Position(Vector pageSize)
         {
 #if (DEBUG)
-                 for (int i = 0; i < PageFiles.Count; i++)
-                 {                
-                     PageFiles[i].PositionText(pageSize, i);
-                 }
+            for (int i = 0; i < PageFiles.Count; i++) PageFiles[i].PositionText(pageSize, i);
 #else
             Parallel.For(0, PageFiles.Count, a => PageFiles[a].PositionText(pageSize, a));
 #endif
         }
 
-        internal void RemoveMarking(PosDef firstHit, PosDef secondHit)
-        {
-            Iterate(firstHit, secondHit, a => a.MarkingColorIndex = 0);
-        }
+        internal void RemoveMarking(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);
 
-        internal void AddMarking(PosDef firstHit, PosDef secondHit, byte ColorIndex)
-        {
-            Iterate(firstHit, secondHit, a => a.MarkingColorIndex = ColorIndex);
-        }
+        internal void AddMarking(PosDef start, PosDef end, byte colInd) => Iterate(start, end, (a, b) => a.MarkingColorIndex = colInd);
 
         private bool Valid(PosDef Pos)
         {
-            return Pos.FileIndex >= 0 && Pos.Line >= 0 && Pos.Word >= 0 && Pos.Letter >= 0 &&
-                Pos.FileIndex < PageFiles.Count && Pos.Line < PageFiles[Pos.FileIndex].Lines.Count &&
-                Pos.Word < PageFiles[Pos.FileIndex].Lines[Pos.Line].Words.Count &&
-                Pos.Letter < PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters.Count;
+            return Pos.FileIndex >= 0 && Pos.Word >= 0 && Pos.Letter >= 0 &&
+                Pos.FileIndex < PageFiles.Count &&
+                Pos.Word < PageFiles[Pos.FileIndex].Words.Count &&
+                Pos.Letter < PageFiles[Pos.FileIndex].Words[Pos.Word].Letters.Count;
         }
 
         internal void SetMarkings(List<MrkDef> markings)
@@ -69,10 +50,7 @@ namespace EPUBRenderer3
             foreach (var Marking in markings)
             {
                 var Pos = Marking.Pos;
-                if (Valid(Pos))
-                {
-                    PageFiles[Pos.FileIndex].Lines[Pos.Line].Words[Pos.Word].Letters[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
-                }
+                if (Valid(Pos)) PageFiles[Pos.FileIndex].Words[Pos.Word].Letters[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
             }
         }
 
@@ -81,27 +59,19 @@ namespace EPUBRenderer3
             if (Pos == PosDef.InvalidPosition) return null;
             if (Pos.FileIndex < PageFiles.Count && Pos.FileIndex >= 0)
             {
-                var Page = PageFiles[Pos.FileIndex];
-                if (Pos.Line < Page.Lines.Count && Pos.Line >= 0)
+                var words = PageFiles[Pos.FileIndex].Words;     
+                if (Pos.Word < words.Count && Pos.Word >= 0)
                 {
-                    var Line = Page.Lines[Pos.Line];
-                    if (Pos.Word < Line.Words.Count && Pos.Word >= 0)
-                    {
-                        var Word = Line.Words[Pos.Word];
-                        if (Pos.Letter < Word.Letters.Count && Pos.Letter >= 0)
-                        {
-                            return Word.Letters[Pos.Letter];
-                        }
-                    }
+                    var Word = words[Pos.Word];
+                    if (Pos.Letter < Word.Letters.Count && Pos.Letter >= 0) return Word.Letters[Pos.Letter];                  
                 }
             }
             return null;
         }
 
-        private void Iterate(PosDef A, PosDef B, Action<Letter> Action)
+        private void Iterate(PosDef A, PosDef B, Action<Letter, PosDef> Action)
         {
             if (A.FileIndex == -1 || B.FileIndex == -1) return;
-
 
             if (A > B)
             {
@@ -115,37 +85,31 @@ namespace EPUBRenderer3
             {
                 var File = PageFiles[F];
                 Last = F == B.FileIndex;
-                int StartLi = F == A.FileIndex && First ? A.Line : 0;
-                int EndLi = Last ? B.Line + 1 : File.Lines.Count;
+                var Words = File.Words;
 
-                for (int Li = StartLi; Li < EndLi; Li++)
+                int StartW = F == A.FileIndex && First ? A.Word : 0;
+                int EndW = Last ? B.Word + 1 : Words.Count;
+
+                for (int W = StartW; W < EndW; W++)
                 {
-                    Last = F == B.FileIndex && Li == B.Line;
-                    var Line = File.Lines[Li];
-                    int StartW = Li == A.Line && First ? A.Word : 0;
-                    int EndW = Last ? B.Word + 1 : Line.Words.Count;
-
-
-                    for (int W = StartW; W < EndW; W++)
+                    Last = F == B.FileIndex && W == B.Word;
+                    var Word = Words[W];
+                    int StartLe = W == A.Word && First ? A.Letter : 0;
+                    int EndLe = Last ? B.Letter + 1 : Word.Letters.Count;
+                    for (int Le = StartLe; Le < EndLe; Le++)
                     {
-                        Last = F == B.FileIndex && Li == B.Line && W == B.Word;
-                        var Word = Line.Words[W];
-                        int StartLe = W == A.Word && First ? A.Letter : 0;
-                        int EndLe = Last ? B.Letter + 1 : Word.Letters.Count;
-                        for (int Le = StartLe; Le < EndLe; Le++)
-                        {
-                            var Letter = Word.Letters[Le];
-                            Action(Letter);
-                        }
-                        First = false;
+                        var Letter = Word.Letters[Le];
+                        Action(Letter, new PosDef(F, W, Le));
                     }
+                    First = false;
+
                 }
             }
         }
 
         internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage)
         {
-            return ShownPage.GetConnectedMarkings(Pos, PageFiles[CurrPos.FileIndex].Lines);
+            return ShownPage.GetConnectedMarkings(Pos, PageFiles[CurrPos.FileIndex].Words);
         }
 
         internal int GetPageCount()
@@ -185,7 +149,7 @@ namespace EPUBRenderer3
         internal List<string> GetChapters()
         {
             var Res = new List<string>();
-            if (epub.toc == null) return Res;          
+            if (epub.toc == null) return Res;
             foreach (var Chapter in epub.toc.Chapters)
             {
                 Res.Add(Chapter.Title);
@@ -209,88 +173,62 @@ namespace EPUBRenderer3
         private List<MrkDef> GetMarkings()
         {
             var Markings = new List<MrkDef>();
-            for (int F = 0; F < PageFiles.Count; F++)
-            {
-                var File = PageFiles[F];
-                for (int Li = 0; Li < File.Lines.Count; Li++)
-                {
-                    var Line = File.Lines[Li];
-                    for (int W = 0; W < Line.Words.Count; W++)
-                    {
-                        var Word = Line.Words[W];
-                        for (int Le = 0; Le < Word.Letters.Count; Le++)
-                        {
-                            var Letter = Word.Letters[Le];
-                            if (Letter.MarkingColorIndex != 0)
-                            {
-                                Markings.Add(new MrkDef(new PosDef(F, Li, W, Le), Letter.MarkingColorIndex));
-                            }
-                        }
-                    }
-                }
-            }
+            Iterate(new PosDef(0, 0, 0), GetLastPos(), (a, b) =>
+              {
+                  if (a.MarkingColorIndex != 0) Markings.Add(new MrkDef(b, a.MarkingColorIndex));
+              });
             return Markings;
         }
 
         internal string GetSelection(PosDef selectionStart, PosDef selectionEnd)
         {
             string Text = "";
-            if (selectionStart == PosDef.InvalidPosition || selectionEnd == PosDef.InvalidPosition)
-            {
-                return Text;
-            }
+            if (selectionStart == PosDef.InvalidPosition || selectionEnd == PosDef.InvalidPosition) return Text;
             if (selectionEnd < selectionStart)
             {
                 var x = selectionEnd;
                 selectionEnd = selectionStart;
                 selectionStart = x;
             }
-            Iterate(selectionStart, selectionEnd, a =>
+            Iterate(selectionStart, selectionEnd, (a, b) =>
             {
                 if (a.Type == LetterTypes.Letter)
                 {
                     var TL = (TextLetter)a;
-                    if (!TL.IsRuby)
-                    {
-                        Text += TL.Character;
-                    }
+                    if (!TL.IsRuby) Text += TL.Character;
                 }
             });
             return Text;
         }
 
-        internal void AddSelection(PosDef selectionStart, PosDef selectionEnd)
-        {
-            Iterate(selectionStart, selectionEnd, a => a.DictSelected = true);
-        }
+        internal void AddSelection(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.DictSelected = true);
 
-        internal void RemoveSelection(PosDef selectionStart, PosDef selectionEnd)
+        internal void RemoveSelection(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.DictSelected = false);
+
+        internal PosDef GetLastPos()
         {
-            Iterate(selectionStart, selectionEnd, a => a.DictSelected = false);
+            var lastFile = PageFiles[PageFiles.Count - 1];
+            var lastWord = lastFile.Words.Last();
+            return new PosDef(PageFiles.Count - 1, lastFile.Words.Count - 1, lastWord.Letters.Count - 1);
         }
 
         internal PosDef GetChapterPos(int chapterIndex)
         {
             var Chapter = epub.toc.Chapters[chapterIndex];
             var Index = epub.Pages.FindIndex(a => a.FullName == Chapter.Source);
-            var Pos = new PosDef(Index, 0, 0, 0);
+            var Pos = new PosDef(Index, 0, 0);
             if (string.IsNullOrEmpty(Chapter.Jumppoint)) return Pos;
             var Page = PageFiles[Index];
-            for (int Li = 0; Li < Page.Lines.Count; Li++)
+            for (int W = 0; W < Page.Words.Count; W++)
             {
-                var Line = Page.Lines[Li];
-                for (int W = 0; W < Line.Words.Count; W++)
+                var Word = Page.Words[W];
+                if (Word.Letters[0].Type == LetterTypes.Marker)
                 {
-                    var Word = Line.Words[W];
-                    if (Word.Letters[0].Type == LetterTypes.Marker)
+                    var Marker = (MarkerLetter)Word.Letters[0];
+                    if (Marker.Id == Chapter.Jumppoint)
                     {
-                        var Marker = (MarkerLetter)Word.Letters[0];
-                        if (Marker.Id == Chapter.Jumppoint)
-                        {
-                            Pos.Line = Li;
-                            Pos.Word = W;
-                            Pos.Letter = 0;
-                        }
+                        Pos.Word = W;
+                        Pos.Letter = 0;
                     }
                 }
             }

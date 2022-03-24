@@ -52,7 +52,6 @@
     <Compile Include="LetterTypes\MarkerLetter.cs" />
     <Compile Include="LetterTypes\TextLetter.cs" />
     <Compile Include="LibraryBook.cs" />
-    <Compile Include="TextParts\Line.cs" />
     <Compile Include="MrkDef.cs" />
     <Compile Include="PageFile.cs" />
     <Compile Include="PosDef.cs" />

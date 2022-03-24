@@ -12,7 +12,7 @@
         public override bool Position(LetterPlacementInfo Info)
         {
             (StartPosition, EndPosition) = GetNeutralStartingPosition(Info);
-            NextWritePos = EndPosition;
+            NextWritePos = StartPosition;
             return true;
         }
     }

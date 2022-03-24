@@ -16,180 +16,109 @@ namespace EPUBRenderer3
         [XmlIgnore]
         public int FileIndex;
         [XmlIgnore]
-        public int Line;
-        [XmlIgnore]
         public int Word;
         [XmlIgnore]
         public int Letter;
         [XmlText]
         public string ShrtTxt
         {
-            get
-            {
-                return $"{FileIndex}|{Line }|{Word }|{Letter}";
-            }
+            get => $"{FileIndex}|{Word }|{Letter}";
             set
             {
                 var Numbers = value.Split('|');
-                if (Numbers.Length != 4) return;
+                if (Numbers.Length != 3) return;
                 try
                 {
                     FileIndex = Convert.ToInt32(Numbers[0]);
-                    Line = Convert.ToInt32(Numbers[1]);
-                    Word = Convert.ToInt32(Numbers[2]);
-                    Letter = Convert.ToInt32(Numbers[3]);
+                    Word = Convert.ToInt32(Numbers[1]);
+                    Letter = Convert.ToInt32(Numbers[2]);
                 }
-                catch (Exception)
-                {
-                    return;
-                }
+                catch (Exception) { return; }
             }
         }
 
-        public PosDef(int FileIndex, int Line, int Word, int Letter)
+        public PosDef(int FileIndex, int Word, int Letter)
         {
             this.FileIndex = FileIndex;
-            this.Line = Line;
             this.Word = Word;
             this.Letter = Letter;
         }
 
-        public static PosDef InvalidPosition = new PosDef(-1, -1, -1, -1);
+        public static PosDef InvalidPosition = new PosDef(-1, -1, -1);
 
         public static bool operator <(PosDef A, PosDef B)
         {
-            if (A.FileIndex < B.FileIndex)
-            {
-                return true;
-            }
+            if (A.FileIndex < B.FileIndex) return true;
             else if (A.FileIndex == B.FileIndex)
             {
-                if (A.Line < B.Line)
-                {
-                    return true;
-                }
-                else if (A.Line == B.Line)
-                {
-                    if (A.Word < B.Word)
-                    {
-                        return true;
-                    }
-                    else if (A.Word == B.Word)
-                    {
-                        return A.Letter < B.Letter;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
+                if (A.Word < B.Word) return true;
+                else if (A.Word == B.Word) return A.Letter < B.Letter;
+                else return false;
             }
-            else
-            {
-                return false;
-            }
+            else return false;
         }
 
-        public static bool operator >(PosDef A, PosDef B)
-        {
-            return !(A < B) && A != B;
-        }
+        public static bool operator >(PosDef A, PosDef B) => !(A < B) && A != B;
 
-        public static bool operator <=(PosDef A, PosDef B)
-        {
-            return A < B || A == B;
-        }
+        public static bool operator <=(PosDef A, PosDef B) => A < B || A == B;
 
-        public static bool operator >=(PosDef A, PosDef B)
-        {
-            return A > B || A == B;
-        }
+        public static bool operator >=(PosDef A, PosDef B) => A > B || A == B;
 
-        public static bool operator ==(PosDef A, PosDef B)
-        {
-            return A.FileIndex == B.FileIndex && A.Line == B.Line && A.Word == B.Word && A.Letter == B.Letter;
-        }
+        public static bool operator ==(PosDef A, PosDef B) => A.FileIndex == B.FileIndex && A.Word == B.Word && A.Letter == B.Letter;
 
-        public static bool operator !=(PosDef A, PosDef B)
-        {
-            return !(A == B);
-        }
+        public static bool operator !=(PosDef A, PosDef B) => !(A == B);
 
-        public override string ToString()
-        {
-            return $"{FileIndex}|{Line}|{Word}|{Letter}";
-        }
+        public override string ToString() => $"{FileIndex}|{Word}|{Letter}";
 
-        internal void Increment(List<Line> lines)
+        internal void Increment(List<Word> words)
         {
             if (this == InvalidPosition) return;
-            if (Letter < lines[Line].Words[Word].Letters.Count - 1)
+            if (Word < words.Count)
             {
-                Letter++;
-            }
-            else
-            {
-                if (Word < lines[Line].Words.Count - 1)
-                {
-                    Word++;
-                    Letter = 0;
-                }
+                if (Letter < words[this.Word].Letters.Count - 1) Letter++;
                 else
                 {
-                    if (Line < lines.Count - 1)
+                    if (Word < words.Count - 1)
                     {
-                        Line++;
-                        Word = 0;
+                        Word++;
                         Letter = 0;
                     }
                     else
                     {
-                        Line = -1;
                         Word = -1;
                         Letter = -1;
                         FileIndex = -1;
                     }
                 }
             }
+            else
+            {
+                Word = -1;
+                Letter = -1;
+                FileIndex = -1;
+            }
         }
 
-        internal void Decrement(List<Line> lines)
+        internal void Decrement(List<Word> words)
         {
             if (this == InvalidPosition) return;
-            if (Letter > 0)
-            {
-                Letter--;
-            }
+            if (this.Letter > 0) Letter--;
             else
             {
                 if (Word > 0)
                 {
                     Word--;
-                    Letter = lines[Line].Words[Word].Letters.Count - 1;
+                    Letter = words[this.Word].Letters.Count - 1;
                 }
                 else
                 {
-                    if (Line > 0)
-                    {
-                        Line--;
-                        Word = lines[Line].Words.Count - 1;
-                        Letter = lines[Line].Words[Word].Letters.Count - 1;
-                    }
-                    else
-                    {                         
-                        Line = -1;
-                        Word = -1;
-                        Letter = -1;
-                        FileIndex = -1;
-                    }
+                    Word = PosDef.InvalidPosition.Word;
+                    Letter = PosDef.InvalidPosition.Letter;
+                    FileIndex = PosDef.InvalidPosition.FileIndex;
                 }
             }
         }
 
-        internal static bool IsInvalid(PosDef pos) => pos.FileIndex == -1 || pos.Letter == -1 || pos.Line == -1 || pos.Word == -1;     
+        internal static bool IsInvalid(PosDef pos) => pos.FileIndex == -1 || pos.Letter == -1 || pos.Word == -1;
     }
 }

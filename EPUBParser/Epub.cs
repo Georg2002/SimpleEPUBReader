@@ -23,6 +23,7 @@ namespace EPUBParser
             this.FilePath = FilePath;
             Pages = new List<EpubPage>();
             Settings = new EpubSettings();
+            CSSExtract = new CSSExtract();
             Logger.Report(string.Format("parsing epub file at \"{0}\"", FilePath), LogType.Info);
 
             if (!File.Exists(FilePath))
@@ -66,8 +67,7 @@ namespace EPUBParser
                         case MediaType.toc:                            
                             toc = new TocInfo(File, Files, fromNav: false);
                             break;
-                        case MediaType.css:
-                            if (CSSExtract == null) CSSExtract = new CSSExtract();                          
+                        case MediaType.css:                       
                             CSSExtract.AddRules(File);
                             break;
                         case MediaType.image:

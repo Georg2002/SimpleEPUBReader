@@ -10,94 +10,65 @@ namespace EPUBRenderer3
 {
     internal class PageFile
     {
-        public List<Line> Lines;
+        public List<Word> Words;
         public List<RenderPage> Pages;
 
-        public PageFile(EpubPage page, CSSExtract CSS)
-        {
-            Lines = PreparePage(page,CSS);
-        }
+        public PageFile(EpubPage page, CSSExtract CSS) => Words = PreparePage(page, CSS);
 
         public void PositionText(Vector PageSize, int Index)
         {
-            Line Prev = null;
+            Word Prev = null;
             Pages = new List<RenderPage>();
             var CurrentPage = new RenderPage();
 
-            void FitLine(Line Line)
+            void FitWords(List<Word> words)
             {
-                var (FitWord, FitLetter) = Line.Position(Prev, PageSize);
-                if (FitWord < Line.Words.Count)
+                var (FitWord, FitLetter) = Word.PositionWords(words, PageSize);
+                if (FitWord < words.Count)
                 {
-                    var (FittingLine, OverflowLine) = Line.Split(FitWord, FitLetter);
-                    if (FittingLine.Words.Count != 0)
-                    {
-                        CurrentPage.Lines.Add(FittingLine);
-                    }
+                    var (fittingWords, overflowWords) = Word.SplitWords(words, FitWord, FitLetter);
+                    if (fittingWords.Count != 0) CurrentPage.Words.AddRange(fittingWords);
                     Pages.Add(CurrentPage);
                     Prev = null;
                     CurrentPage = new RenderPage();
-                    FitLine(OverflowLine);
+                    FitWords(overflowWords);
                 }
                 else
                 {
-                    CurrentPage.Lines.Add(Line);
-                    Prev = CurrentPage.Lines.Last();
+                    CurrentPage.Words.AddRange(words);
+                    Prev = CurrentPage.Words.Last();
                 }
             }
 
-            foreach (var Line in Lines)
-            {
-                FitLine(Line);
-            }
+            FitWords(Words);
             Pages.Add(CurrentPage);
 
-            var Curr = new PosDef(Index, 0, 0, 0);
+            var Curr = new PosDef(Index, 0, 0);
 
             for (int i = 0; i < Pages.Count; i++)
             {
-
                 var CurrPage = Pages[i];
                 CurrPage.StartPos = Curr;
-                if (CurrPage.Lines.Count == 1)
-                {
-                    if (CurrPage.Lines[0].Words.Count == 1)
-                    {
-                        if (CurrPage.Lines[0].Words[0].Letters.Count == 1)
-                        {
 
-                        }
-                        else
-                        {
-                            Curr.Letter += CurrPage.Lines[0].Words[0].Letters.Count - 1;
-                        }
-                    }
-                    else
-                    {
-                        Curr.Word += CurrPage.Lines[0].Words.Count - 1;
-                        Curr.Letter = CurrPage.Lines[0].Words.Last().Letters.Count - 1;
-                    }
-                }
-                else
-                {
-                    Curr.Line += CurrPage.Lines.Count - 1;
-                    Curr.Word = CurrPage.Lines.Last().Words.Count - 1;
-                    Curr.Letter = CurrPage.Lines.Last().Words.Last().Letters.Count - 1;
-                }
+
+                if (CurrPage.Words.Count == 1) Curr.Letter += CurrPage.Words[0].Letters.Count - 1;
+                else Curr.Letter = CurrPage.Words.Last().Letters.Count - 1;
+
+                Curr.Word += CurrPage.Words.Count - 1;
+
+
+
                 CurrPage.EndPos = Curr;
-                Curr.Increment(Lines);
+                Curr.Increment(Words);
             }
         }
 
-        bool PosValid(PosDef Pos)
-        {
-            return Lines.Count > Pos.Line && Lines[Pos.Line].Words.Count > Pos.Word && Lines[Pos.Line].Words[Pos.Word].Letters.Count > Pos.Letter;
-        }
+        bool PosValid(PosDef Pos) => Words.Count > Pos.Word && Words[Pos.Word].Letters.Count > Pos.Letter;
 
         public override string ToString()
         {
             string Text = "";
-            Lines.ForEach(a => Text += a);
+            Words.ForEach(a => Text += a);
             return Text;
         }
 
@@ -126,25 +97,24 @@ namespace EPUBRenderer3
                         case EPUBParser.FontWeights.normal:
                             NewStyle.Weight = System.Windows.FontWeights.Normal;
                             break;
-                    }                 
+                    }
                 }
             }
             return NewStyle;
         }
 
-        private List<Line> PreparePage(EpubPage page, CSSExtract CSS)
+        private List<Word> PreparePage(EpubPage page, CSSExtract CSS)
         {
-            var Lines = new List<Line>();
+            var res = new List<Word>();
 
             foreach (var RawLine in page.Lines)
             {
-                var Line = new Line();
                 var Word = new Word();
                 Word.Style = GetStyle(RawLine.Parts.FirstOrDefault(), CSS);
 
                 void AddWordToList(BaseLinePart Part)
                 {
-                    Line.Words.Add(Word);                   
+                    res.Add(Word);
                     Word = new Word();
                     Word.Style = GetStyle(Part, CSS);
                 }
@@ -163,7 +133,7 @@ namespace EPUBRenderer3
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
                             bool NoRuby = string.IsNullOrEmpty(TextPart.Ruby) && TextPart.Type != LinePartTypes.sesame;
-                            char Prev = 'a';   
+                            char Prev = 'a';
                             foreach (var Character in TextPart.Text)
                             {
                                 bool NewWordBefore = NoRuby && CharInfo.PossibleLineBreaksBefore.Contains(Character);
@@ -179,34 +149,23 @@ namespace EPUBRenderer3
                                     if (NewWordAfter) AddWordToList(Part);
                                     Word.Letters.Add(new TextLetter(Character, Word.Style));
                                 }
-                               
+
                                 Prev = Character;
                             }
-                            if (Word.Letters.Count == 0)
-                            {
-                                break;
-                            }
+                            if (Word.Letters.Count == 0) break;
                             AddWordToList(Part);
-                         
+
                             if (!NoRuby)
                             {
                                 if (!string.IsNullOrEmpty(TextPart.Ruby))
                                 {
-                                    foreach (var Character in TextPart.Ruby)
-                                    {
-                                       
-                                        Word.Letters.Add(new TextLetter(Character, Word.Style));
-                                    }
+                                    foreach (var Character in TextPart.Ruby) Word.Letters.Add(new TextLetter(Character, Word.Style));
                                     Word.Type = WordTypes.Ruby;
                                 }
                                 else if (TextPart.Type == LinePartTypes.sesame)
                                 {
-                                    int Length = Line.Words.Last().Letters.Count;
-                                    for (int i = 0; i < Length; i++)
-                                    {
-                                        Word.Letters.Add(new TextLetter('﹅', Word.Style));
-                                    }
-
+                                    int Length = res.Last().Letters.Count;
+                                    for (int i = 0; i < Length; i++) Word.Letters.Add(new TextLetter('﹅', Word.Style));
                                 }
                                 AddWordToList(Part);
                             }
@@ -224,9 +183,8 @@ namespace EPUBRenderer3
                             throw new NotImplementedException();
                     }
                 }
-                Lines.Add(Line);
             }
-            return Lines;
+            return res;
         }
     }
 }

@@ -45,7 +45,7 @@ namespace EPUBRenderer3
             }
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            var Lines = CurrBook.PageFiles[SelectionStart.FileIndex].Lines;
+            var Lines = CurrBook.PageFiles[SelectionStart.FileIndex].Words;
             MoveSelectionPoints(front, end, Lines);
 
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
@@ -65,19 +65,19 @@ namespace EPUBRenderer3
             Refresh();
         }
 
-        private void MoveSelectionPoints(int front, int end, List<Line> Lines)
+        private void MoveSelectionPoints(int front, int end, List<Word> Words)
         {
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            if (front > 0) SelectionStart.Increment(Lines);
-            else if (front < 0) SelectionStart.Decrement(Lines);
+            if (front > 0) SelectionStart.Increment(Words);
+            else if (front < 0) SelectionStart.Decrement(Words);
             if (SelectionStart.FileIndex == -1)
             {
                 SelectionStart = StartOld;
                 return;
             }
-            if (end > 0) SelectionEnd.Increment(Lines);
-            else if (end < 0) SelectionEnd.Decrement(Lines);
+            if (end > 0) SelectionEnd.Increment(Words);
+            else if (end < 0) SelectionEnd.Decrement(Words);
             if (SelectionEnd.FileIndex == -1)
             {
                 SelectionEnd = EndOld;
@@ -87,20 +87,14 @@ namespace EPUBRenderer3
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
             Letter EndLetter = CurrBook.GetLetter(SelectionEnd);
 
-            if (StartLetter == null || EndLetter == null)
-            {
-                return;
-            }
+            if (StartLetter == null || EndLetter == null) return;
             if (StartLetter.Type == LetterTypes.Letter && EndLetter.Type == LetterTypes.Letter)
             {
                 var StartTL = (TextLetter)StartLetter;
                 var EndTL = (TextLetter)EndLetter;
-                if (!StartTL.IsRuby && !EndTL.IsRuby)
-                {
-                    return;
-                }
+                if (!StartTL.IsRuby && !EndTL.IsRuby) return;
             }
-            MoveSelectionPoints(front, end, Lines);
+            MoveSelectionPoints(front, end, Words);
         }
 
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -208,7 +202,7 @@ namespace EPUBRenderer3
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
             DrawTempMarking(relPoint, ColorIndex);
-            SecondHit = new PosDef(-1, -1, -1, -1);
+            SecondHit = PosDef.InvalidPosition;
         }
 
         public void RemoveMarking(Point relPoint)
@@ -217,7 +211,7 @@ namespace EPUBRenderer3
             {
                 PosDef Hit = ShownPage.Intersect(relPoint);
                 SetCurrPos(Hit);
-                if (PosDef.IsInvalid(Hit)) return;                 
+                if (PosDef.IsInvalid(Hit)) return;
                 (PosDef A, PosDef B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
                 CurrBook.RemoveMarking(A, B);
             }
