@@ -50,13 +50,10 @@ namespace EPUBRenderer3
                 var CurrPage = Pages[i];
                 CurrPage.StartPos = Curr;
 
-
                 if (CurrPage.Words.Count == 1) Curr.Letter += CurrPage.Words[0].Letters.Count - 1;
                 else Curr.Letter = CurrPage.Words.Last().Letters.Count - 1;
 
                 Curr.Word += CurrPage.Words.Count - 1;
-
-
 
                 CurrPage.EndPos = Curr;
                 Curr.Increment(Words);
@@ -65,12 +62,7 @@ namespace EPUBRenderer3
 
         bool PosValid(PosDef Pos) => Words.Count > Pos.Word && Words[Pos.Word].Letters.Count > Pos.Letter;
 
-        public override string ToString()
-        {
-            string Text = "";
-            Words.ForEach(a => Text += a);
-            return Text;
-        }
+        public override string ToString() => string.Join("", Words.Select(a => a.ToString()));       
 
         private WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {

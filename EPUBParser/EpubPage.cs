@@ -17,11 +17,8 @@ namespace EPUBParser
         public string Name { get; set; }
         public string FullName { get; set; }
 
-        public override string ToString()
-        {
-            return PageSettings.Title;
-        }
-
+        public override string ToString() => PageSettings.Title;
+    
         public EpubPage(ZipEntry File, EpubSettings Settings, List<ZipEntry> Entries)
         {
             PageSettings = new EpubSettings();
@@ -73,10 +70,7 @@ namespace EPUBParser
                     if (Node.Name != "#text")
                     {                   
                         var NewLine = new EpubLine(Node, Entries, File);
-                        if (NewLine.Parts.Count > 0)
-                        {
-                            Lines.Add(NewLine);
-                        }
+                        if (NewLine.Parts.Count > 0) Lines.Add(NewLine);                        
                     }
                 }
             }

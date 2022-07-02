@@ -28,10 +28,7 @@ namespace EPUBParser
 
             try
             {
-                if (File.Content == null)
-                {
-                    File.Content = new byte[0];
-                }
+                if (File.Content == null) File.Content = new byte[0];             
 
                 Doc.LoadHtml(Encoding.UTF8.GetString(File.Content));
                 foreach (var Error in Doc.ParseErrors)
@@ -61,25 +58,11 @@ namespace EPUBParser
                 Logger.Report(string.Format("Node \"{0}\" couldn't be found"
                     , NodeName), LogType.Error);
                 return null;
-            }
-            else
-            {
-                return Node;
-            }
+            } 
+            else return Node;
         }
 
-        internal static string SafeNodeTextGet(HtmlNode ParentNode, string NodeName)
-        {
-            var Node = SafeNodeGet(ParentNode, NodeName);
-            if (Node == null)
-            {
-                return "";
-            }
-            else
-            {
-                return Node.InnerText;
-            }
-        }
+        internal static string SafeNodeTextGet(HtmlNode ParentNode, string NodeName) => SafeNodeGet(ParentNode, NodeName)?.InnerText ?? "";      
 
         internal static string SafeAttributeGet(HtmlNode Node, string AttributeName, bool IgnoreMissing = false)
         {
@@ -97,10 +80,7 @@ namespace EPUBParser
                 }
                 return "";
             }
-            else
-            {
-                return Attribute.Value;
-            }
+            else return Attribute.Value;           
         }
     }
 }

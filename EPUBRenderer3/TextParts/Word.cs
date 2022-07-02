@@ -60,15 +60,16 @@ namespace EPUBRenderer3
             }
             if (Fit != 0 && !Letters[Fit - 1].InsidePageHor(PageSize)) return 0;
             if (FinalRound) return Fit;
-            if (NewLine)
+            if(!AllFit)
             {
-                if (!AllFit) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true);
+                if (NewLine) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true);            
+                else
+                {
+                    if (TightFit) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true, FinalRound: true);
+                    else Fit = Position(PrevWord, NextWord, PageSize, true);
+                }
             }
-            else if (!AllFit)
-            {
-                if (TightFit) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true, FinalRound: true);
-                else Fit = Position(PrevWord, NextWord, PageSize, true);
-            }
+           
 
             return Fit;
         }

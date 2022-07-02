@@ -38,54 +38,25 @@ namespace EPUBRenderer3
         public bool DictSelected;
         public Vector StartPosition;
         public Vector EndPosition;
-        public virtual Vector HitboxStart { get => StartPosition; }
-        public virtual Vector HitboxEnd { get => EndPosition; }
+        public virtual Vector HitboxStart => StartPosition; 
+        public virtual Vector HitboxEnd => EndPosition;
+        public Vector Middle => (this.HitboxStart + this.HitboxEnd) / 2;
         public Vector NextWritePos;
         public LetterTypes Type;
         public byte MarkingColorIndex;
         internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
         public Letter PrevLetter;
 
-        public virtual bool Position(LetterPlacementInfo Info)
-        {
-            return false;
-        }
+        public virtual bool Position(LetterPlacementInfo Info) => false;
+        internal bool Inside(Point relPoint) => relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
+        public virtual object GetRenderElement(bool katakanaLearningMode) => null;
 
-        internal bool Inside(Point relPoint)
-        {
-            return relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
-        }
-
-        public virtual object GetRenderElement(bool katakanaLearningMode)
-        {
-            return null;
-        }
-
-        public virtual Rect GetMarkingRect()
-        {
-            //arranged to avoid negative numbers
-            return new Rect(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
-        }
-
-        public override string ToString()
-        {
-            return Type.ToString();
-        }
-
-        public bool InsidePageVert(Vector PageSize)
-        {
-            return EndPosition.Y <= PageSize.Y;
-        }
-
-        public bool InsidePageHor(Vector PageSize)
-        {
-            return EndPosition.X >= 0;
-        }
-
-        public bool InsidePage(Vector PageSize)
-        {
-            return InsidePageHor(PageSize) && InsidePageVert(PageSize);
-        }
+        //arranged to avoid negative numbers
+        public virtual Rect GetMarkingRect() => new Rect(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
+        public override string ToString() => Type.ToString();
+        public bool InsidePageVert(Vector PageSize) => EndPosition.Y <= PageSize.Y;
+        public bool InsidePageHor(Vector PageSize) => EndPosition.X >= 0;
+        public bool InsidePage(Vector PageSize) => InsidePageHor(PageSize) && InsidePageVert(PageSize);
 
         public (Vector, Vector) GetNeutralStartingPosition(LetterPlacementInfo Info)
         {
@@ -117,12 +88,12 @@ namespace EPUBRenderer3
                 if (prev.Type == LetterTypes.Letter)
                 {
                     var prevLetter = (TextLetter)prev;
-                    if (prevLetter.StartPosition.X != this.StartPosition.X) break;                   
-                    if (maxSize < prevLetter.FontSize) maxSize = prevLetter.FontSize;                 
+                    if (prevLetter.StartPosition.X != this.StartPosition.X) break;
+                    if (maxSize < prevLetter.FontSize) maxSize = prevLetter.FontSize;
                 }
                 prev = prev.PrevLetter;
             }
-            if (maxSize < 0) maxSize = Letter.StandardFontSize;         
+            if (maxSize < 0) maxSize = Letter.StandardFontSize;
             return GetLineDist(maxSize);
         }
     }

@@ -37,13 +37,10 @@ namespace EPUBRenderer3
 
         internal void AddMarking(PosDef start, PosDef end, byte colInd) => Iterate(start, end, (a, b) => a.MarkingColorIndex = colInd);
 
-        private bool Valid(PosDef Pos)
-        {
-            return Pos.FileIndex >= 0 && Pos.Word >= 0 && Pos.Letter >= 0 &&
+        private bool Valid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Word >= 0 && Pos.Letter >= 0 &&
                 Pos.FileIndex < PageFiles.Count &&
                 Pos.Word < PageFiles[Pos.FileIndex].Words.Count &&
-                Pos.Letter < PageFiles[Pos.FileIndex].Words[Pos.Word].Letters.Count;
-        }
+                Pos.Letter < PageFiles[Pos.FileIndex].Words[Pos.Word].Letters.Count;   
 
         internal void SetMarkings(List<MrkDef> markings)
         {
@@ -107,38 +104,21 @@ namespace EPUBRenderer3
             }
         }
 
-        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage)
-        {
-            return ShownPage.GetConnectedMarkings(Pos, PageFiles[CurrPos.FileIndex].Words);
-        }
+        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage) => ShownPage.GetConnectedMarkings(Pos, PageFiles[CurrPos.FileIndex].Words);
 
-        internal int GetPageCount()
-        {
-            int Count = 0;
-            foreach (var File in PageFiles)
-            {
-                Count += File.Pages.Count;
-            }
-            return Count;
-        }
+        internal int GetPageCount() => this.PageFiles.Sum(a => a.Pages.Count);       
 
         internal int GetCurrentPage()
         {
             int Count = 0;
             foreach (var File in PageFiles)
             {
-                if (File.Pages.Last().EndPos < CurrPos)
-                {
-                    Count += File.Pages.Count;
-                }
+                if (File.Pages.Last().EndPos < CurrPos) Count += File.Pages.Count;         
                 else
                 {
                     foreach (var Page in File.Pages)
                     {
-                        if (Page.StartPos > CurrPos)
-                        {
-                            return Count;
-                        }
+                        if (Page.StartPos > CurrPos) return Count;                      
                         Count++;
                     }
                 }
@@ -150,26 +130,18 @@ namespace EPUBRenderer3
         {
             var Res = new List<string>();
             if (epub.toc == null) return Res;
-            foreach (var Chapter in epub.toc.Chapters)
-            {
-                Res.Add(Chapter.Title);
-            }
+            foreach (var Chapter in epub.toc.Chapters) Res.Add(Chapter.Title);           
             return Res;
         }
 
-        internal LibraryBook GetLibraryBook()
+        internal LibraryBook GetLibraryBook() => new LibraryBook
         {
-            var Book = new LibraryBook
-            {
-                CurrPos = CurrPos,
-                FilePath = epub.FilePath,
-                Title = epub.Settings.Title,
-                Markings = GetMarkings(),
-                DateAdded = DateAdded
-            };
-            return Book;
-        }
-
+            CurrPos = CurrPos,
+            FilePath = epub.FilePath,
+            Title = epub.Settings.Title,
+            Markings = GetMarkings(),
+            DateAdded = DateAdded
+        };   
         private List<MrkDef> GetMarkings()
         {
             var Markings = new List<MrkDef>();

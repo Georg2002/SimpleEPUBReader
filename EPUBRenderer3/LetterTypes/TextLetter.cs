@@ -14,28 +14,31 @@ namespace EPUBRenderer3
         public Typeface Typeface;
         public char Character;
         public Vector Offset;
+        public bool Rotated => this.Rotation != 0;
+        public double Rotation = 0;
 
         private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2, 0);
         private Vector _HitboxStart;
-        public override Vector HitboxStart { get => _HitboxStart; }
+        public override Vector HitboxStart  => _HitboxStart; 
         private Vector _HitboxEnd;
-        public override Vector HitboxEnd { get => _HitboxEnd; }
+        public override Vector HitboxEnd=> _HitboxEnd; 
         private Vector VertSpacing;
         internal bool IsRuby;
 
-        public TextLetter(char Character, WordStyle Style)
+        public TextLetter(char character, WordStyle Style)
         {
-            this.Character = Character;
+            this.Character = character;
             Type = LetterTypes.Letter;
             this.Weight = Style.Weight;
             Typeface = new Typeface(new FontFamily("Hiragino Sans GB"), FontStyles.Normal,
             Weight, new FontStretch(), new FontFamily("Global User Interface"));
 
-            if (CharInfo.SpecialCharacters.ContainsKey(Character))
+            if (CharInfo.SpecialCharacters.ContainsKey(this.Character))
             {
-                var Info = CharInfo.SpecialCharacters[Character];
+                var Info = CharInfo.SpecialCharacters[this.Character];
                 Offset = Info.Offset;
                 RelScale = Info.Scaling;
+                this.Rotation = Info.Rotation;
                 this.Character = Info.Replacement;
             }
         }
@@ -91,10 +94,7 @@ namespace EPUBRenderer3
 
                 double TextLength = PrevWord.Length();
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
-                if (!((TextLetter)PrevLetter).IsRuby)
-                {
-                    StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
-                }
+                if (!((TextLetter)PrevLetter).IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));  
                 else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);
@@ -106,17 +106,13 @@ namespace EPUBRenderer3
             }
         }
 
-        public override Rect GetMarkingRect()
-        {
-            Rect MarkingRect = new Rect
+        public override Rect GetMarkingRect() => new Rect
             {
                 Y = StartPosition.Y - VertSpacing.Y,
                 X = EndPosition.X,
                 Width = FontSize,
-                Height = VertSpacing.Y * 2 + FontSize
-            };
-            return MarkingRect;
-        }
+                Height = VertSpacing.Y* 2 + FontSize
+    };        
 
         public override object GetRenderElement(bool KatakanaLearningMode)
         {
@@ -126,9 +122,6 @@ namespace EPUBRenderer3
             { TextAlignment = TextAlignment.Center };
         }
 
-        public override string ToString()
-        {
-            return Character.ToString();
-        }
+        public override string ToString() => Character.ToString();    
     }
 }

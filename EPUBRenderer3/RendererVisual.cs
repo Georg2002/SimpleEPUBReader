@@ -28,11 +28,14 @@ namespace EPUBRenderer3
                     {
                         case LetterTypes.Letter:
                             var Text = (FormattedText)Let.GetRenderElement(KatakanaLearningMode);
-                            var TxtLetter = (TextLetter)Let;
-                            var DrawPos = Let.StartPosition + TxtLetter.Offset * TxtLetter.FontSize;
-                            DrawPos.Y -= TxtLetter.FontSize * CharInfo.FontOffset;
-                            drawingContext.DrawText(Text, new Point(DrawPos.X - TxtLetter.FontSize / 2, DrawPos.Y));
-                            if (TxtLetter.DictSelected && !TxtLetter.IsRuby)
+                            var txtLetter = (TextLetter)Let;
+                            var DrawPos = Let.StartPosition + txtLetter.Offset * txtLetter.FontSize;
+                            DrawPos.Y -= txtLetter.FontSize * CharInfo.FontOffset;
+                            if (txtLetter.Rotated) drawingContext.PushTransform(new RotateTransform(txtLetter.Rotation,txtLetter.Middle.X,txtLetter.Middle.Y));
+                            drawingContext.DrawText(Text, new Point(DrawPos.X - txtLetter.FontSize / 2, DrawPos.Y));
+                            if (txtLetter.Rotated) drawingContext.Pop();
+
+                            if (txtLetter.DictSelected && !txtLetter.IsRuby)
                             {
                                 var Rect = Let.GetMarkingRect();
                                 drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
