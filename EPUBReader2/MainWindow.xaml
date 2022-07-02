@@ -52,56 +52,61 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
-                <Border VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="8" Margin="5">
-                    <TextBlock  x:Name="txtTitle" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" 
-                                FontFamily="Hiragino Sans GB" FontSize="15"/>
-                </Border>
-                <Border VerticalAlignment="Center"  Grid.Column="9" HorizontalAlignment="Center" Margin="15">
-                    <TextBlock  x:Name="txtTimer" TextWrapping="NoWrap" HorizontalAlignment="Center" 
-                                FontSize="20"/>
-                </Border>
-
-                <Button Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" x:Name="OpenButton">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Open"/>
-                    </Border>
-                </Button>
-                <Button Click="Library_Click" Grid.Column="1" Style="{StaticResource MenuButtonStyle}">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Library"/>
-                    </Border>
-                </Button>
-                <Button Click="Chapter_Click" Grid.Column="2" Style="{StaticResource MenuButtonStyle}">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Chapters"/>
-                    </Border>
-                </Button>
-                <Button Click="Pages_Click" Grid.Column="3" Style="{StaticResource MenuButtonStyle}">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Pages"/>
-                    </Border>
-                </Button>
-                <Button Click="Color_Click" x:Name="ColorButton" Grid.Column="4" Style="{StaticResource MenuButtonStyle}">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Change color"/>
-                    </Border>
-                </Button>
-                <Button Click="Fullscreen_Click" Grid.Column="5" Style="{StaticResource MenuButtonStyle}">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Fullscreen"/>
-                    </Border>
-                </Button>
-                <Button Click="Dict_Click" Grid.Column="6" Style="{StaticResource MenuButtonStyle}">
-                    <Border Style="{StaticResource BorderStyle}">
-                        <TextBlock Text="Dictionary"/>
-                    </Border>
-                </Button>
-                <Button Click="Close_Click" MouseDoubleClick="Close_MouseDoubleClick" Grid.Column="7" Style="{StaticResource MenuButtonStyle}">
+                <Button Click="Close_Click" MouseDoubleClick="Close_MouseDoubleClick" Grid.Column="0" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
                         <TextBlock Text="Close" x:Name="txtClose" TextAlignment="Center"/>
                     </Border>
                 </Button>
+
+                <Button Click="OpenButton_Click" Style="{StaticResource MenuButtonStyle}" Grid.Column="1" x:Name="OpenButton">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Open"/>
+                    </Border>
+                </Button>
+                <Button Click="Fullscreen_Click" Grid.Column="2" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Fullscreen"/>
+                    </Border>
+                </Button>
+                <Button Click="Color_Click" x:Name="ColorButton" Grid.Column="3" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Change color"/>
+                    </Border>
+                </Button>
+                <Button Click="Library_Click" Grid.Column="4" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Library"/>
+                    </Border>
+                </Button>
+                <Button Click="Chapter_Click" Grid.Column="5" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Chapters"/>
+                    </Border>
+                </Button>
+                <Button Click="Pages_Click" Grid.Column="6" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Pages"/>
+                    </Border>
+                </Button>
+             
+           
+                <Border VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="8" Margin="5">
+                    <TextBlock  x:Name="txtTitle" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" 
+                                FontFamily="Hiragino Sans GB" FontSize="15"/>
+                </Border>
+
+                <Border VerticalAlignment="Center"  Grid.Column="9" HorizontalAlignment="Center" Margin="15">
+                    <TextBlock  x:Name="txtTimer" TextWrapping="NoWrap" HorizontalAlignment="Center" 
+                                FontSize="20"/>
+                </Border>
+                <Button Click="Dict_Click" Grid.Column="10" Style="{StaticResource MenuButtonStyle}">
+                    <Border Style="{StaticResource BorderStyle}">
+                        <TextBlock Text="Dictionary"/>
+                    </Border>
+                </Button>
+                
             </Grid>
         </Border>
     </Grid>
