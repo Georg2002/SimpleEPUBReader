@@ -176,21 +176,11 @@ namespace WatconWrapper
         static LanguageResources()
         {
             KatakanaDict = new Dictionary<char, char>(HiraganaDict.Count);
-            foreach (var Entry in HiraganaDict)
-            {
-                KatakanaDict.Add(Entry.Value, Entry.Key);
-            }
+            foreach (var Entry in HiraganaDict) KatakanaDict.Add(Entry.Value, Entry.Key);         
         }
 
-        public static string GetHiragana(string text)
-        {
-            return ExchangeKana(text, HiraganaDict);
-        }
-
-        public static string GetKatakana(string text)
-        {
-            return ExchangeKana(text, KatakanaDict);
-        }
+        public static string GetHiragana(string text) => ExchangeKana(text, HiraganaDict);
+        public static string GetKatakana(string text) => ExchangeKana(text, KatakanaDict);    
 
         public static string SwitchKana(string Text)
         {
@@ -198,18 +188,9 @@ namespace WatconWrapper
             for (int i = 0; i < Text.Length; i++)
             {
                 char c = Text[i];
-                if (KatakanaDict.ContainsKey(c))
-                {
-                    Switched += KatakanaDict[c];
-                }
-                else if (HiraganaDict.ContainsKey(c))
-                {
-                    Switched += HiraganaDict[c];
-                }
-                else
-                {
-                    Switched += c;
-                }
+                if (KatakanaDict.ContainsKey(c)) Switched += KatakanaDict[c];
+                else if (HiraganaDict.ContainsKey(c)) Switched += HiraganaDict[c];             
+                else Switched += c;           
             }
             return Switched;
         }
@@ -220,14 +201,8 @@ namespace WatconWrapper
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
-                if (Dict.ContainsKey(c))
-                {
-                    Res += Dict[c];
-                }
-                else
-                {
-                    Res += c;
-                }
+                if (Dict.ContainsKey(c)) Res += Dict[c];              
+                else Res += c;              
             }
             return Res;
         }             

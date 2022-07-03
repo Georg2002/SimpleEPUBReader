@@ -17,10 +17,7 @@ namespace WatconWrapper
         bool LookupActive;
         bool Abort;
 
-        public JapDictionary()
-        {
-            GetAllEntries();
-        }
+        public JapDictionary() => GetAllEntries();      
 
         private void GetAllEntries()
         {
@@ -50,21 +47,14 @@ namespace WatconWrapper
                 int i = 0;
                 while (LookupActive == true)
                 {
-                    i++;
-                    if (i > 1000)
-                    {
-                        return new List<DictWord>();
-                    }
+                    if (++i > 1000) return new List<DictWord>();                   
                     await Task.Delay(5);
                 }
                 Abort = false;
             }
 
             LookupActive = true;
-            if (Dict == null)
-            {
-                await DictTask;
-            }
+            if (Dict == null) await DictTask;
 
             text = text.Trim();
             string[] Searchwords = GetSearchwords(text);
@@ -77,13 +67,7 @@ namespace WatconWrapper
         private List<DictWord> GetSortedResults(List<DictWord> results)
         {
             List<DictWord> SortedRes = new List<DictWord>();
-            foreach (var Word in results)
-            {
-                if (!SortedRes.Contains(Word))
-                {
-                    SortedRes.Add(Word);
-                }
-            }
+            foreach (var Word in results) if (!SortedRes.Contains(Word)) SortedRes.Add(Word);           
             return SortedRes.OrderBy(a => (int)a.Type).ToList();
         }
 
@@ -107,7 +91,7 @@ namespace WatconWrapper
             return Res;
         }
 
-        private void IncludeDict(DictWord NewWord, Dictionary<Char, List<DictWord>> Dict)
+        private void IncludeDict(DictWord NewWord, Dictionary<char, List<DictWord>> Dict)
         {
             string StartingLetters = "";
             foreach (var Word in NewWord.Readings)
@@ -122,10 +106,7 @@ namespace WatconWrapper
             }
             foreach (var C in StartingLetters)
             {
-                if (!Dict.ContainsKey(C))
-                {
-                    Dict.Add(C, new List<DictWord>());
-                }
+                if (!Dict.ContainsKey(C)) Dict.Add(C, new List<DictWord>());             
                 Dict[C].Add(NewWord);
             }
         }
@@ -139,18 +120,9 @@ namespace WatconWrapper
             string Katakana = LanguageResources.GetKatakana(text);
             List<string> res = new List<string>();
             res.Add(text);
-            if (Katakana != text)
-            {
-                res.Add(Katakana);
-            }
-
-            foreach (var Form in BaseForm)
-            {
-                if (Form != null && Form != text)
-                {
-                    res.Add(Form);
-                }
-            }
+            if (Katakana != text) res.Add(Katakana);
+           
+            foreach (var Form in BaseForm) if (Form != null && Form != text) res.Add(Form); 
             return res.ToArray();
         }
     }

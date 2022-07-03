@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using EPUBRenderer3;
 using Microsoft.Win32;
+using System.Globalization;
 
 namespace EPUBReader2
 {
@@ -59,11 +60,7 @@ namespace EPUBReader2
             Timer.Start();
         }
 
-        private void timer_tick(object sender, EventArgs e)
-        {
-            txtTimer.Text = DateTime.Now.ToString("HH:mm");
-        }
-
+        private void timer_tick(object sender, EventArgs e) => txtTimer.Text = DateTime.Now.ToString("HH:mm");
         private void LoadSave()
         {
             SaveStruc Save = SaveAndLoad.LoadSave();
@@ -71,17 +68,8 @@ namespace EPUBReader2
             ColorButton.Background = MarkingColors[ColorIndex];
             Renderer.KatakanaLearningMode = Save.KatakanaLearningMode;
             string Root = Path.GetPathRoot(Save.LastDirectory);
-            if (!Directory.Exists(Root) || Root == "\\")
-            {
-                Save.LastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            }
-            else
-            {
-                while (!Directory.Exists(Save.LastDirectory))
-                {
-                    Save.LastDirectory = Path.Combine(Save.LastDirectory, @"\..");
-                }
-            }
+            if (!Directory.Exists(Root) || Root == "\\") Save.LastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            else while (!Directory.Exists(Save.LastDirectory)) Save.LastDirectory = Path.Combine(Save.LastDirectory, @"\..");
             Dialog.InitialDirectory = Path.GetFullPath(Save.LastDirectory);
             if (Save.Books != null)
             {
@@ -114,11 +102,7 @@ namespace EPUBReader2
             Menu.SetToLibrary(Library.GetBooks());
         }
 
-        internal int GetCurrentPage()
-        {
-            return Renderer.GetCurrentPage();
-        }
-
+        internal int GetCurrentPage() => Renderer.GetCurrentPage();
         internal bool MouseOverText()
         {
             var Pos = Mouse.GetPosition(Renderer);
@@ -130,22 +114,11 @@ namespace EPUBReader2
             LibraryBook Book = Library.GetBook(LibraryIndex);
             Renderer.LoadBook(Book.FilePath, Book.DateAdded, Book.CurrPos, Book.Markings);
             SetTitle();
-            if (Menu.Visibility == Visibility.Visible)
-            {
-                Library_Click(null, null);
-            }
+            if (Menu.Visibility == Visibility.Visible) Library_Click(null, null);
         }
 
-        internal void Lookup(string Text)
-        {
-            DictControl.SelectionChanged(Text);
-        }
-
-        internal int GetPageCount()
-        {
-            return Renderer.GetPageCount();
-        }
-
+        internal void Lookup(string Text) => DictControl.SelectionChanged(Text);
+        internal int GetPageCount() => Renderer.GetPageCount();
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             DictControl.Init(this);
@@ -158,16 +131,8 @@ namespace EPUBReader2
             LoadSave();
         }
 
-        private void Right_Click(object sender, RoutedEventArgs e)
-        {
-            JumpPages(-1);
-        }
-
-        private void Left_Click(object sender, RoutedEventArgs e)
-        {
-            JumpPages(1);
-        }
-
+        private void Right_Click(object sender, RoutedEventArgs e) => JumpPages(-1);
+        private void Left_Click(object sender, RoutedEventArgs e) => JumpPages(1);
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -210,7 +175,6 @@ namespace EPUBReader2
             const string PresetText = "Debug mode active, start window size preset";
             if (Renderer.CurrBook == null) Title = PresetText;
             else Title = Renderer.CurrBook.Title + "; " + PresetText;
-
 #else
             Title = Renderer.CurrBook == null ? "Epub Reader 2" : Renderer.CurrBook.Title;
 #endif
@@ -236,7 +200,6 @@ namespace EPUBReader2
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
                 Menu.SetToLibrary(Library.GetBooks());
             }
-
         }
 
         private void Chapter_Click(object sender, RoutedEventArgs e)
@@ -262,10 +225,7 @@ namespace EPUBReader2
         public void SetChapter(int ChapterIndex)
         {
             Renderer.SetChapter(ChapterIndex);
-            if (Menu.Visibility == Visibility.Visible)
-            {
-                Chapter_Click(null, null);
-            }
+            if (Menu.Visibility == Visibility.Visible) Chapter_Click(null, null);
         }
 
         private void Pages_Click(object sender, RoutedEventArgs e)
@@ -290,10 +250,7 @@ namespace EPUBReader2
         private void Color_Click(object sender, RoutedEventArgs e)
         {
             ColorIndex++;
-            if (ColorIndex == MarkingColors.Length)
-            {
-                ColorIndex = 1;
-            }
+            if (ColorIndex == MarkingColors.Length) ColorIndex = 1;
             ColorButton.Background = MarkingColors[ColorIndex];
         }
 
@@ -337,22 +294,10 @@ namespace EPUBReader2
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            SaveAndLoad.Save(GetSave());
-        }
-
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) => SaveAndLoad.Save(GetSave());
         private void Dict_Click(object sender, RoutedEventArgs e)
         {
-            if (DictionaryActive)
-            {
-                DictColumn.Width = new GridLength(0, GridUnitType.Pixel);
-
-            }
-            else
-            {
-                DictColumn.Width = new GridLength(1, GridUnitType.Auto);
-            }
+            this.DictColumn.Width = this.DictionaryActive ? new GridLength(0, GridUnitType.Pixel) : new GridLength(1, GridUnitType.Auto);
             DictionaryActive = !DictionaryActive;
             DictControl.ActiveSet(DictionaryActive);
             MouseManager.DictActive = DictionaryActive;
@@ -377,9 +322,18 @@ namespace EPUBReader2
             txtClose.Text = "Close";
         }
 
-        private void Close_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void Close_MouseDoubleClick(object sender, MouseButtonEventArgs e) => Application.Current.Shutdown();
+    }
+
+    [ValueConversion(typeof(Thickness), typeof(Thickness))]
+    public class ThicknessConverter : IValueConverter
+    {
+        //spaghet
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            Application.Current.Shutdown();
+            if (!(value is Thickness)) return new Thickness();
+            return new Thickness(0,-30 + (60 + ((Thickness)value).Top) / 2, 0, ((Thickness)value).Top / 2);//manually replace this value : content grid margin and bar margin
         }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();//can't
     }
 }

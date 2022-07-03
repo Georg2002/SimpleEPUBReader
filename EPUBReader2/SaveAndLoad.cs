@@ -27,7 +27,7 @@ namespace EPUBReader2
                     {
                         return (SaveStruc)Serializer.Deserialize(Reader);
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         MessageBox.Show("Loading save filed failed", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
@@ -39,10 +39,7 @@ namespace EPUBReader2
         internal static void Save(SaveStruc saveStruc)
         {
             string SaveFolder = GetSaveFolder();
-            if (!Directory.Exists(SaveFolder))
-            {
-                Directory.CreateDirectory(SaveFolder);
-            }
+            if (!Directory.Exists(SaveFolder)) Directory.CreateDirectory(SaveFolder);
             string SaveFile = Path.Combine(SaveFolder, FileName);
             XmlSerializer serializer = new XmlSerializer(typeof(SaveStruc));
             using (var Writer = new StreamWriter(SaveFile))
@@ -51,22 +48,18 @@ namespace EPUBReader2
             }
         }
 
-        private static string GetSaveFolder()
-        {
-            var AppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(AppData, "SimpleEpubReader");
-        }
+        private static string GetSaveFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SimpleEpubReader");
     }
 
     public struct SaveStruc
     {
         public bool KatakanaLearningMode;
-  public int CurrentBookIndex;
+        public int CurrentBookIndex;
         public bool Fullscreen;
         public Vector WindowSize;
         public string LastDirectory;
         public byte ColorIndex;
         public bool DictOpen;
-        public List<LibraryBook> Books;      
+        public List<LibraryBook> Books;
     }
 }

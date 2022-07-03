@@ -67,10 +67,7 @@ namespace EPUBReader2
 
         internal void MouseMove(Point Pos, bool Down, bool RightDown)
         {
-            if (ResScal == 0)
-            {
-                ResScal = PresentationSource.FromVisual(MainWindow).CompositionTarget.TransformToDevice.M11;
-            }
+            if (ResScal == 0) ResScal = PresentationSource.FromVisual(MainWindow).CompositionTarget.TransformToDevice.M11;        
             this.RightDown = RightDown;
             Delta = DateTime.Now.Subtract(LastMove).TotalSeconds;
             LastMove = DateTime.Now;
@@ -117,10 +114,7 @@ namespace EPUBReader2
             var RelPoint = MainWindow.TranslatePoint(MousePos, Renderer);
             MarkingInProgress = Switched ? false : MarkingInProgress;
 
-            if (RightDown)
-            {
-                MarkingInProgress = false;
-            }
+            if (RightDown) MarkingInProgress = false;       
             if (MarkingInProgress)
             {
                 if (Liftup) MarkingInProgress = false;
@@ -157,16 +151,10 @@ namespace EPUBReader2
             {
                 if (Liftup)
                 {
-                    if (Draw)
-                    {
-                        Renderer.FinishMarking(RelPoint, MainWindow.ColorIndex);
-                    }
+                    if (Draw) Renderer.FinishMarking(RelPoint, MainWindow.ColorIndex);                
                     MarkingInProgress = false;
                 }
-                else if (Draw && Delta > 0)
-                {
-                    Renderer.DrawTempMarking(RelPoint, MainWindow.ColorIndex);
-                }
+                else if (Draw && Delta > 0) Renderer.DrawTempMarking(RelPoint, MainWindow.ColorIndex);              
             }
             else
             {
