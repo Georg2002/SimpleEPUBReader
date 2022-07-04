@@ -21,7 +21,7 @@
             <local:ThicknessConverter x:Key="ThicknessConverter" />
         </ResourceDictionary>
     </Window.Resources>
-    <Grid ShowGridLines="True">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
 

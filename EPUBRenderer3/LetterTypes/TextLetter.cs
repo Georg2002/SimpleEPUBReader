@@ -8,14 +8,17 @@ namespace EPUBRenderer3
 {
     internal class TextLetter : Letter
     {
-        public float RelScale = 1;
         public float FontSize;
         public FontWeight Weight;
         public Typeface Typeface;
         public char Character;
+
         public Vector Offset;
+        public float RelScale = 1;
         public bool Rotated => this.Rotation != 0;
         public double Rotation = 0;
+
+        public char OrigChar;
 
         private static readonly Vector HitboxExpansion = new Vector((LineDist - StandardFontSize) / 2, 0);
         private Vector _HitboxStart;
@@ -32,13 +35,14 @@ namespace EPUBRenderer3
             this.Weight = Style.Weight;
             Typeface = new Typeface(new FontFamily("Hiragino Sans GB"), FontStyles.Normal,
             Weight, new FontStretch(), new FontFamily("Global User Interface"));
+            this.OrigChar = this.Character;
 
             if (CharInfo.SpecialCharacters.ContainsKey(this.Character))
             {
                 var Info = CharInfo.SpecialCharacters[this.Character];
                 Offset = Info.Offset;
                 RelScale = Info.Scaling;
-                this.Rotation = Info.Rotation;
+                this.Rotation = Info.Rotation;             
                 this.Character = Info.Replacement;
             }
         }

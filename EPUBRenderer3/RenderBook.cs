@@ -167,7 +167,7 @@ namespace EPUBRenderer3
                 if (a.Type == LetterTypes.Letter)
                 {
                     var TL = (TextLetter)a;
-                    if (!TL.IsRuby) Text += TL.Character;
+                    if (!TL.IsRuby) Text += TL.OrigChar;
                 }
             });
             return Text;
