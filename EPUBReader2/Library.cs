@@ -1,6 +1,7 @@
 ﻿using EPUBRenderer3;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +47,7 @@ namespace EPUBReader2
         {
             return Books.IndexOf(book);
         }
+        internal int GetIndex(string file) => Books.FindIndex(a=>a.FilePath == file);
 
         internal List<LibraryBook> GetBooks()
         {

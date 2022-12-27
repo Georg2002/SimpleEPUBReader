@@ -162,6 +162,12 @@ namespace EPUBReader2
             if (Dialog.ShowDialog() == true)
             {
                 Library.AddOrReplaceBook(Renderer.GetCurrentBook());
+                int bookIndex = Library.GetIndex(Dialog.FileName);
+                if (bookIndex != -1)
+                {
+                    SetToBook(bookIndex);
+                    return;
+                }
                 Renderer.LoadBook(Dialog.FileName, DateTime.Now);
                 SetTitle();
                 Dialog.InitialDirectory = Path.GetDirectoryName(Dialog.FileName);

@@ -170,7 +170,7 @@ namespace EPUBRenderer3
                     if (!TL.IsRuby) Text += TL.OrigChar;
                 }
             });
-            return Text;
+            return Text.Trim(CharInfo.TrimCharacters);
         }
 
         internal void AddSelection(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.DictSelected = true);

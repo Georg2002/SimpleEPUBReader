@@ -53,7 +53,6 @@ namespace EPUBReader2
         {
             if (!Active) return;
             if (txtSelection.Text == Text) return;
-
             txtSelection.Text = Text;
             var Results = await Dict.Lookup(Text);
             List.Items.Clear();
