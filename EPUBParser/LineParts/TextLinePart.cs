@@ -6,16 +6,14 @@ namespace EPUBParser
     {
         public string Ruby;        
 
-        public TextLinePart(string Text, string Ruby, List<string> ActiveClasses)
-        {
-            this.ActiveClasses = new string[ActiveClasses.Count];
-           ActiveClasses.CopyTo(this.ActiveClasses);
+        public TextLinePart(string Text, string Ruby, List<string> ActiveClasses) : base(ActiveClasses)
+        {        
             this.Text = Text;
             this.Ruby = Ruby;
             Type = LinePartTypes.normal;
         }
 
-        public TextLinePart()
+        public TextLinePart() : base(new List<string>())
         {
             Type = LinePartTypes.normal;
             Text = "";

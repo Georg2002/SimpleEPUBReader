@@ -12,7 +12,7 @@ namespace EPUBParser
     public class Epub
     {
         public string FilePath;
-        public List<EpubPage> Pages;        
+        public List<EpubPage> Pages;
         public PackageInfo Package;
         public TocInfo toc;
         public EpubSettings Settings;
@@ -31,7 +31,7 @@ namespace EPUBParser
                 Logger.Report(string.Format("file missing: \"{0}\"", FilePath), LogType.Error);
                 return;
             }
-         
+
             var Files = Unzipper.GetFiles(FilePath);
 
             var PackageFile = GetFile(Files, GlobalSettings.PackageFileNames);
@@ -48,37 +48,34 @@ namespace EPUBParser
             Settings.Title = Package.Title;
             Settings.Language = Package.Language;
 
-            if (Package.Manifest.Count > 0)
+            foreach (var ManifestItem in Package.Manifest)
             {
-                foreach (var ManifestItem in Package.Manifest)
+                ZipEntry File = ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile);
+                switch (ManifestItem.Type)
                 {
-                    ZipEntry File = ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile);
-                    switch (ManifestItem.Type)
-                    {
-                        case MediaType.xhtml:
-                            if (File.Name.StartsWith("nav"))
-                            {
-                                if (toc == null) toc = new TocInfo(File, Files, fromNav: true);
-                                else toc.AddChaptersFromNav(File, Files);
+                    case MediaType.xhtml:
+                        if (File.Name.StartsWith("nav"))
+                        {
+                            if (toc == null) toc = new TocInfo(File, Files, fromNav: true);
+                            else toc.AddChaptersFromNav(File, Files);
 
-                            }
-                            Pages.Add(new EpubPage(File, Settings, Files));
-                            break;
-                        case MediaType.toc:                            
-                            toc = new TocInfo(File, Files, fromNav: false);
-                            break;
-                        case MediaType.css:                       
-                            CSSExtract.AddRules(File);
-                            break;
-                        case MediaType.image:
-                            break;
-                        case MediaType.empty:
-                            break;
-                        case MediaType.unknown:
-                            break;
-                        default:
-                            break;
-                    }
+                        }
+                        Pages.Add(new EpubPage(File, Settings, Files));
+                        break;
+                    case MediaType.toc:
+                        toc = new TocInfo(File, Files, fromNav: false);
+                        break;
+                    case MediaType.css:
+                        CSSExtract.AddRules(File);
+                        break;
+                    case MediaType.image:
+                        break;
+                    case MediaType.empty:
+                        break;
+                    case MediaType.unknown:
+                        break;
+                    default:
+                        break;
                 }
             }
             if (toc == null)

@@ -14,6 +14,8 @@ namespace EPUBRenderer3
     {
         public FontWeight Weight;
         public float RelativeFontSize;
+        public double? Width = null;
+        public double? Height = null;
         public WordStyle()
         {
             Weight = FontWeights.Normal;

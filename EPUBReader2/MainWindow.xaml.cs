@@ -61,7 +61,7 @@ namespace EPUBReader2
         }
 
         private void timer_tick(object sender, EventArgs e) => txtTimer.Text = DateTime.Now.ToString("HH:mm");
-        private void LoadSave()
+        private void LoadSave(string arg)
         {
             SaveStruc Save = SaveAndLoad.LoadSave();
             ColorIndex = Save.ColorIndex != 0 && Save.ColorIndex < MarkingColors.Length ? Save.ColorIndex : (byte)1;
@@ -74,6 +74,16 @@ namespace EPUBReader2
             if (Save.Books != null)
             {
                 Library.SetFromSave(Save.Books);
+                if (File.Exists(arg) && arg.ToLower().EndsWith(".epub"))
+                {
+                    int index = Library.GetIndex(arg);
+                    if (index != -1) Save.CurrentBookIndex = index;
+                    else
+                    {
+                        Renderer.LoadBook(arg, DateTime.Now);
+                        SetTitle();
+                    }
+                }            
                 if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count && Renderer.CurrBook == null)
                 {
                     SetToBook(Save.CurrentBookIndex);
@@ -123,12 +133,8 @@ namespace EPUBReader2
         {
             DictControl.Init(this);
             var Args = Environment.GetCommandLineArgs();
-            if (Args.Length > 1 && File.Exists(Args[1]) && Args[1].ToLower().EndsWith(".epub"))
-            {
-                Renderer.LoadBook(Args[1], DateTime.Now);
-                SetTitle();
-            }
-            LoadSave();
+            string arg = Args.Length > 1 ? Args[1] : null;
+            LoadSave(arg);
         }
 
         private void Right_Click(object sender, RoutedEventArgs e) => JumpPages(-1);
@@ -338,7 +344,7 @@ namespace EPUBReader2
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (!(value is Thickness)) return new Thickness();
-            return new Thickness(0,-30 + (60 + ((Thickness)value).Top) / 2, 0, ((Thickness)value).Top / 2);//manually replace this value : content grid margin and bar margin
+            return new Thickness(0, -30 + (60 + ((Thickness)value).Top) / 2, 0, ((Thickness)value).Top / 2);//manually replace this value : content grid margin and bar margin
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();//can't
     }

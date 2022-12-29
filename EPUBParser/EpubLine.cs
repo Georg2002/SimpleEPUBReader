@@ -54,7 +54,7 @@ namespace EPUBParser
                 case "h6":
                     ActiveClasses.Add(Node.Name);
                     foreach (var c in Node.ChildNodes) AddAppropriatePart(c, Entries, File, ActiveClasses);
-                    Parts.Add(new BreakLinePart());
+                    Parts.Add(new BreakLinePart(ActiveClasses));
                     ActiveClasses.Remove(Node.Name);
                     break;
                 case "#text":
@@ -104,7 +104,7 @@ namespace EPUBParser
                     break;
                 case "hr":
                 case "br":
-                    Parts.Add(new BreakLinePart());
+                    Parts.Add(new BreakLinePart(ActiveClasses));
                     break;
                 case "span":
                     AddSpanElement(Node, Entries, File, ActiveClasses);
@@ -112,16 +112,16 @@ namespace EPUBParser
                 case "a":
                 case "svg":
                 case "div":
-                    AddChapterMarker(Node);
+                    AddChapterMarker(Node, ActiveClasses);
                     foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
                     break;
                 case "p":
-                    AddChapterMarker(Node);
+                    AddChapterMarker(Node, ActiveClasses);
                     if (Node.ChildNodes.Count > 1 || Node.FirstChild.Name != "br")
                     {
                         foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
                     }
-                    Parts.Add(new BreakLinePart());
+                    Parts.Add(new BreakLinePart(ActiveClasses));
                     break;
                 case "image":
                 case "img":
@@ -145,7 +145,7 @@ namespace EPUBParser
                         if (Inline || Parent.ParentNode == null) break;
                         Parent = Parent.ParentNode;
                     }
-                    var Image = new ImageLinePart(Link, Inline);
+                    var Image = new ImageLinePart(Link, Inline, ActiveClasses);
                     //Set later to allow parallelization
                     Parts.Add(Image);
                     break;
@@ -163,15 +163,15 @@ namespace EPUBParser
             if (ClassAdded) ActiveClasses.RemoveAt(ActiveClasses.Count - 1);
         }
 
-        private void AddChapterMarker(HtmlNode Node)
+        private void AddChapterMarker(HtmlNode Node, List<string> activeClasses)
         {
             string Id = HTMLParser.SafeAttributeGet(Node, "id", true);
-            if (!string.IsNullOrEmpty(Id)) Parts.Add(new ChapterMarkerLinePart(Id));
+            if (!string.IsNullOrEmpty(Id)) Parts.Add(new ChapterMarkerLinePart(Id, activeClasses));
         }
 
         private void AddSpanElement(HtmlNode node, List<ZipEntry> Entries, ZipEntry File, List<string> ActiveClasses)
         {
-            AddChapterMarker(node);
+            AddChapterMarker(node, ActiveClasses);
             var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
             var IgnoreAttribute = HTMLParser.SafeAttributeGet(node, "data-amznremoved-m8", true);
             if (IgnoreAttribute == "true") return;

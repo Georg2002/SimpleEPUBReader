@@ -24,8 +24,15 @@ namespace EPUBRenderer3
             var PageSize = Info.PageSize;
             var PrevWord = Info.PrevWord;
             if (Image == null) Width = Height = 300;
-            else Width = Image.Width; Height = Image.Height;
-
+            else
+            {
+                var style = Info.OwnWord.Style;
+                this.Width = style.Width.HasValue ? style.Width.Value: Image.Width;
+                this.Height = style.Height.HasValue ? style.Height.Value : Image.Height;
+                double ratio = Image.Height / Image.Width;
+                if (style.Width.HasValue) this.Height = ratio * this.Width;
+                else if (style.Height.HasValue) this.Width = this.Height / ratio;
+            } 
 
             bool MustScale = PageSize.X < Width || PageSize.Y < Height;
             StartPosition = PrevLetter == null ? new Vector(PageSize.X, 0) : new Vector(PrevLetter.EndPosition.X, 0);

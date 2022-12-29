@@ -44,7 +44,7 @@ namespace EPUBParser
             return Image;
         }
 
-        public ImageLinePart(string Path, bool Inline)
+        public ImageLinePart(string Path, bool Inline, List<string> activeClasses) : base(activeClasses)
         {
             this.Text = Path;
             this.Type = LinePartTypes.image;

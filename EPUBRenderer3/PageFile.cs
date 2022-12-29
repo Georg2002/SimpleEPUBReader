@@ -73,8 +73,9 @@ namespace EPUBRenderer3
                 var Style = CSS.Styles.FirstOrDefault(a => a.SelectorText == SelectorText);
                 if (Style != null)
                 {
-
                     NewStyle.RelativeFontSize = Style.FontSize;
+                    NewStyle.Width = Style.Width * TextLetter.StandardFontSize;
+                    NewStyle.Height = Style.Height * TextLetter.StandardFontSize;
                     switch (Style.FontWeight)
                     {//main font only supports up to W6, aka semi bold, or maybe none at all
                         case EPUBParser.FontWeights.bold:

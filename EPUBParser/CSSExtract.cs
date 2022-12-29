@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ExCSS;
 
@@ -7,19 +8,17 @@ namespace EPUBParser
 {
     public class CSSExtract
     {
-        public List<CSSStyle> Styles;
-        public CSSExtract()
-        {
-            Styles = new List<CSSStyle>();
-            //headers
-            Styles.Add(new CSSStyle() { FontSize = 2f, FontWeight = FontWeights.bold, SelectorText = "h1" });
-            Styles.Add(new CSSStyle() { FontSize = 1.5f, FontWeight = FontWeights.bold, SelectorText = "h2" });
-            Styles.Add(new CSSStyle() { FontSize = 1.17f, FontWeight = FontWeights.bold, SelectorText = "h3" });
-            Styles.Add(new CSSStyle() { FontSize = 1f, FontWeight = FontWeights.bold, SelectorText = "h4" });
-            Styles.Add(new CSSStyle() { FontSize = 0.83f, FontWeight = FontWeights.bold, SelectorText = "h5" });
-            Styles.Add(new CSSStyle() { FontSize = 0.67f, FontWeight = FontWeights.bold, SelectorText = "h6" });
-        }
-
+        const double defaultFontSize = 16;//16 as default browser font size
+        public List<CSSStyle> Styles = new List<CSSStyle>
+            {
+                //headers
+                new CSSStyle() { FontSize = 2f, FontWeight = FontWeights.bold, SelectorText = "h1" },
+                new CSSStyle() { FontSize = 1.5f, FontWeight = FontWeights.bold, SelectorText = "h2" },
+                new CSSStyle() { FontSize = 1.17f, FontWeight = FontWeights.bold, SelectorText = "h3" },
+                new CSSStyle() { FontSize = 1f, FontWeight = FontWeights.bold, SelectorText = "h4" },
+                new CSSStyle() { FontSize = 0.83f, FontWeight = FontWeights.bold, SelectorText = "h5" },
+                new CSSStyle() { FontSize = 0.67f, FontWeight = FontWeights.bold, SelectorText = "h6" }
+            };
         public void AddRules(ZipEntry file)
         {
             if (file == null)
@@ -33,40 +32,16 @@ namespace EPUBParser
             foreach (IRule Child in Stylesheet.Children)
             {
                 if (Child.Type != RuleType.Style) continue;
-                bool Set = false;
                 var Style = (IStyleRule)Child;
                 CSSStyle NewStyle = new CSSStyle();
                 NewStyle.SelectorText = Style.SelectorText.Remove(0, 1);//removes leading .
                 string FontString = Style.Style.FontSize;
                 if (!string.IsNullOrEmpty(FontString))
                 {
-                    bool ContainsDigit = false;
-                    foreach (var c in FontString)
-                    {
-                        if (char.IsDigit(c))
-                        {
-                            ContainsDigit = true;
-                            break;
-                        }
-                    }
+                    bool ContainsDigit = FontString.Any(a => char.IsDigit(a));
                     if (ContainsDigit)
                     {
-                        if (FontString.EndsWith("px"))
-                        {
-                           FontString = FontString.Replace("px", "");
-                            NewStyle.FontSize = Convert.ToSingle(FontString)/16f;//16 as default browser font size
-                        }
-                        else
-                        {
-                            FontString = FontString.Replace("em", "");
-                            FontString = FontString.Replace("%", "");
-                            if (System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator == ",")
-                            {
-                                FontString = FontString.Replace(".", ",");
-                            }
-
-                            NewStyle.FontSize = Convert.ToSingle(FontString);
-                        }
+                        NewStyle.FontSize = (float)fromSize(FontString);
                     }
                     else
                     {
@@ -75,13 +50,14 @@ namespace EPUBParser
                             case "small":
                                 NewStyle.FontSize = 0.8f;
                                 break;
+                            default:
+                                Logger.Report("Font size specifier not found: " + FontString, LogType.Error);
+                                break;
                         }
                     }
-                    Set = true;
                 }
                 if (!string.IsNullOrEmpty(Style.Style.FontWeight))
                 {
-                    Set = true;
                     switch (Style.Style.FontWeight)
                     {
                         default:
@@ -99,32 +75,58 @@ namespace EPUBParser
                             break;
                     }
                 }
-
-                if (Set && NewStyle.NotStandard()) Styles.Add(NewStyle);
+                string widthString = Style.Style.Width;
+                string heightString = Style.Style.Height;
+                if (!string.IsNullOrEmpty(widthString))
+                {
+                    NewStyle.Width = this.FromDimension(widthString) * NewStyle.FontSize;
+                }
+                if (!string.IsNullOrEmpty(heightString))
+                {
+                    NewStyle.Height = this.FromDimension(heightString) * NewStyle.FontSize;
+                }
+                if (NewStyle.NotStandard()) Styles.Add(NewStyle);
             }
         }
 
+        private double fromSize(string sizeString)
+        {
+            if (sizeString.EndsWith("px"))
+            {
+                sizeString = sizeString.Replace("px", "");
+                return Convert.ToSingle(sizeString) / defaultFontSize;
+            }
+            else
+            {
+                sizeString = sizeString.Replace("em", "");
+                sizeString = sizeString.Replace("%", "");
+                if (System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator == ",")
+                {
+                    sizeString = sizeString.Replace(".", ",");
+                }
+
+                return Convert.ToSingle(sizeString);
+            }
+        }
+        private double? FromDimension(string dimensionString)
+        {
+            if (dimensionString == null || dimensionString == "auto") return null;       
+            return fromSize(dimensionString);
+        }
     }
 
     public class CSSStyle
     {
         public string SelectorText;
-        public float FontSize;
-        public FontWeights FontWeight;
-        public CSSStyle()
-        {
-            FontSize = 1;
-            FontWeight = FontWeights.normal;
-        }
-
-        public override string ToString()
-        {
-            return SelectorText;
-        }
-
+        public float FontSize = 1;
+        public FontWeights FontWeight = FontWeights.normal;
+        //for images
+        public double? Width = null;
+        public double? Height = null;
+        public override string ToString() => SelectorText;
         internal bool NotStandard()
         {
-            return FontSize != 1 || FontWeight != FontWeights.normal;
+            return FontSize != 1 || FontWeight != FontWeights.normal || Width != null || Height != null;
         }
     }
 
