@@ -7,8 +7,7 @@ using WatconWrapper;
 namespace EPUBRenderer3
 {
     internal class TextLetter : Letter
-    {
-        public float FontSize;
+    {        
         public FontWeight Weight;
         public Typeface Typeface;
         public char Character;
@@ -25,8 +24,7 @@ namespace EPUBRenderer3
         public override Vector HitboxStart  => _HitboxStart; 
         private Vector _HitboxEnd;
         public override Vector HitboxEnd=> _HitboxEnd; 
-        private Vector VertSpacing;
-        internal bool IsRuby;
+        private Vector VertSpacing;        
 
         public TextLetter(char character, WordStyle Style)
         {
@@ -87,8 +85,7 @@ namespace EPUBRenderer3
             }
             else
             {
-                IsRuby = true;
-                var MainWordFontSize = ((TextLetter)PrevWord.Letters.Last()).FontSize;
+                var MainWordFontSize = PrevWord.Letters.Last().FontSize;
                 FontSize = RubyFontSize * Style.RelativeFontSize;
                 var Last = Info.Last;
                 float RubyCount = OwnWord.Letters.Count;
@@ -98,7 +95,7 @@ namespace EPUBRenderer3
 
                 double TextLength = PrevWord.Length();
                 double RubyLength = OwnWord.Letters.Count * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
-                if (!((TextLetter)PrevLetter).IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));  
+                if (!PrevLetter.IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));  
                 else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-FontSize, FontSize);

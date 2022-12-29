@@ -7,7 +7,7 @@ namespace EPUBRenderer3
     {
         public ImageSource Image;
         public bool Inline;
-
+        public override float FontSize => (float)this.Width;
         public ImageLetter(ImageSource Image, bool Inline)
         {
             Type = LetterTypes.Image;

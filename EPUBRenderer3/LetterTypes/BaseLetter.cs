@@ -25,12 +25,14 @@ namespace EPUBRenderer3
 
     internal class Letter
     {
+        public virtual float FontSize { get; set; }
         public const float StandardFontSize = 19;//19
         public const float RubyScale = 0.7f;//0.7
         public const float RubyFontSize = RubyScale * StandardFontSize;
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
         public static readonly Vector OutsideVector = new Vector(-100000, -100000);
+        internal bool IsRuby;
         public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
         public float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
 

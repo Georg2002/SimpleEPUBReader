@@ -4,7 +4,7 @@ namespace EPUBParser
 {
     public class BreakLinePart : BaseLinePart
     {
-        public BreakLinePart(List<string> activeClasses) : base(activeClasses)
+        public BreakLinePart(LineSplitInfo info) : base(info)
         {
             Type = LinePartTypes.paragraph;
         }

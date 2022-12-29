@@ -9,11 +9,15 @@ namespace EPUBParser
         public string Text;
         public LinePartTypes Type;
         public string[] ActiveClasses;
+        public bool Splittable = true;
+        public bool IsRuby = false;
 
-        public BaseLinePart(List<string> activeClasses)
+        public BaseLinePart(LineSplitInfo info)
         {
-            this.ActiveClasses = new string[activeClasses.Count];
-            activeClasses.CopyTo(this.ActiveClasses);
+            this.ActiveClasses = new string[info.ActiveClasses.Count];
+            info.ActiveClasses.CopyTo(this.ActiveClasses);
+            this.Splittable = info.Splittable;
+            this.IsRuby = info.IsRuby;
         }
         public override string ToString()
         {
@@ -23,6 +27,6 @@ namespace EPUBParser
 
     public enum LinePartTypes
     {
-        normal, sesame, image, paragraph, marker
+        normal, image, paragraph, marker
     }
 }

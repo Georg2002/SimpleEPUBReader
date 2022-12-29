@@ -62,7 +62,7 @@ namespace EPUBRenderer3
 
         bool PosValid(PosDef Pos) => Words.Count > Pos.Word && Words[Pos.Word].Letters.Count > Pos.Letter;
 
-        public override string ToString() => string.Join("", Words.Select(a => a.ToString()));       
+        public override string ToString() => string.Join("", Words.Select(a => a.ToString()));
 
         private WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {
@@ -107,6 +107,11 @@ namespace EPUBRenderer3
 
                 void AddWordToList(BaseLinePart Part)
                 {
+                    if (Part.IsRuby)
+                    {
+                        Word.Type = WordTypes.Ruby;
+                        foreach (var letter in Word.Letters) letter.IsRuby = true;
+                    }
                     res.Add(Word);
                     Word = new Word();
                     Word.Style = GetStyle(Part, CSS);
@@ -122,15 +127,14 @@ namespace EPUBRenderer3
                             Word.Letters.Add(new MarkerLetter(MarkerPart.Id));
                             AddWordToList(Part);
                             break;
-                        case LinePartTypes.sesame:
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
-                            bool NoRuby = string.IsNullOrEmpty(TextPart.Ruby) && TextPart.Type != LinePartTypes.sesame;
+
                             char Prev = 'a';
                             foreach (var Character in TextPart.Text)
                             {
-                                bool NewWordBefore = NoRuby && CharInfo.PossibleLineBreaksBefore.Contains(Character);
-                                bool NewWordAfter = NoRuby && CharInfo.PossibleLineBreaksAfter.Contains(Prev) && !CharInfo.PossibleLineBreaksAfter.Contains(Character);
+                                bool NewWordBefore = TextPart.Splittable && CharInfo.PossibleLineBreaksBefore.Contains(Character);
+                                bool NewWordAfter = TextPart.Splittable && CharInfo.PossibleLineBreaksAfter.Contains(Prev) && !CharInfo.PossibleLineBreaksAfter.Contains(Character);
 
                                 if (NewWordBefore)
                                 {
@@ -145,23 +149,8 @@ namespace EPUBRenderer3
 
                                 Prev = Character;
                             }
-                            if (Word.Letters.Count == 0) break;
-                            AddWordToList(Part);
+                            if (Word.Letters.Count != 0) AddWordToList(Part);
 
-                            if (!NoRuby)
-                            {
-                                if (!string.IsNullOrEmpty(TextPart.Ruby))
-                                {
-                                    foreach (var Character in TextPart.Ruby) Word.Letters.Add(new TextLetter(Character, Word.Style));
-                                    Word.Type = WordTypes.Ruby;
-                                }
-                                else if (TextPart.Type == LinePartTypes.sesame)
-                                {
-                                    int Length = res.Last().Letters.Count;
-                                    for (int i = 0; i < Length; i++) Word.Letters.Add(new TextLetter('﹅', Word.Style));
-                                }
-                                AddWordToList(Part);
-                            }
                             break;
                         case LinePartTypes.image:
                             var ImagePart = (ImageLinePart)Part;

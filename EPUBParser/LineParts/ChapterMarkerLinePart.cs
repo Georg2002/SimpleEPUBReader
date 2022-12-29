@@ -5,7 +5,7 @@ namespace EPUBParser
     public class ChapterMarkerLinePart : BaseLinePart
     {
         public string Id;
-        public ChapterMarkerLinePart(string Id, List<string> activeClasses) : base(activeClasses)
+        public ChapterMarkerLinePart(string Id, LineSplitInfo info) : base(info)
         {
             this.Id = Id;
             this.Type = LinePartTypes.marker;

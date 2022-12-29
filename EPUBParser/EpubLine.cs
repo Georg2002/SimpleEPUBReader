@@ -5,6 +5,14 @@ using System.Linq;
 
 namespace EPUBParser
 {
+    public class LineSplitInfo
+    {
+        public List<ZipEntry> Entries;
+        public ZipEntry File;
+        public List<string> ActiveClasses;
+        public bool IsRuby;
+        public bool Splittable;
+    }
     public class EpubLine
     {
         public override string ToString()
@@ -31,10 +39,10 @@ namespace EPUBParser
                 return;
             }
             var ActiveClasses = new List<string>();
-            AddAppropriatePart(HtmlLine, Entries, File, ActiveClasses);
+            AddAppropriatePart(HtmlLine, new LineSplitInfo() { Entries = Entries, File = File, ActiveClasses = ActiveClasses, IsRuby = false, Splittable = true });
         }
 
-        private void AddAppropriatePart(HtmlNode Node, List<ZipEntry> Entries, ZipEntry File, List<string> ActiveClasses)
+        private void AddAppropriatePart(HtmlNode Node, LineSplitInfo info)
         {
             string Text = "";
             string NewClass = HTMLParser.SafeAttributeGet(Node, "class", true);
@@ -42,7 +50,7 @@ namespace EPUBParser
             if (!string.IsNullOrEmpty(NewClass))
             {
                 ClassAdded = true;
-                ActiveClasses.Add(NewClass);
+                info.ActiveClasses.Add(NewClass);
             }
             switch (Node.Name)
             {
@@ -52,50 +60,27 @@ namespace EPUBParser
                 case "h4":
                 case "h5":
                 case "h6":
-                    ActiveClasses.Add(Node.Name);
-                    foreach (var c in Node.ChildNodes) AddAppropriatePart(c, Entries, File, ActiveClasses);
-                    Parts.Add(new BreakLinePart(ActiveClasses));
-                    ActiveClasses.Remove(Node.Name);
+                    info.ActiveClasses.Add(Node.Name);
+                    foreach (var c in Node.ChildNodes) AddAppropriatePart(c, info);
+                    Parts.Add(new BreakLinePart(info));
+                    info.ActiveClasses.Remove(Node.Name);
                     break;
                 case "#text":
                 case "nav":
                     Text = Node.InnerText;
-                    if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text, "", ActiveClasses));
+                    if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text, info));
                     break;
                 case "ruby":
                     if (Node.ChildNodes.Count >= 2)
                     {
-                        string Ruby = "";
-                        bool Broken = false;
                         foreach (var Child in Node.ChildNodes)
                         {
-                            if (Broken) break;
-                            void SwitchName(HtmlNode ChildNode)
-                            {
-                                switch (ChildNode.Name)
-                                {
-                                    case "rt":
-                                        Ruby += Child.InnerText;
-                                        break;
-                                    case "#text":
-                                    case "rb":
-                                        Text += Child.InnerText;
-                                        break;
-                                    case "span":
-                                        foreach (var SubChild in Child.ChildNodes)
-                                        {
-                                            SwitchName(SubChild);
-                                        }
-                                        break;
-                                    default:
-                                        Logger.Report("Broken ruby found, ignoring", LogType.Error);
-                                        Broken = true;
-                                        break;
-                                }
-                            }
-                            SwitchName(Child);
+                            if (Child.Name == "rt") info.IsRuby = true;
+                            else info.Splittable = false;
+                            AddAppropriatePart(Child, info);
+                            if (Child.Name == "rt") info.IsRuby = false;
+                            else info.Splittable = true;
                         }
-                        Parts.Add(new TextLinePart(Text, Ruby, ActiveClasses));
                     }
                     else
                     {
@@ -104,24 +89,24 @@ namespace EPUBParser
                     break;
                 case "hr":
                 case "br":
-                    Parts.Add(new BreakLinePart(ActiveClasses));
+                    Parts.Add(new BreakLinePart(info));
                     break;
                 case "span":
-                    AddSpanElement(Node, Entries, File, ActiveClasses);
+                    AddSpanElement(Node, info);
                     break;
                 case "a":
                 case "svg":
                 case "div":
-                    AddChapterMarker(Node, ActiveClasses);
-                    foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
+                    AddChapterMarker(Node, info);
+                    foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, info);
                     break;
                 case "p":
-                    AddChapterMarker(Node, ActiveClasses);
+                    AddChapterMarker(Node, info);
                     if (Node.ChildNodes.Count > 1 || Node.FirstChild.Name != "br")
                     {
-                        foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
+                        foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, info);
                     }
-                    Parts.Add(new BreakLinePart(ActiveClasses));
+                    Parts.Add(new BreakLinePart(info));
                     break;
                 case "image":
                 case "img":
@@ -145,7 +130,7 @@ namespace EPUBParser
                         if (Inline || Parent.ParentNode == null) break;
                         Parent = Parent.ParentNode;
                     }
-                    var Image = new ImageLinePart(Link, Inline, ActiveClasses);
+                    var Image = new ImageLinePart(Link, Inline, info);
                     //Set later to allow parallelization
                     Parts.Add(Image);
                     break;
@@ -153,25 +138,22 @@ namespace EPUBParser
                     Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\""
                         , Node.OuterHtml, Node.ParentNode.Name, Node.Name), LogType.Error);
                     Logger.Report("trying to force parse...", LogType.Info);
-                    foreach (var ChildNode in Node.ChildNodes)
-                    {
-                        AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
-                    }
+                    foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, info);
                     break;
             }
 
-            if (ClassAdded) ActiveClasses.RemoveAt(ActiveClasses.Count - 1);
+            if (ClassAdded) info.ActiveClasses.RemoveAt(info.ActiveClasses.Count - 1);
         }
 
-        private void AddChapterMarker(HtmlNode Node, List<string> activeClasses)
+        private void AddChapterMarker(HtmlNode Node, LineSplitInfo info)
         {
             string Id = HTMLParser.SafeAttributeGet(Node, "id", true);
-            if (!string.IsNullOrEmpty(Id)) Parts.Add(new ChapterMarkerLinePart(Id, activeClasses));
+            if (!string.IsNullOrEmpty(Id)) Parts.Add(new ChapterMarkerLinePart(Id, info));
         }
 
-        private void AddSpanElement(HtmlNode node, List<ZipEntry> Entries, ZipEntry File, List<string> ActiveClasses)
+        private void AddSpanElement(HtmlNode node, LineSplitInfo info)
         {
-            AddChapterMarker(node, ActiveClasses);
+            AddChapterMarker(node, info);
             var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
             var IgnoreAttribute = HTMLParser.SafeAttributeGet(node, "data-amznremoved-m8", true);
             if (IgnoreAttribute == "true") return;
@@ -180,17 +162,19 @@ namespace EPUBParser
             {
                 case "sesame":
                     if (node.ChildNodes.Count == 0) return;
-                    var NewSesamePart = new TextLinePart
+                    string text = node.ChildNodes[0].InnerHtml;
+                    var NewSesamePart = new TextLinePart(text, info)
                     {
-                        Text = node.ChildNodes[0].InnerHtml,
-                        Type = LinePartTypes.sesame
+                        Splittable = false
                     };
                     Parts.Add(NewSesamePart);
+                    string dots = new string('﹅', text.Length);
+                    Parts.Add(new TextLinePart(dots, info) { Splittable = false, IsRuby = true });
                     return;
                 case "img":
                     foreach (var ChildNode in node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
+                        AddAppropriatePart(ChildNode, info);
                     }
                     return;
                 default:
@@ -205,7 +189,7 @@ namespace EPUBParser
                     }
                     foreach (var ChildNode in node.ChildNodes)
                     {
-                        AddAppropriatePart(ChildNode, Entries, File, ActiveClasses);
+                        AddAppropriatePart(ChildNode, info);
                     }
                     return;
             }
