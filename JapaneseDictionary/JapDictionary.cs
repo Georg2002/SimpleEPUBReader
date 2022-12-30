@@ -26,12 +26,14 @@ namespace WatconWrapper
                 var assembly = Assembly.GetExecutingAssembly();                
                 var resourcePath = Path.Combine(assembly.Location, @"..\Resources\Dict.txt");              
                 var TDict = new Dictionary<char, List<DictWord>>();
+                var tempList = new List<string>(20);
+                var tempCharList = new List<char>(20);
                 using (StreamReader reader = new StreamReader(resourcePath))
                 {
                     while (!reader.EndOfStream)
                     {
-                        var NewWord = new DictWord(reader);
-                        IncludeDict(NewWord, TDict);
+                        var NewWord = new DictWord(reader, tempList);
+                        IncludeDict(NewWord, TDict, tempCharList);
                     }
                 }
                 Dict = TDict;
@@ -91,24 +93,24 @@ namespace WatconWrapper
             return Res;
         }
 
-        private void IncludeDict(DictWord NewWord, Dictionary<char, List<DictWord>> Dict)
+        private void IncludeDict(DictWord NewWord, Dictionary<char, List<DictWord>> Dict, List<char> startingLetters)
         {
-            string StartingLetters = "";
             foreach (var Word in NewWord.Readings)
             {
                 char StartingLetter = Word[0];
-                if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
+                if (!startingLetters.Contains(StartingLetter)) startingLetters.Add(StartingLetter);
             }
             foreach (var Word in NewWord.WrittenForms)
             {
                 char StartingLetter = Word[0];
-                if (!StartingLetters.Contains(StartingLetter)) StartingLetters += StartingLetter;
+                if (!startingLetters.Contains(StartingLetter)) startingLetters.Add(StartingLetter);
             }
-            foreach (var C in StartingLetters)
+            foreach (var C in startingLetters)
             {
                 if (!Dict.ContainsKey(C)) Dict.Add(C, new List<DictWord>());             
                 Dict[C].Add(NewWord);
             }
+            startingLetters.Clear();
         }
 
         private string[] GetSearchwords(string text)

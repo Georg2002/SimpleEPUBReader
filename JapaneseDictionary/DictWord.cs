@@ -23,14 +23,13 @@ namespace WatconWrapper
         public override string ToString() => WrittenForms.FirstOrDefault() + " " + Readings.FirstOrDefault();
         public DictWord() { }
 
-        public DictWord(StreamReader Reader)
+        public DictWord(StreamReader Reader, List<string> tempList)
         {
             Type = (VocabType)Convert.ToInt32(Reader.ReadLine());
-            var TempList = new List<string>();           
-            WrittenForms = GetWordArray(Reader,TempList);
-            Readings = GetWordArray(Reader,TempList);
-            Meanings = GetWordArray(Reader,TempList);
-            TempList.Clear();
+            WrittenForms = GetWordArray(Reader, tempList);
+            Readings = GetWordArray(Reader, tempList);
+            Meanings = GetWordArray(Reader, tempList);
+            tempList.Clear();
         }
 
         private string[] GetWordArray(StreamReader Reader, List<string> TempList)
