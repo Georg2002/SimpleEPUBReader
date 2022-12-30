@@ -1,6 +1,6 @@
-Make sure to install the two fonts in this folder, otherwise you will only see boxes instead of text.
-
-
+    Make sure to install the two fonts in this folder, otherwise you will only see boxes instead of text.
+![Alt text](img_1.png)
+![Alt text](img_2.png)
 # Main features:
 ### Touch-compatibilty
     No tiny buttons and context menus
@@ -39,5 +39,5 @@ Make sure to install the two fonts in this folder, otherwise you will only see b
     This custom rendering is very fast.
 ### Font needs to be installed
     You need to install a font in order to use this reader: I do not know how to include
-    the font in the application for I am not a software developer.
-    The font is included in the files (MSMINCHO.TTF).
+    the fonts in the application for I am not a software developer.
+    The fonts are included in the files (MSMINCHO.TTF, Hiragino-Sans-GB-W3.otf).
