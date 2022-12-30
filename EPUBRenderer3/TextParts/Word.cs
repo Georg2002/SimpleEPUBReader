@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Linq;
 using System;
+using System.Windows.Media;
 
 namespace EPUBRenderer3
 {
@@ -16,10 +17,13 @@ namespace EPUBRenderer3
         public float RelativeFontSize;
         public double? Width = null;
         public double? Height = null;
+        public Typeface Typeface;
         public WordStyle()
         {
             Weight = FontWeights.Normal;
             RelativeFontSize = 1;
+            this.Typeface = new Typeface(CharInfo.StandardFont, FontStyles.Normal,
+            Weight, new FontStretch(), CharInfo.StandardFallbackFont);
         }
     }
 
@@ -28,22 +32,22 @@ namespace EPUBRenderer3
         public List<Letter> Letters;
         public WordTypes Type;
         public WordStyle Style;
+        private LetterPlacementInfo Info = new LetterPlacementInfo();//less garbage collection
+        
         public int Position(Word PrevWord, Word NextWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
         {
             Letter PrevLetter = null;
             if (PrevWord != null) PrevLetter = PrevWord.Letters.Last();
             int Fit = 0;
-            LetterPlacementInfo Info = new LetterPlacementInfo()
-            {
-                PageSize = PageSize,
-                PrevLetter = PrevLetter,
-                OwnWord = this,
-                PrevWord = PrevWord,
-                NextWord = NextWord,
-                NewLine = NewLine,
-                TightFit = TightFit,
-                Last = false
-            };
+            this.Info.PageSize = PageSize;
+            this.Info.PrevLetter = PrevLetter;
+            this.Info.OwnWord = this;
+            this.Info.PrevWord = PrevWord;
+            this.Info.NextWord = NextWord;
+            this.Info.NewLine = NewLine;
+            this.Info.TightFit = TightFit;
+            this.Info.Last = false;
+
             bool AllFit = true;
             for (int i = 0; i < Letters.Count; i++)
             {

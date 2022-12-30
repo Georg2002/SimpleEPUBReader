@@ -100,7 +100,7 @@
 
                 <Border VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="8" Margin="5">
                     <TextBlock  x:Name="txtTitle" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" 
-                                FontFamily="Hiragino Sans GB" FontSize="15"/>
+                                FontFamily="{StaticResource Hiragino}" FontSize="15"/>
                 </Border>
 
                 <Button Click="Dict_Click" Grid.Column="9" Style="{StaticResource MenuButtonStyle}">

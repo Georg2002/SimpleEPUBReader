@@ -11,7 +11,7 @@
             <Setter Property="Height" Value="50"/>
             <Setter Property="FontSize" Value="30"/>
             <Setter Property="Margin" Value="2"/>
-            <Setter Property="FontFamily" Value="Hiragino Sans GB W3"/>   
+            <Setter Property="FontFamily" Value="{StaticResource Hiragino}"/>   
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightColorKey}}"/>
@@ -70,9 +70,9 @@
                                 <ColumnDefinition Width="auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Top">
-                                <TextBlock Style="{StaticResource TextStyle}" Text="{Binding Writing}" FontFamily="Hiragino Sans GB W3"/>
+                                <TextBlock Style="{StaticResource TextStyle}" Text="{Binding Writing}" FontFamily="{StaticResource Hiragino}"/>
                                 <Separator/>
-                                <TextBlock Style="{StaticResource TextStyle}" Text="{Binding Reading}" FontFamily="Hiragino Sans GB W3"/>
+                                <TextBlock Style="{StaticResource TextStyle}" Text="{Binding Reading}" FontFamily="{StaticResource Hiragino}"/>
                                 <Separator/>
                                 <TextBlock Style="{StaticResource TextStyle}" Text="{Binding Meaning}"/>
                             </StackPanel>                     

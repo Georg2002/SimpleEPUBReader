@@ -58,5 +58,6 @@
                 <Setter Property="Margin" Value="6"/>
             </Style.Setters>
         </Style>
-    </Application.Resources>
+        <FontFamily x:Key="Hiragino">pack://application:,,,/EPUBRenderer3;component/Fonts/#Hiragino Sans GB</FontFamily>
+      </Application.Resources>
 </Application>

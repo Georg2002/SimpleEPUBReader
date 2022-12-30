@@ -36,6 +36,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -73,10 +74,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NOTES_READ_ME.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
+    <Resource Include="Fonts\Hiragino-Sans-GB-W3.otf" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

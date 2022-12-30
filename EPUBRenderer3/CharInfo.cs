@@ -10,19 +10,21 @@ namespace EPUBRenderer3
 {
     public static class CharInfo
     {
-        public readonly static Typeface StandardTypeface = new Typeface(new FontFamily("Hiragino Sans GB W3"), FontStyles.Normal,
-   FontWeights.Normal, new FontStretch(), new FontFamily("Global User Interface"));
+        public readonly static FontFamily StandardFallbackFont = new FontFamily("Global User Interface");
+        public readonly static FontFamily StandardFont = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer3;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Hiragino"));
+        public readonly static Typeface StandardTypeface = new Typeface(StandardFont, FontStyles.Normal,
+   FontWeights.Normal, new FontStretch(), StandardFallbackFont);
 
         public static char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
         public static char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
         public static char[] TrimCharacters = PossibleLineBreaksAfter.Concat(PossibleLineBreaksBefore).ToArray();
 
-        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0.02,-0.26), 1.34f, '〜', rotation:91.5);
+        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0.02, -0.26), 1.34f, '〜', rotation: 91.5);
         private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');
 
         public const float FontOffset = 0.24f;//0.24
 
-        public static Dictionary<char, SpecialCharacter> SpecialCharacters { get; set; } = new Dictionary<char, SpecialCharacter>() 
+        public static Dictionary<char, SpecialCharacter> SpecialCharacters { get; set; } = new Dictionary<char, SpecialCharacter>()
         {
             {'」',new SpecialCharacter(new Vector(),1,'﹂')},{'「',new SpecialCharacter(new Vector(),1,'﹁')},
             {'（',new SpecialCharacter(new Vector(),1,'︵')},{'）',new SpecialCharacter(new Vector(),1,'︶')},
