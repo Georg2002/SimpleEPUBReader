@@ -23,6 +23,12 @@ namespace EPUBRenderer3
         public bool TightFit;
     }
 
+    internal struct WordInfo
+    {
+        internal WordStyle Style;
+        internal bool IsRuby;
+        internal bool IsWordEnd;
+    }
     internal class Letter
     {
         public virtual float FontSize { get; set; }
@@ -33,6 +39,14 @@ namespace EPUBRenderer3
         public const float RubyOffset = 0.93f * LineDist;
         public static readonly Vector OutsideVector = new Vector(-100000, -100000);
         internal bool IsRuby;
+        internal bool IsWordEnd;
+        internal WordStyle Style;
+        public Letter(WordInfo wordInfo)
+        {
+            this.IsRuby = wordInfo.IsRuby;
+            this.IsWordEnd = wordInfo.IsWordEnd;
+            this.Style = wordInfo.Style;
+        }
         public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
         public float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
 

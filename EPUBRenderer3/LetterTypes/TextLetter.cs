@@ -26,10 +26,11 @@ namespace EPUBRenderer3
         public override Vector HitboxEnd => _HitboxEnd;
         private Vector VertSpacing;
 
-        public TextLetter(char character, WordStyle Style)
+        public TextLetter(char character, WordInfo wordInfo) : base(wordInfo)
         {
             this.Character = character;
             Type = LetterTypes.Letter;
+            var Style = wordInfo.Style;
             this.Weight = Style.Weight;
             Typeface = Style.Typeface;
             this.OrigChar = this.Character;

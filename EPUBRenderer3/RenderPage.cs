@@ -7,11 +7,13 @@ using System.Windows;
 
 namespace EPUBRenderer3
 {
+
     internal class RenderPage
     {
-        public List<Word> Words;
-        public PosDef StartPos;
-        public PosDef EndPos;
+        public PageFile Page;
+        public PageExtractDef Extract;
+        public PosDef StartPos => new PosDef(Page.Index, Extract.startWord, Extract.startLetter);
+        public PosDef EndPos => new PosDef(Page.Index, Extract.endWord, Extract.endLetter);
 
         public override string ToString()
         {

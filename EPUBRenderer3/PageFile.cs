@@ -2,33 +2,81 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Windows;
 
 namespace EPUBRenderer3
 {
+    internal struct PageExtractDef
+    {
+        public int startWord;//index of first partial word
+        public int startLetter;
+        public int endWord; //index of last complete word
+        public int endLetter;
+
+        internal Tuple<PageExtractDef, PageExtractDef> SplitWords(List<Word> words, PageExtractDef extract, int WordCount, int LetterCount)
+        {
+            //Word count is words including partial, letter count are the letters of the last (maybe partial) word
+            PageExtractDef front = new PageExtractDef();
+            PageExtractDef rear = new PageExtractDef();
+            //at first only the full words are added, then the partial word is split and added
+            front.startLetter = extract.startLetter;
+            front.startWord = extract.startWord;
+            front.endWord = front.startWord + WordCount - 1;
+            front.endLetter = extract.endLetter;
+
+            int relLetterCount = words[extract.endWord].Letters.Count;
+            //partial last word
+            if (relLetterCount < LetterCount)
+            {
+                rear.startLetter = front.endLetter + 1;
+                rear.startWord = front.endWord;
+            }
+            else
+            {
+                rear.startLetter = 0;
+                rear.startWord = front.endWord + 1;
+            }
+            rear.endLetter = extract.endLetter;
+            rear.endWord = extract.endWord;
+            return new Tuple<PageExtractDef, PageExtractDef>(front, rear);
+        }
+    }
     internal class PageFile
     {
-        public List<Word> Words;
-        public List<RenderPage> Pages;
+        public List<Letter> Letters;
+        public List<RenderPage> Pages = new List<RenderPage>();
+        private int UsedCachePages = 0;
+        private List<RenderPage> CachedPages = new List<RenderPage>();
+        internal int Index;
 
-        public PageFile(EpubPage page, CSSExtract CSS) => Words = PreparePage(page, CSS);
+        public PageFile(EpubPage page, CSSExtract CSS) => PreparePage(page, CSS);
 
+        private RenderPage GetFreshPage()
+        {
+            if (CachedPages.Count < UsedCachePages++) CachedPages.Add(new RenderPage());
+            var res = CachedPages[UsedCachePages];
+            return res;
+        }
         public void PositionText(Vector PageSize, int Index)
         {
+            this.Index = Index;
             Word Prev = null;
-            Pages = new List<RenderPage>();
-            var CurrentPage = new RenderPage();
+            Pages.Clear();
+            UsedCachePages = 0;
+            var CurrentPage = GetFreshPage();
 
-            void FitWords(List<Word> words)
+            //fit using indexes without creating new objects
+            void FitWords(List<Word> words, PageExtractDef extract)
             {
                 var (FitWord, FitLetter) = Word.PositionWords(words, PageSize);
                 if (FitWord < words.Count)
                 {
-                    var (fittingWords, overflowWords) = Word.SplitWords(words, FitWord, FitLetter);
-                    if (fittingWords.Count != 0) CurrentPage.Words.AddRange(fittingWords);
+                    var (fittingWords, overflowWords) = PageExtractDef.SplitWords(words, FitWord, FitLetter);
+                    if (FitWord > 0) CurrentPage.Words.AddRange(fittingWords);
                     Pages.Add(CurrentPage);
                     Prev = null;
-                    CurrentPage = new RenderPage();
+                    CurrentPage = GetFreshPage();
                     FitWords(overflowWords);
                 }
                 else
@@ -38,7 +86,7 @@ namespace EPUBRenderer3
                 }
             }
 
-            FitWords(Words);
+            FitWords(Words, 0, 0, Words.Count, Words.Last().Letters.Count());
             Pages.Add(CurrentPage);
 
             var Curr = new PosDef(Index, 0, 0);
@@ -94,36 +142,21 @@ namespace EPUBRenderer3
             return NewStyle;
         }
 
-        private List<Word> PreparePage(EpubPage page, CSSExtract CSS)
+        private List<Letter> PreparePage(EpubPage page, CSSExtract CSS)
         {
-            var res = new List<Word>();
+            WordInfo wordInfo = new WordInfo();
 
             foreach (var RawLine in page.Lines)
             {
-                var Word = new Word();
-                Word.Style = GetStyle(RawLine.Parts.FirstOrDefault(), CSS);
-
-                void AddWordToList(BaseLinePart Part)
-                {
-                    if (Part.IsRuby)
-                    {
-                        Word.Type = WordTypes.Ruby;
-                        foreach (var letter in Word.Letters) letter.IsRuby = true;
-                    }
-                    res.Add(Word);
-                    Word = new Word();
-                    Word.Style = GetStyle(Part, CSS);
-                }
-
                 foreach (var Part in RawLine.Parts)
                 {
-                    Word.Style = GetStyle(Part, CSS);
+                    wordInfo.Style = GetStyle(Part, CSS);
+                    wordInfo.IsRuby = Part.IsRuby;
                     switch (Part.Type)
                     {
                         case LinePartTypes.marker:
                             var MarkerPart = (ChapterMarkerLinePart)Part;
-                            Word.Letters.Add(new MarkerLetter(MarkerPart.Id));
-                            AddWordToList(Part);
+                            this.Letters.Add(new MarkerLetter(MarkerPart.Id, wordInfo));
                             break;
                         case LinePartTypes.normal:
                             var TextPart = (TextLinePart)Part;
@@ -136,13 +169,13 @@ namespace EPUBRenderer3
 
                                 if (NewWordBefore)
                                 {
-                                    if (Word.Letters.Count != 0) AddWordToList(Part);
-                                    Word.Letters.Add(new TextLetter(Character, Word.Style));
+                                    var prev = Letters.LastOrDefault();
+                                    if (prev != null) prev.IsWordEnd = true;
                                 }
                                 else
                                 {
-                                    if (NewWordAfter) AddWordToList(Part);
-                                    Word.Letters.Add(new TextLetter(Character, Word.Style));
+                                    if (NewWordAfter) this.Letters.LastOrDefault().IsWordEnd = true;
+                                    this.Letters.Add(new TextLetter(Character, wordInfo));
                                 }
 
                                 Prev = Character;
