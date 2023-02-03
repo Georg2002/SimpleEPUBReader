@@ -92,6 +92,7 @@ namespace EPUBRenderer3
         private void CreateContent(EpubPage page, CSSExtract CSS)
         {
             WordInfo wordInfo = new WordInfo();
+            
 
             foreach (var RawLine in page.Lines)
             {
