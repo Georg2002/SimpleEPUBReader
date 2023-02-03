@@ -104,6 +104,21 @@ namespace EPUBRenderer3
             int Fit = 0;
             bool AllFit = true;
             bool fitHorizontal = false;
+            int lastWordStart = -1;
+            int lastWordEnd = -1;
+            int currWordStart = 0;
+            for (int i = 0; i < Extract.length; i++)
+            {
+                var letter = Content.ElementAt(i);
+
+
+                if (letter.IsWordEnd)
+                {
+                    lastWordStart = currWordStart;
+                    lastWordEnd = i;
+                    currWordStart = i + 1;
+                }
+            }
             foreach (var letter in Content)
             {
                 letter.PrevLetter = Info.PrevLetter;
