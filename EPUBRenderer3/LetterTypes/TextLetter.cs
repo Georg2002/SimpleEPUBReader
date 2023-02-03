@@ -51,12 +51,29 @@ namespace EPUBRenderer3
             var PageSize = Info.PageSize;
             var TightFit = Info.TightFit;
             var NewLine = Info.NewLine;
-            var OwnWord = Info.OwnWord;
-            var NextWord = Info.NextWord;
-            var PrevWord = Info.PrevWord;
-            var Style = OwnWord.Style;
 
-            if (OwnWord.Type == WordTypes.Normal)
+            if (IsRuby)
+            {
+                var MainWordFontSize = PrevWord.Letters.Last().FontSize;
+                FontSize = RubyFontSize * Style.RelativeFontSize;
+                float RubyCount = OwnWord.Letters.Count;
+                float TextCount = PrevWord.Letters.Count;
+                VertSpacing = new Vector();
+                VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * MainWordFontSize / 2, 0);
+
+                double TextLength = PrevWord.Length();
+                double RubyLength = OwnWord.Letters.Count * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
+                if (!PrevLetter.IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
+                else StartPosition = PrevLetter.NextWritePos;
+                StartPosition += VertSpacing;
+                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+                if (IsWordEnd) NextWritePos = PrevWord.Letters.Last().NextWritePos;
+                else NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                _HitboxStart = OutsideVector;
+                _HitboxEnd = OutsideVector;
+                return true;               
+            }
+            else
             {
                 FontSize = StandardFontSize * Style.RelativeFontSize;
                 StartPosition = PrevLetter == null ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
@@ -82,28 +99,6 @@ namespace EPUBRenderer3
                 _HitboxStart = StartPosition + HitboxExpansion - VertSpacing;
                 _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;
                 return InsidePageVert(PageSize);
-            }
-            else
-            {
-                var MainWordFontSize = PrevWord.Letters.Last().FontSize;
-                FontSize = RubyFontSize * Style.RelativeFontSize;
-                var Last = Info.Last;
-                float RubyCount = OwnWord.Letters.Count;
-                float TextCount = PrevWord.Letters.Count;
-                VertSpacing = new Vector();
-                VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * MainWordFontSize / 2, 0);
-
-                double TextLength = PrevWord.Length();
-                double RubyLength = OwnWord.Letters.Count * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
-                if (!PrevLetter.IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
-                else StartPosition = PrevLetter.NextWritePos;
-                StartPosition += VertSpacing;
-                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                if (Last) NextWritePos = PrevWord.Letters.Last().NextWritePos;
-                else NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
-                _HitboxStart = OutsideVector;
-                _HitboxEnd = OutsideVector;
-                return true;
             }
         }
 

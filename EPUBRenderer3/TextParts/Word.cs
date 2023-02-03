@@ -32,72 +32,24 @@ namespace EPUBRenderer3
         public List<Letter> Letters;
         public WordTypes Type;
         public WordStyle Style;
-        private LetterPlacementInfo Info = new LetterPlacementInfo();//less garbage collection
         
-        public int Position(Word PrevWord, Word NextWord, Vector PageSize, bool NewLine = false, bool TightFit = false, bool FinalRound = false)
+
+        public static int PositionWords(List<Word> words, Vector PageSize)
         {
-            Letter PrevLetter = null;
-            if (PrevWord != null) PrevLetter = PrevWord.Letters.Last();
-            int Fit = 0;
-            this.Info.PageSize = PageSize;
-            this.Info.PrevLetter = PrevLetter;
-            this.Info.OwnWord = this;
-            this.Info.PrevWord = PrevWord;
-            this.Info.NextWord = NextWord;
-            this.Info.NewLine = NewLine;
-            this.Info.TightFit = TightFit;
-            this.Info.Last = false;
-
-            bool AllFit = true;
-            for (int i = 0; i < Letters.Count; i++)
-            {
-                var Letter = Letters[i];
-                Info.Last = i == Letters.Count - 1;
-                Letter.PrevLetter = Info.PrevLetter;
-                bool LetterFit = Letter.Position(Info);
-                Info.NewLine = false;
-                Info.PrevLetter = Letter;
-                if (LetterFit) Fit++;
-                else
-                {
-                    AllFit = false;
-                    break;
-                }
-            }
-            if (Fit != 0 && !Letters[Fit - 1].InsidePageHor(PageSize)) return 0;
-            if (FinalRound) return Fit;
-            if(!AllFit)
-            {
-                if (NewLine) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true);            
-                else
-                {
-                    if (TightFit) Fit = Position(PrevWord, NextWord, PageSize, NewLine: false, TightFit: true, FinalRound: true);
-                    else Fit = Position(PrevWord, NextWord, PageSize, true);
-                }
-            }
-           
-
-            return Fit;
-        }
-
-        public static Tuple<int, int> PositionWords(List<Word> words, Vector PageSize)
-        {
-            Word Prev = null;
+            Letter Prev = null;
 
             int WordFit = 0;
             int LetterFit = 0;
-            Word NextWord = null;
             for (int i = 0; i < words.Count; i++)
             {
                 var Word = words[i];
                 WordFit++;
-                NextWord = i == words.Count - 1 ? null : words[i + 1];
-                LetterFit = Word.Position(Prev, NextWord, PageSize);
+                LetterFit = Word.Position(Prev, PageSize);
                 if (LetterFit < Word.Letters.Count) break;
                 LetterFit = 0;
-                Prev = Word;
+                Prev = Word.Letters.Last();
             }
-            return new Tuple<int, int>(WordFit, LetterFit);
+            return LetterFit;
         }
 
         internal Tuple<Word, Word> Split(int letterCount)

@@ -45,8 +45,8 @@ namespace EPUBRenderer3
             }
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            var Lines = CurrBook.PageFiles[SelectionStart.FileIndex].Words;
-            MoveSelectionPoints(front, end, Lines);
+            var length = CurrBook.PageFiles[SelectionStart.FileIndex].Content.Count;
+            MoveSelectionPoints(front, end, length);
 
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
             Letter EndLetter = CurrBook.GetLetter(SelectionEnd);
@@ -65,19 +65,19 @@ namespace EPUBRenderer3
             Refresh();
         }
 
-        private void MoveSelectionPoints(int front, int end, List<Word> Words)
+        private void MoveSelectionPoints(int front, int end, int letterCount)
         {
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            if (front > 0) SelectionStart.Increment(Words);
-            else if (front < 0) SelectionStart.Decrement(Words);
+            if (front > 0) SelectionStart.Increment(letterCount);
+            else if (front < 0) SelectionStart.Decrement();
             if (SelectionStart.FileIndex == -1)
             {
                 SelectionStart = StartOld;
                 return;
             }
-            if (end > 0) SelectionEnd.Increment(Words);
-            else if (end < 0) SelectionEnd.Decrement(Words);
+            if (end > 0) SelectionEnd.Increment(letterCount);
+            else if (end < 0) SelectionEnd.Decrement();
             if (SelectionEnd.FileIndex == -1)
             {
                 SelectionEnd = EndOld;
@@ -94,7 +94,7 @@ namespace EPUBRenderer3
                 var EndTL = (TextLetter)EndLetter;
                 if (!StartTL.IsRuby && !EndTL.IsRuby) return;
             }
-            MoveSelectionPoints(front, end, Words);
+            MoveSelectionPoints(front, end, letterCount);
         }
 
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -175,7 +175,7 @@ namespace EPUBRenderer3
 
         private void SetCurrPos(PosDef pos)
         {
-            if (CurrBook != null && !PosDef.IsInvalid(pos)) CurrBook.CurrPos = pos;
+            if (CurrBook != null && !pos.IsInvalid) CurrBook.CurrPos = pos;
         }
 
         public bool StartMarking(Point relPoint)
@@ -185,7 +185,7 @@ namespace EPUBRenderer3
             {
                 FirstHit = ShownPage.Intersect(relPoint);
                 SetCurrPos(FirstHit);
-                Valid = !PosDef.IsInvalid(FirstHit);
+                Valid = !FirstHit.IsInvalid;
             }
             return Valid;
         }
@@ -211,7 +211,7 @@ namespace EPUBRenderer3
             {
                 PosDef Hit = ShownPage.Intersect(relPoint);
                 SetCurrPos(Hit);
-                if (PosDef.IsInvalid(Hit)) return;
+                if (Hit.IsInvalid) return;
                 (PosDef A, PosDef B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
                 CurrBook.RemoveMarking(A, B);
             }
@@ -242,7 +242,7 @@ namespace EPUBRenderer3
             RemoveSelection();
             SelectionEnd = ShownPage.Intersect(relPoint);
             SetCurrPos(SelectionEnd);
-            if (!PosDef.IsInvalid(SelectionStart) && !PosDef.IsInvalid(SelectionEnd)) CurrBook.AddSelection(SelectionStart, SelectionEnd);
+            if (!SelectionStart.IsInvalid && !SelectionEnd.IsInvalid) CurrBook.AddSelection(SelectionStart, SelectionEnd);
         }
 
         public string GetSelection() => CurrBook.GetSelection(SelectionStart, SelectionEnd);

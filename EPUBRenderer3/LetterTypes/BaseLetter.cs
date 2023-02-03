@@ -13,12 +13,10 @@ namespace EPUBRenderer3
 
     internal struct LetterPlacementInfo
     {
-        public Word PrevWord;
-        public Word NextWord;
         public Letter PrevLetter;
-        public Word OwnWord;
         public Vector PageSize;
-        public bool Last;
+        public Letter lastWordStart;
+        public Letter lastWordEnd;
         public bool NewLine;
         public bool TightFit;
     }
@@ -28,6 +26,7 @@ namespace EPUBRenderer3
         internal WordStyle Style;
         internal bool IsRuby;
         internal bool IsWordEnd;
+        internal int wordLength;
     }
     internal class Letter
     {
@@ -41,11 +40,13 @@ namespace EPUBRenderer3
         internal bool IsRuby;
         internal bool IsWordEnd;
         internal WordStyle Style;
+        internal int WordLength;
         public Letter(WordInfo wordInfo)
         {
             this.IsRuby = wordInfo.IsRuby;
             this.IsWordEnd = wordInfo.IsWordEnd;
             this.Style = wordInfo.Style;
+            this.WordLength = wordInfo.le
         }
         public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
         public float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
