@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWPF>true</UseWPF>
+     <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />
+    <ProjectReference Include="..\EPUBRenderer\EPUBRenderer.csproj" />
+    <ProjectReference Include="..\JapaneseDictionary\JapaneseDictionary.csproj" />
+  </ItemGroup>
+
+</Project>

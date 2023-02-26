@@ -1,9 +1,5 @@
-﻿using System.IO.Compression;
-using System.IO;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.IO;
+using System.IO.Compression;
 
 namespace EPUBParser
 {

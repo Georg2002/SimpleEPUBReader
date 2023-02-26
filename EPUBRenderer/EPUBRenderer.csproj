@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+      <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Fonts\Hiragino-Sans-GB-W3.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\Hiragino-Sans-GB-W3.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />
+    <ProjectReference Include="..\JapaneseDictionary\JapaneseDictionary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+</Project>

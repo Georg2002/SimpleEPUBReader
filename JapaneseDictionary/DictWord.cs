@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace WatconWrapper
+namespace JapaneseDictionary
 {
     public enum VocabType
     {

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EPUBParser
 {
@@ -22,25 +21,22 @@ namespace EPUBParser
             BitmapImage Image = null;
             try
             {
-                Image = new BitmapImage();
                 using (var mem = new MemoryStream(ImageData))
                 {
-                    mem.Position = 0;
+                    Image = new BitmapImage();
                     Image.BeginInit();
-                    Image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                    Image.CacheOption = BitmapCacheOption.OnLoad;
-                    Image.UriSource = null;
+                    Image.CacheOption = BitmapCacheOption.OnLoad; // here
                     Image.StreamSource = mem;
                     Image.EndInit();
+                    Image.Freeze();
+                    return Image;
                 }
-                Image.Freeze();
             }
             catch (Exception ex)
             {
                 Logger.Report(string.Format("image from \"{0}\" couldn't be loaded", Text), LogType.Error);
                 Logger.Report(ex.Message, LogType.Error);
             }
-
             return Image;
         }
 
