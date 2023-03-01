@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using JapaneseDictionary;
+using System.Runtime.InteropServices;
 
 namespace EPUBRenderer
 {
     internal class TextLetter : Letter
     {
         public FontWeight Weight;
-        public Typeface Typeface;
         public char Character;
 
         public Vector Offset;
@@ -32,7 +34,6 @@ namespace EPUBRenderer
             Type = LetterTypes.Letter;
             var Style = wordInfo.Style;
             this.Weight = Style.Weight;
-            Typeface = Style.Typeface;
             this.OrigChar = this.Character;
 
             if (CharInfo.SpecialCharacters.ContainsKey(this.Character))
@@ -101,26 +102,26 @@ namespace EPUBRenderer
             }
         }
 
-        public override Rect GetMarkingRect() => new()
-        {
-            Y = StartPosition.Y - VertSpacing.Y,
-            X = EndPosition.X,
-            Width = FontSize,
-            Height = VertSpacing.Y * 2 + FontSize
-        };
+        public override RectangleF GetMarkingRect() => new((float)EndPosition.X, (float)(StartPosition.Y - VertSpacing.Y), (float)FontSize, (float)(VertSpacing.Y * 2 + FontSize));
 
-        private static Dictionary<int, FormattedText> FormattedTextCache = new(4000);
-        private int textKey => (this.Character << 16) | ((UInt16)this.FontSize);
-        public override object GetRenderElement()
+        private static Dictionary<int, IntPtr> FontCache = new(100);
+        private int fontKey => ((UInt16)this.FontSize) ^ ((this.Style.Weight == FontWeights.Normal).GetHashCode() << 16);
+        public override object GetRenderElement(Graphics graphics)
         {
-            var key = this.textKey;
-            FormattedText res;
-            if (FormattedTextCache.TryGetValue(key, out res)) return res;
+            var key = this.fontKey;
+            IntPtr res;
+            if (FontCache.TryGetValue(key, out res)) return res;
 
-            res = new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture,
-             FlowDirection.RightToLeft, Typeface, FontSize * RelScale, Brushes.Black, 1)
-            { TextAlignment = TextAlignment.Center };
-            FormattedTextCache[key] = res;
+            // = Win32Func.CreateFontA((int)(this.FontSize * 0.75f), 0, 0, (int)(this.Rotation * 10), 400, 0, 0, 0, 136, 8, 1, 5, 0, "Arial");
+
+            graphics.ReleaseHdc();//unlock
+            res = Marshal.AllocHGlobal(200);
+            var logfont =  new LOGFONT();
+            var font = new Font(CharInfo.StandardFontFamily, this.FontSize * 0.75f, this.Style.Weight == FontWeights.Normal ? System.Drawing.FontStyle.Regular : System.Drawing.FontStyle.Bold, GraphicsUnit.Point);
+            font.ToLogFont(logfont);
+            Marshal.StructureToPtr(logfont, res, false);
+            graphics.GetHdc();
+            FontCache[key] = res;
             return res;
         }
 

@@ -17,8 +17,7 @@ namespace EPUBRenderer
         public FontWeight Weight = FontWeights.Normal;
         public float RelativeFontSize = 1;
         public double? Width = null;
-        public double? Height = null;
-        public Typeface Typeface;       
+        public double? Height = null;     
     }
 
     internal class Word

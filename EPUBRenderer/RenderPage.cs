@@ -79,7 +79,7 @@ namespace EPUBRenderer
             return new PosDef(StartPos.FileIndex, Global.Letter - StartPos.Letter);
         }
         private PosDef ToGlobal(PosDef Local) => new PosDef(Local.FileIndex, Local.Letter + StartPos.Letter);
-        internal PosDef Intersect(Point relPoint)
+        internal PosDef Intersect(System.Windows.Point relPoint)
         {
             var i = 0;
             foreach (var letter in Content)

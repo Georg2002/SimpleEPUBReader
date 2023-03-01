@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing.Text;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,17 +16,18 @@ namespace EPUBRenderer
 {
     public static class CharInfo
     {
-        public readonly static FontFamily StandardFallbackFont = new FontFamily("Global User Interface");
-        public readonly static FontFamily StandardFont = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Hiragino"));
-        public readonly static Typeface StandardTypeface = new Typeface(StandardFont, FontStyles.Normal,
-   FontWeights.Normal, new FontStretch(), StandardFallbackFont);
+        public readonly static System.Drawing.FontFamily StandardFontFamily;
+        public readonly static IntPtr StandardFont;
+        public readonly static System.Drawing.Color Black = System.Drawing.Color.FromKnownColor(KnownColor.Black);
+        public readonly static System.Drawing.Color White = System.Drawing.Color.FromKnownColor(KnownColor.White);
 
         public static char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
         public static char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
         public static char[] TrimCharacters = PossibleLineBreaksAfter.Concat(PossibleLineBreaksBefore).ToArray();
-
-        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0.02, -0.26), 1.34f, '〜', rotation: 91.5);
+        //0.02, -0.26
+        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(-0, 0.02), 1.34f, '〜', rotation: 91.5);
         private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');
+        private static readonly SpecialCharacter VertLine = new SpecialCharacter(new Vector(0, -0.1), 1, '│');
 
         public const float FontOffset = 0.24f;//0.24
 
@@ -31,9 +38,8 @@ namespace EPUBRenderer
             {'『',new SpecialCharacter(new Vector(),1,'﹃')},{'』',new SpecialCharacter(new Vector(),1,'﹄')},
             {'。',new SpecialCharacter(new Vector(),1,'︒')},{'、',new SpecialCharacter(new Vector(),1,'︑')},
             {'?',Questionmark},{'？',Questionmark}
-            ,{'!',new SpecialCharacter(new Vector(0,0),1,'!')},
-            {'！',new SpecialCharacter(new Vector(0,0),1,'!')},{ 'ー',new SpecialCharacter(new Vector(),1,'│')},
-            { '─',new SpecialCharacter(new Vector(),1,'│')}, {'―',new SpecialCharacter(new Vector(),1,'│')},
+            ,{'!',new SpecialCharacter(new Vector(0,0),1,'!')},{'！',new SpecialCharacter(new Vector(0,0),1,'!')},
+            { 'ー',VertLine},{ '─',VertLine}, {'―',VertLine},{'-',VertLine },{'－',VertLine },
             {'…',new SpecialCharacter(new Vector(),1,'︙')},
             {'〈',new SpecialCharacter(new Vector(),1,'︿')},{'〉',new SpecialCharacter(new Vector(),1,'﹀')},
             {'【',new SpecialCharacter(new Vector(),1,'︻')},{'】',new SpecialCharacter(new Vector(),1,'︼')},
@@ -47,10 +53,45 @@ namespace EPUBRenderer
             {'~',Wiggle},{'∼',Wiggle},{'～',Wiggle},{'〜',Wiggle},{'\u0027',new SpecialCharacter(new Vector(),1,'︑')},
             {'゠',new SpecialCharacter(new Vector(),1,'║')},{'＝',new SpecialCharacter(new Vector(),1,'║')}
             ,{'〟',new SpecialCharacter(new Vector(0,-0.8),1.3f,'〟')},{'〝',new SpecialCharacter(new Vector(0,0.5),1.3f,'〝') },
-            {'．',new SpecialCharacter(new Vector(1,-1.9),2f,'．') },{'-',new SpecialCharacter(new Vector(),1,'│') }
-           ,{'－',new SpecialCharacter(new Vector(),1,'│') }
+            {'．',new SpecialCharacter(new Vector(1,-1.9),2f,'．') }
         };
 
+        public static long FontDataLength;
+        public static IntPtr FontDataPtr;
+
+        private static PrivateFontCollection pfc = new PrivateFontCollection();
+        static CharInfo()
+        {
+            var ass = Assembly.GetExecutingAssembly();
+            var nameList = ass.GetManifestResourceNames().Where(a => a.Contains("Hiragino"));
+            var name = nameList.FirstOrDefault(a => a.Contains("W3"));
+
+            using (Stream stream = ass.GetManifestResourceStream(name))
+            {
+                FontDataLength = stream.Length;
+                var buffer = new byte[FontDataLength];
+                using (MemoryStream reader = new MemoryStream(buffer))
+                {
+                    stream.CopyTo(reader);
+                    unsafe
+                    {
+                        fixed (byte* p = buffer)
+                        {
+                            FontDataPtr = (IntPtr)p;
+                        }
+                    }
+                }
+            }
+            pfc.AddMemoryFont(CharInfo.FontDataPtr, (int)CharInfo.FontDataLength);
+            StandardFontFamily = pfc.Families.Last();
+            var logfont = new LOGFONT();
+            var res = Marshal.AllocHGlobal(200);
+            new Font(StandardFontFamily, 12, System.Drawing.FontStyle.Regular).ToLogFont(logfont);
+            logfont.lfOutPrecision = 8;
+            logfont.lfQuality = 5;
+            Marshal.StructureToPtr(logfont, res, false);
+            StandardFont = res;
+        }
     }
 
     public struct SpecialCharacter

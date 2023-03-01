@@ -32,10 +32,5 @@ namespace EPUBRenderer
             else NextWritePos = new Vector(StartPosition.X - GetNewLineDist(), 0);          
             return true;
         }
-
-        public override object GetRenderElement()
-        {
-            return null;
-        }
     }
 }

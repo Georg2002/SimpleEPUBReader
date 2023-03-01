@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using EPUBParser;
+using Point = System.Windows.Point;
 
 namespace EPUBRenderer
 {
@@ -17,7 +18,7 @@ namespace EPUBRenderer
         RenderPage ShownPage = null;
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
-        public Brush[] MarkingColors;
+        public System.Drawing.Brush[] MarkingColors;
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private bool Rerender = false;
@@ -100,7 +101,7 @@ namespace EPUBRenderer
         {
             if (string.IsNullOrEmpty(Path) || !File.Exists(Path) || !Path.ToLower().EndsWith(".epub"))
             {
-                MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             SelectionStart = PosDef.InvalidPosition;
@@ -166,7 +167,7 @@ namespace EPUBRenderer
             if (CurrBook != null && !pos.IsInvalid) CurrBook.CurrPos = pos;
         }
 
-        public bool StartMarking(Point relPoint)
+        public bool StartMarking(System.Windows.Point relPoint)
         {
             bool Valid = false;
             if (CurrBook != null)

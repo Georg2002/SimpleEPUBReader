@@ -23,23 +23,17 @@ namespace EPUBRenderer
             PageFiles = new List<PageFile>();
             foreach (var Page in epub.Pages) PageFiles.Add(new PageFile(Page, epub.CSSExtract));
         }
-        bool initialized = false;
         internal void Position(Vector pageSize)
         {
             void pageOp(int a)
             {
                 PageFiles[a].CalculatePages(pageSize, a);
-               // if (!initialized)
-               // {
-              //      foreach (var letter in PageFiles[a].Content.Where(a => a.Type == LetterTypes.Letter)) letter.GetRenderElement();
-               // }
             }
 #if (DEBUG)
             for (int i = 0; i < PageFiles.Count; i++) pageOp(i);
 #else
             Parallel.For(0, PageFiles.Count, a => pageOp(a));
 #endif
-            initialized = true;
         }
 
         internal void RemoveMarking(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);

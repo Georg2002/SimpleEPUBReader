@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using Point = System.Windows.Point;
 
 namespace EPUBRenderer
 {
@@ -26,7 +28,6 @@ namespace EPUBRenderer
     {
         internal WordStyle Style;
         internal bool IsRuby;
-        internal bool IsWordEnd;
     }
     internal class Letter
     {
@@ -48,7 +49,6 @@ namespace EPUBRenderer
         public Letter(WordInfo wordInfo)
         {
             this.IsRuby = wordInfo.IsRuby;
-            this.IsWordEnd = wordInfo.IsWordEnd;
             this.Style = wordInfo.Style;
         }
         public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
@@ -64,14 +64,14 @@ namespace EPUBRenderer
         public Vector NextWritePos;
         public LetterTypes Type;
         public byte MarkingColorIndex;
-        internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
+        internal static SolidBrush DictSelectionColor = new SolidBrush(System.Drawing.Color.FromArgb(100, 50, 50, 50));
 
         public virtual bool Position(LetterPlacementInfo Info) => false;
         internal bool Inside(Point relPoint) => relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
-        public virtual object GetRenderElement() => null;
+        public virtual object GetRenderElement(Graphics graphics) => null;
 
         //arranged to avoid negative numbers
-        public virtual Rect GetMarkingRect() => new Rect(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
+        public virtual RectangleF GetMarkingRect() => new((float)EndPosition.X, (float)StartPosition.Y, (float)(StartPosition.X - EndPosition.X), (float)(EndPosition.Y - StartPosition.Y));
         public override string ToString() => Type.ToString();
         public bool InsidePageVert(Vector PageSize) => EndPosition.Y <= PageSize.Y;
         public bool InsidePageHor(Vector PageSize) => EndPosition.X >= 0;

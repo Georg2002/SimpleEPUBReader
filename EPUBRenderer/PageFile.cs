@@ -88,8 +88,6 @@ namespace EPUBRenderer
                     }
                 }
             }
-            NewStyle.Typeface = new Typeface(CharInfo.StandardFont, FontStyles.Normal,
-            NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFont);
             return NewStyle;
         }
 
@@ -116,14 +114,11 @@ namespace EPUBRenderer
                         foreach (var Character in TextPart.Text)
                         {
                             bool NewWordBefore = TextPart.Splittable && CharInfo.PossibleLineBreaksBefore.Contains(Character);
-                            bool NewWordAfter = TextPart.Splittable && CharInfo.PossibleLineBreaksAfter.Contains(prevChar) && !CharInfo.PossibleLineBreaksAfter.Contains(Character);
+                            bool NewWordAfter = TextPart.Splittable && CharInfo.PossibleLineBreaksAfter.Contains(Character);
 
                             var letter = new TextLetter(Character, wordInfo);
-                            if (NewWordBefore)
-                            {
-                                if (prevLetter != null) prevLetter.IsWordEnd = true;
-                            }
-                            else if (NewWordAfter) letter.IsWordEnd = true;
+                            if (NewWordBefore && prevLetter != null) prevLetter.IsWordEnd = true;
+                            if (NewWordAfter) letter.IsWordEnd = true;
                             Content.Add(prevLetter = letter);
                             prevChar = Character;
                         }

@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.Net;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using static System.Net.Mime.MediaTypeNames;
+using System.Drawing;
 
 namespace EPUBParser
 {
@@ -11,25 +9,20 @@ namespace EPUBParser
         private byte[] ImageData;
         public bool Inline;
 
-        public ImageSource GetImage()
+        public System.Drawing.Image GetImage()
         {
             if (ImageData == null)
             {
                 Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
                 return null;
             }
-            BitmapImage Image = null;
+            Image img = null;
             try
             {
                 using (var mem = new MemoryStream(ImageData))
                 {
-                    Image = new BitmapImage();
-                    Image.BeginInit();
-                    Image.CacheOption = BitmapCacheOption.OnLoad; // here
-                    Image.StreamSource = mem;
-                    Image.EndInit();
-                    Image.Freeze();
-                    return Image;
+                    img = Image.FromStream(mem);
+                    return img;
                 }
             }
             catch (Exception ex)
@@ -37,7 +30,7 @@ namespace EPUBParser
                 Logger.Report(string.Format("image from \"{0}\" couldn't be loaded", Text), LogType.Error);
                 Logger.Report(ex.Message, LogType.Error);
             }
-            return Image;
+            return img;
         }
 
         public ImageLinePart(string Path, bool Inline, LineSplitInfo info) : base(info)
