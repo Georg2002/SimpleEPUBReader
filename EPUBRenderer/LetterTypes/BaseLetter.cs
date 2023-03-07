@@ -1,6 +1,6 @@
-﻿using System;
+﻿using EPUBRenderer;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,8 +48,8 @@ namespace EPUBRenderer
         internal bool IsPageStart;
         public Letter(WordInfo wordInfo)
         {
-            this.IsRuby = wordInfo.IsRuby;
-            this.Style = wordInfo.Style;
+            IsRuby = wordInfo.IsRuby;
+            Style = wordInfo.Style;
         }
         public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
         public float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
@@ -60,18 +60,23 @@ namespace EPUBRenderer
         public Vector EndPosition;
         public virtual Vector HitboxStart => StartPosition;
         public virtual Vector HitboxEnd => EndPosition;
-        public Vector Middle => (this.HitboxStart + this.HitboxEnd) / 2;
+        public Vector Middle => (HitboxStart + HitboxEnd) / 2;
         public Vector NextWritePos;
         public LetterTypes Type;
         public byte MarkingColorIndex;
-        internal static SolidBrush DictSelectionColor = new SolidBrush(System.Drawing.Color.FromArgb(100, 50, 50, 50));
+        internal static SolidColorBrush DictSelectionColor;
+        static Letter()
+        {
+            DictSelectionColor = new SolidColorBrush(Color.FromArgb(100, 50, 50, 50));
+            DictSelectionColor.Freeze();
+        }
 
         public virtual bool Position(LetterPlacementInfo Info) => false;
         internal bool Inside(Point relPoint) => relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
-        public virtual object GetRenderElement(Graphics graphics) => null;
+        public virtual object GetRenderElement() => null;
 
         //arranged to avoid negative numbers
-        public virtual RectangleF GetMarkingRect() => new((float)EndPosition.X, (float)StartPosition.Y, (float)(StartPosition.X - EndPosition.X), (float)(EndPosition.Y - StartPosition.Y));
+        public virtual Rect GetMarkingRect() => new(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
         public override string ToString() => Type.ToString();
         public bool InsidePageVert(Vector PageSize) => EndPosition.Y <= PageSize.Y;
         public bool InsidePageHor(Vector PageSize) => EndPosition.X >= 0;
@@ -99,19 +104,19 @@ namespace EPUBRenderer
         public float GetNewLineDist()
         {
             float maxSize = -1;
-            Letter prev = this.PrevLetter;
+            Letter prev = PrevLetter;
             while (true)
             {
                 if (prev == null) break;
                 if (prev.Type == LetterTypes.Letter)
                 {
                     var prevLetter = (TextLetter)prev;
-                    if (prevLetter.StartPosition.X != this.StartPosition.X) break;
+                    if (prevLetter.StartPosition.X != StartPosition.X) break;
                     if (maxSize < prevLetter.FontSize) maxSize = prevLetter.FontSize;
                 }
                 prev = prev.PrevLetter;
             }
-            if (maxSize < 0) maxSize = Letter.StandardFontSize;
+            if (maxSize < 0) maxSize = StandardFontSize;
             return GetLineDist(maxSize);
         }
     }

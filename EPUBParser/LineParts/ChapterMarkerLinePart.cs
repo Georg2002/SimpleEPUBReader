@@ -8,7 +8,7 @@ namespace EPUBParser
         public ChapterMarkerLinePart(string Id, LineSplitInfo info) : base(info)
         {
             this.Id = Id;
-            this.Type = LinePartTypes.marker;
+            Type = LinePartTypes.marker;
         }
     }
 }

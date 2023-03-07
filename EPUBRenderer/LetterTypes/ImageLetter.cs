@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using Point = System.Windows.Point;
 
@@ -7,14 +6,14 @@ namespace EPUBRenderer
 {
     internal class ImageLetter : Letter
     {
-        public System.Drawing.Image Image;
+        public ImageSource Image;
         public bool Inline;
-        public override float FontSize => (float)this.Width;
-        public ImageLetter(System.Drawing.Image Image, bool Inline, WordInfo wordInfo) : base(wordInfo)
+        public override float FontSize => (float)Width;
+        public ImageLetter(ImageSource Image, bool Inline, WordInfo wordInfo) : base(wordInfo)
         {
             Type = LetterTypes.Image;
             this.Inline = Inline;
-            this.IsWordEnd = true;
+            IsWordEnd = true;
             this.Image = Image;
         }
 
@@ -27,11 +26,11 @@ namespace EPUBRenderer
             if (Image == null) Width = Height = 300;
             else
             {
-                this.Width = Style.Width.HasValue ? Style.Width.Value : Image.Width;
-                this.Height = Style.Height.HasValue ? Style.Height.Value : Image.Height;
+                Width = Style.Width.HasValue ? Style.Width.Value : Image.Width;
+                Height = Style.Height.HasValue ? Style.Height.Value : Image.Height;
                 double ratio = Image.Height / Image.Width;
-                if (Style.Width.HasValue) this.Height = ratio * this.Width;
-                else if (Style.Height.HasValue) this.Width = this.Height / ratio;
+                if (Style.Width.HasValue) Height = ratio * Width;
+                else if (Style.Height.HasValue) Width = Height / ratio;
             }
 
             bool MustScale = PageSize.X < Width || PageSize.Y < Height;
@@ -71,9 +70,9 @@ namespace EPUBRenderer
             return InsidePage(PageSize);
         }
 
-        public PointF GetStartPoint() => new((float)StartPosition.X, (float)StartPosition.Y);
-        public PointF GetEndPoint() => new((float)EndPosition.X, (float)EndPosition.Y);
-        public Rectangle GetImageRect() => new Rectangle((int)EndPosition.X, (int)StartPosition.Y, (int)(StartPosition.X - EndPosition.X), (int)(EndPosition.Y - StartPosition.Y));
+        public Point GetStartPoint() => new(StartPosition.X, StartPosition.Y);
+        public Point GetEndPoint() => new(EndPosition.X, EndPosition.Y);
+        public Rect GetImageRect() => new(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
 
         public Vector GetMaxRenderSize(Vector PageSize)
         {
@@ -82,6 +81,6 @@ namespace EPUBRenderer
             return PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
         }
 
-        public override object GetRenderElement(Graphics gdc) => Image;
+        public override object GetRenderElement() => Image;
     }
 }

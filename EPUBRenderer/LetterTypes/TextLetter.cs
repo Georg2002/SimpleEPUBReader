@@ -1,22 +1,25 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using JapaneseDictionary;
 using System.Runtime.InteropServices;
+using System.Reflection;
+using System.Security.Policy;
+using System.Windows.Documents;
+using EPUBRenderer;
 
 namespace EPUBRenderer
 {
     internal class TextLetter : Letter
     {
         public FontWeight Weight;
+        public Typeface Typeface;
         public char Character;
 
         public Vector Offset;
         public float RelScale = 1;
-        public bool Rotated => this.Rotation != 0;
+        public bool Rotated => Rotation != 0;
         public double Rotation = 0;
 
         public char OrigChar;
@@ -30,19 +33,20 @@ namespace EPUBRenderer
 
         public TextLetter(char character, WordInfo wordInfo) : base(wordInfo)
         {
-            this.Character = character;
+            Character = character;
             Type = LetterTypes.Letter;
             var Style = wordInfo.Style;
-            this.Weight = Style.Weight;
-            this.OrigChar = this.Character;
+            Weight = Style.Weight;
+            Typeface = Style.Typeface;
+            OrigChar = Character;
 
-            if (CharInfo.SpecialCharacters.ContainsKey(this.Character))
+            if (CharInfo.SpecialCharacters.ContainsKey(Character))
             {
-                var Info = CharInfo.SpecialCharacters[this.Character];
+                var Info = CharInfo.SpecialCharacters[Character];
                 Offset = Info.Offset;
                 RelScale = Info.Scaling;
-                this.Rotation = Info.Rotation;
-                this.Character = Info.Replacement;
+                Rotation = Info.Rotation;
+                Character = Info.Replacement;
             }
         }
 
@@ -102,27 +106,86 @@ namespace EPUBRenderer
             }
         }
 
-        public override RectangleF GetMarkingRect() => new((float)EndPosition.X, (float)(StartPosition.Y - VertSpacing.Y), (float)FontSize, (float)(VertSpacing.Y * 2 + FontSize));
-
-        private static Dictionary<int, IntPtr> FontCache = new(100);
-        private int fontKey => ((UInt16)this.FontSize) ^ ((this.Style.Weight == FontWeights.Normal).GetHashCode() << 16);
-        public override object GetRenderElement(Graphics graphics)
+        public override Rect GetMarkingRect() => new(EndPosition.X, StartPosition.Y - VertSpacing.Y, FontSize, VertSpacing.Y * 2 + FontSize);
+        private struct typefaceRun
         {
-            var key = this.fontKey;
-            IntPtr res;
-            if (FontCache.TryGetValue(key, out res)) return res;
+            public GlyphTypeface typeface;
+            public GlyphRun run;
+        }
 
-            // = Win32Func.CreateFontA((int)(this.FontSize * 0.75f), 0, 0, (int)(this.Rotation * 10), 400, 0, 0, 0, 136, 8, 1, 5, 0, "Arial");
+        private static Dictionary<int, typefaceRun> RunCache = new(100);
 
-            graphics.ReleaseHdc();//unlock
-            res = Marshal.AllocHGlobal(200);
-            var logfont =  new LOGFONT();
-            var font = new Font(CharInfo.StandardFontFamily, this.FontSize * 0.75f, this.Style.Weight == FontWeights.Normal ? System.Drawing.FontStyle.Regular : System.Drawing.FontStyle.Bold, GraphicsUnit.Point);
-            font.ToLogFont(logfont);
-            Marshal.StructureToPtr(logfont, res, false);
-            graphics.GetHdc();
-            FontCache[key] = res;
-            return res;
+        public static void DrawRuns(DrawingContext dc)
+        {
+            foreach (var run in RunCache.Values.Select(a => a.run))
+            {
+                dc.DrawGlyphRun(Brushes.Black, run);
+            }
+        }
+        public static void ClearRuns()
+        {
+            foreach (var run in RunCache.Values.Select(a => a.run))
+            {
+                var caretStops = run.CaretStops as List<bool>;
+                caretStops.Clear();
+                caretStops.Add(false);
+                run.GlyphIndices.Clear();
+                run.GlyphOffsets.Clear();
+                run.ClusterMap.Clear();
+                run.Characters.Clear();
+                run.AdvanceWidths.Clear();
+            }
+        }
+
+        private void addGlyph(GlyphRun run, GlyphTypeface gtypeface, char c)
+        {
+            ushort gi = 0;
+            if (!gtypeface.CharacterToGlyphMap.TryGetValue(Character, out gi)) gi = gtypeface.CharacterToGlyphMap['X'];
+            run.Characters.Add(c);
+            run.AdvanceWidths.Add(gtypeface.AdvanceWidths[gi]);
+            run.CaretStops.Add(false);
+            run.GlyphIndices.Add(gi);
+            //glyph offsets in visual render
+
+            if (run.GlyphIndices.Count > 1)
+            {
+                //1 offset because idk
+                run.ClusterMap.Add(0);
+            }
+        }
+
+        private int fontKey => (int)(FontSize * 10) ^ (Style.Weight == FontWeights.Normal).GetHashCode() << 16 ^ (Style.Weight == FontWeights.Bold).GetHashCode() << 17;
+        public override object GetRenderElement()
+        {
+            typefaceRun temp;
+            GlyphRun run;
+            GlyphTypeface gtypeface;
+            var key = fontKey;
+            if (!RunCache.TryGetValue(key, out temp))
+            {
+                Typeface.TryGetGlyphTypeface(out gtypeface);
+
+                ushort gindex = 0;//default value
+                var widths = new List<double> { gtypeface.AdvanceWidths[gindex] };
+                run = new GlyphRun(gtypeface, 1, false, FontSize, 0.5f, new List<ushort> { gindex }, new Point(), widths, new List<Point> { new Point() }, new List<char> { Character }, null, new List<ushort> { 0 }, new List<bool> { false, false }, System.Windows.Markup.XmlLanguage.Empty);
+
+                RunCache[fontKey] = temp = new typefaceRun() { run = run, typeface = gtypeface };
+
+                var caretStops = run.CaretStops as List<bool>;
+                caretStops.Clear();
+                caretStops.Add(false);
+                run.GlyphIndices.Clear();
+                run.GlyphOffsets.Clear();
+                run.ClusterMap.Clear();
+                run.Characters.Clear();
+                run.AdvanceWidths.Clear();
+                //reset to workable state
+            }
+
+            run = temp.run;
+            gtypeface = temp.typeface;
+            addGlyph(run, gtypeface, Character);
+            return run;
         }
 
         public override string ToString() => Character.ToString();

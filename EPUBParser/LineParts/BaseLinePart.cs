@@ -14,10 +14,10 @@ namespace EPUBParser
 
         public BaseLinePart(LineSplitInfo info)
         {
-            this.ActiveClasses = new string[info.ActiveClasses.Count];
-            info.ActiveClasses.CopyTo(this.ActiveClasses);
-            this.Splittable = info.Splittable;
-            this.IsRuby = info.IsRuby;
+            ActiveClasses = new string[info.ActiveClasses.Count];
+            info.ActiveClasses.CopyTo(ActiveClasses);
+            Splittable = info.Splittable;
+            IsRuby = info.IsRuby;
         }
         public override string ToString()
         {

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net;
-using System.Drawing;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace EPUBParser
 {
@@ -9,34 +10,42 @@ namespace EPUBParser
         private byte[] ImageData;
         public bool Inline;
 
-        public System.Drawing.Image GetImage()
+        public ImageSource GetImage()
         {
             if (ImageData == null)
             {
                 Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
                 return null;
             }
-            Image img = null;
+            BitmapImage Image = null;
             try
             {
+                Image = new BitmapImage();
                 using (var mem = new MemoryStream(ImageData))
                 {
-                    img = Image.FromStream(mem);
-                    return img;
+                    mem.Position = 0;
+                    Image.BeginInit();
+                    Image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                    Image.CacheOption = BitmapCacheOption.OnLoad;
+                    Image.UriSource = null;
+                    Image.StreamSource = mem;
+                    Image.EndInit();
                 }
+                Image.Freeze();
             }
             catch (Exception ex)
             {
                 Logger.Report(string.Format("image from \"{0}\" couldn't be loaded", Text), LogType.Error);
                 Logger.Report(ex.Message, LogType.Error);
             }
-            return img;
+
+            return Image;
         }
 
         public ImageLinePart(string Path, bool Inline, LineSplitInfo info) : base(info)
         {
-            this.Text = Path;
-            this.Type = LinePartTypes.image;
+            Text = Path;
+            Type = LinePartTypes.image;
             this.Inline = Inline;
         }
 

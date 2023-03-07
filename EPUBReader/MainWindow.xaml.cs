@@ -36,17 +36,11 @@ namespace EPUBReader
         public byte ColorIndex = 1;
         private const byte Alpha = 100;
         private bool DictionaryActive = false;
-        readonly Brush[] MarkingColors = new Brush[] {null,
+        readonly SolidColorBrush[] MarkingColors = new[] {null,
             new SolidColorBrush(new Color() { R = 255, G = 0, B = 0, A = Alpha }),
             new SolidColorBrush( new Color() { R = 0, G = 255,B = 0,A = Alpha}),
             new SolidColorBrush(new Color() { R = 255, G = 255,B = 0,A = Alpha}),
             new SolidColorBrush(new Color() {R = 0, G = 0,B = 255,A = Alpha})
-        };
-        readonly System.Drawing.Brush[] MarkingColorsSysDraw = new[] {null,
-            new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(Alpha,255, 0, 0)),
-            new System.Drawing.SolidBrush(System.Drawing. Color.FromArgb(Alpha, 0,  255, 0)),
-            new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(Alpha,  255,  255, 0)),
-            new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(Alpha, 0, 0, 255))
         };
         private Vector WindowSize;
         private DispatcherTimer Timer = new DispatcherTimer();
@@ -55,7 +49,7 @@ namespace EPUBReader
         {
             InitializeComponent();
             MouseManager = new MouseManager(Bar, ContentGrid, Renderer, this);
-            Renderer.MarkingColors = MarkingColorsSysDraw;
+            Renderer.MarkingColors = MarkingColors;
             Bar.Margin = new Thickness(0, -MouseManager.BarHeight, 0, 0);
             ContentGrid.Margin = new Thickness(0, MouseManager.BarHeight / 2, 0, MouseManager.BarHeight / 2);
             Bar.Height = MouseManager.BarHeight;

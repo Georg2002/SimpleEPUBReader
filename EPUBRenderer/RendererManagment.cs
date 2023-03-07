@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using EPUBParser;
+using EPUBRenderer;
 using Point = System.Windows.Point;
 
 namespace EPUBRenderer
@@ -18,7 +19,7 @@ namespace EPUBRenderer
         RenderPage ShownPage = null;
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
-        public System.Drawing.Brush[] MarkingColors;
+        public SolidColorBrush[] MarkingColors;
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private bool Rerender = false;

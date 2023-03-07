@@ -8,5 +8,5 @@ namespace EPUBParser
         {
             Type = LinePartTypes.paragraph;
         }
-    } 
+    }
 }

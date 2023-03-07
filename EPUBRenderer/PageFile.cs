@@ -6,6 +6,8 @@ using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System.Windows.Media;
+using System.Reflection;
+using EPUBRenderer;
 
 namespace EPUBRenderer
 {
@@ -88,6 +90,8 @@ namespace EPUBRenderer
                     }
                 }
             }
+            NewStyle.Typeface = new Typeface(CharInfo.StandardFontFamily, FontStyles.Normal, NewStyle.Weight, FontStretches.Normal);
+
             return NewStyle;
         }
 

@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using EPUBParser.LineParts;
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -16,10 +16,11 @@ namespace EPUBRenderer
 {
     public static class CharInfo
     {
-        public readonly static System.Drawing.FontFamily StandardFontFamily;
-        public readonly static IntPtr StandardFont;
-        public readonly static System.Drawing.Color Black = System.Drawing.Color.FromKnownColor(KnownColor.Black);
-        public readonly static System.Drawing.Color White = System.Drawing.Color.FromKnownColor(KnownColor.White);
+        public readonly static FontFamily StandardFallbackFontFamily = new FontFamily("Global User Interface");
+        //font as embedded resource for assembly stuff, normal resource for font family
+        public readonly static FontFamily StandardFontFamily = new FontFamily("Arial"); //Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Hiragino"));
+        public readonly static Typeface StandardTypeface = new Typeface(StandardFontFamily, FontStyles.Normal,
+   FontWeights.Normal, new FontStretch(), StandardFallbackFontFamily);
 
         public static char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
         public static char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
@@ -57,41 +58,7 @@ namespace EPUBRenderer
         };
 
         public static long FontDataLength;
-        public static IntPtr FontDataPtr;
-
-        private static PrivateFontCollection pfc = new PrivateFontCollection();
-        static CharInfo()
-        {
-            var ass = Assembly.GetExecutingAssembly();
-            var nameList = ass.GetManifestResourceNames().Where(a => a.Contains("Hiragino"));
-            var name = nameList.FirstOrDefault(a => a.Contains("W3"));
-
-            using (Stream stream = ass.GetManifestResourceStream(name))
-            {
-                FontDataLength = stream.Length;
-                var buffer = new byte[FontDataLength];
-                using (MemoryStream reader = new MemoryStream(buffer))
-                {
-                    stream.CopyTo(reader);
-                    unsafe
-                    {
-                        fixed (byte* p = buffer)
-                        {
-                            FontDataPtr = (IntPtr)p;
-                        }
-                    }
-                }
-            }
-            pfc.AddMemoryFont(CharInfo.FontDataPtr, (int)CharInfo.FontDataLength);
-            StandardFontFamily = pfc.Families.Last();
-            var logfont = new LOGFONT();
-            var res = Marshal.AllocHGlobal(200);
-            new Font(StandardFontFamily, 12, System.Drawing.FontStyle.Regular).ToLogFont(logfont);
-            logfont.lfOutPrecision = 8;
-            logfont.lfQuality = 5;
-            Marshal.StructureToPtr(logfont, res, false);
-            StandardFont = res;
-        }
+        public static IntPtr FontDataPtr;     
     }
 
     public struct SpecialCharacter

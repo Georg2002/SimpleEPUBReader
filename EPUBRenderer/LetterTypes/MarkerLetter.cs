@@ -7,7 +7,7 @@
         {
             this.Id = Id;
             Type = LetterTypes.Marker;
-            this.IsWordEnd = true;
+            IsWordEnd = true;
         }
 
         public override bool Position(LetterPlacementInfo Info)
