@@ -2,12 +2,16 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+      <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
      <LangVersion>10</LangVersion>
      <PackageIcon>iconTransparent2.ico</PackageIcon>
      <ApplicationIcon>iconTransparent2.ico</ApplicationIcon>
+      <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>     
+     <OutputPath>..\Output</OutputPath>
+      <PlatformTarget>AnyCPU</PlatformTarget>
+      <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>

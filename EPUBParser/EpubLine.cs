@@ -1,4 +1,4 @@
-﻿using EPUBParser.LineParts;
+﻿using EPUBParser;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;

@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
       <LangVersion>10</LangVersion>
+      <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+      <OutputPath>..\Output</OutputPath>
+
   </PropertyGroup>
 
   <ItemGroup>

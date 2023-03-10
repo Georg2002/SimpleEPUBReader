@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EPUBReader": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

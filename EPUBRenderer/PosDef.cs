@@ -1,4 +1,4 @@
-﻿using EPUBRenderer.LetterTypes;
+﻿using EPUBRenderer;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

@@ -1,4 +1,4 @@
-﻿using EPUBParser.LineParts;
+﻿using EPUBParser;
 using ExCSS;
 using Microsoft.SqlServer.Server;
 using System.Collections.Generic;

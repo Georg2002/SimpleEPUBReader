@@ -1,12 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+      <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
       <UseWPF>true</UseWPF>
     <Nullable>disable</Nullable>
     <LangVersion>10</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+      <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+      <OutputPath>..\Output</OutputPath>
+
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />
     <ProjectReference Include="..\JapaneseDictionary\JapaneseDictionary.csproj" />
+    <ProjectReference Include="..\RenderSupport\RenderSupport.vcxproj" />
   </ItemGroup>
 
 </Project>

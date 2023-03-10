@@ -13,13 +13,21 @@ using System.Reflection;
 using System.Windows.Media.TextFormatting;
 using EPUBRenderer;
 using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 namespace EPUBRenderer
 {
 
     public partial class Renderer : FrameworkElement
     {
-        public static extern void 
+        [DllImport("RenderSupport.dll",
+     CallingConvention = CallingConvention.StdCall)]
+        public static extern IntPtr SetWindow(IntPtr windowHandle);
+        [DllImport("RenderSupport.dll",
+  CallingConvention = CallingConvention.StdCall)]
+        public static extern void PositionWindow(int x, int y, int width, int height);
+
+        IntPtr childWindow;
         private void drawCharAt(GlyphRun run, Point topCenter)
         {
             //    dc.PushTransform(new TranslateTransform(topCenter.X, topCenter.Y));
@@ -28,11 +36,24 @@ namespace EPUBRenderer
             //    dc.Pop();
 
         }
+        bool initialized = false;
+        DateTime xx = DateTime.Now;
         protected override void OnRender(DrawingContext drawingContext)
         {
-            IntPtr windowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
 
+            if (DateTime.Now.Subtract(xx).Seconds > 10)
+            {
+                if (!initialized)
+                {
+                    initialized = true;
+                    IntPtr windowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
+                    childWindow = SetWindow(windowHandle);
+                }
+            }
+            else return;
             if (ShownPage == null || !Rerender) return;
+            var pos = this.TransformToAncestor(Application.Current.MainWindow).Transform(new Point());
+            PositionWindow((int)pos.X, (int)pos.Y, (int)this.ActualWidth, (int)this.ActualHeight);
 
             TextLetter.ClearRuns();
 

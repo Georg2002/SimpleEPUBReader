@@ -24,12 +24,11 @@ namespace EPUBRenderer
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private bool Rerender = false;
 
-
         public Renderer()
         {
             SizeChanged += Renderer_SizeChanged;
             MinHeight = 100;
-            MinWidth = 100;
+            MinWidth = 100;           
         }
 
         public void MoveSelection(int front, int end)
@@ -260,7 +259,7 @@ namespace EPUBRenderer
         private void Refresh()
         {
             Rerender = true;
-            InvalidateVisual();            
+            InvalidateVisual();
         }
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
