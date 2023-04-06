@@ -17,14 +17,14 @@ namespace WatconWrapper
         bool LookupActive;
         bool Abort;
 
-        public JapDictionary() => GetAllEntries();      
+        public JapDictionary() => GetAllEntries();
 
         private void GetAllEntries()
         {
             DictTask = Task.Run(() =>
             {
-                var assembly = Assembly.GetExecutingAssembly();                
-                var resourcePath = Path.Combine(assembly.Location, @"..\Resources\Dict.txt");              
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourcePath = Path.Combine(assembly.Location, "..", "Resources", "Dict.txt");
                 var TDict = new Dictionary<char, List<DictWord>>();
                 var tempList = new List<string>(20);
                 var tempCharList = new List<char>(20);
@@ -49,7 +49,7 @@ namespace WatconWrapper
                 int i = 0;
                 while (LookupActive == true)
                 {
-                    if (++i > 1000) return new List<DictWord>();                   
+                    if (++i > 1000) return new List<DictWord>();
                     await Task.Delay(5);
                 }
                 Abort = false;
@@ -69,7 +69,7 @@ namespace WatconWrapper
         private List<DictWord> GetSortedResults(List<DictWord> results)
         {
             List<DictWord> SortedRes = new List<DictWord>();
-            foreach (var Word in results) if (!SortedRes.Contains(Word)) SortedRes.Add(Word);           
+            foreach (var Word in results) if (!SortedRes.Contains(Word)) SortedRes.Add(Word);
             return SortedRes.OrderBy(a => (int)a.Type).ToList();
         }
 
@@ -107,7 +107,7 @@ namespace WatconWrapper
             }
             foreach (var C in startingLetters)
             {
-                if (!Dict.ContainsKey(C)) Dict.Add(C, new List<DictWord>());             
+                if (!Dict.ContainsKey(C)) Dict.Add(C, new List<DictWord>());
                 Dict[C].Add(NewWord);
             }
             startingLetters.Clear();
@@ -116,15 +116,15 @@ namespace WatconWrapper
         private string[] GetSearchwords(string text)
         {
             text = LanguageResources.Trim(text);
-            if (string.IsNullOrWhiteSpace(text)) return new string[0];         
+            if (string.IsNullOrWhiteSpace(text)) return new string[0];
             var BaseForm = LanguageResources.GetPossibleBaseForms(text);
 
             string Katakana = LanguageResources.GetKatakana(text);
             List<string> res = new List<string>();
             res.Add(text);
             if (Katakana != text) res.Add(Katakana);
-           
-            foreach (var Form in BaseForm) if (Form != null && Form != text) res.Add(Form); 
+
+            foreach (var Form in BaseForm) if (Form != null && Form != text) res.Add(Form);
             return res.ToArray();
         }
     }
