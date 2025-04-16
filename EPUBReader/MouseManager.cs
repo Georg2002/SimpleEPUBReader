@@ -63,6 +63,8 @@ namespace EPUBReader
             BarAnimationUp = new ThicknessAnimation(BarUpMarg, new Duration(TimeSpan.FromMilliseconds(TimeUp)));
             ShrinkingAnimation = new ThicknessAnimation(GridShrinkMarg, new Duration(TimeSpan.FromMilliseconds(TimeDown)));
             ExpandingAnimation = new ThicknessAnimation(GridExpMarg, new Duration(TimeSpan.FromMilliseconds(TimeUp)));
+
+            Renderer.MouseMoved += this.MouseMove;
         }
 
         internal void MouseMove(Point Pos, bool Down, bool RightDown)

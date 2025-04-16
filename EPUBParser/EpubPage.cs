@@ -19,7 +19,7 @@ namespace EPUBParser
         public string FullName { get; set; }
 
         public override string ToString() => PageSettings.Title;
-    
+
         public EpubPage(ZipEntry File, EpubSettings Settings, List<ZipEntry> Entries)
         {
             PageSettings = new EpubSettings();
@@ -60,7 +60,7 @@ namespace EPUBParser
                     Logger.Report("title not found, set to standard", LogType.Info);
                     PageSettings.Title = Settings.Title;
                 }
-                else PageSettings.Title = ParsedTitle;               
+                else PageSettings.Title = ParsedTitle;
             }
 
             var BodyNode = HTMLParser.SafeNodeGet(htmlNode, "body");
@@ -69,15 +69,16 @@ namespace EPUBParser
                 foreach (var Node in BodyNode.ChildNodes)
                 {
                     if (Node.Name != "#text")
-                    {                   
+                    {
                         var NewLine = new EpubLine(Node, Entries, File);
-                        if (NewLine.Parts.Count > 0) Lines.Add(NewLine);                        
+                        if (NewLine.Parts.Count > 0) Lines.Add(NewLine);
                     }
                 }
             }
+
             //to make getting images from web faster
-            Lines.AsParallel().ForAll(a => a.Parts.Where(b => b.Type == LinePartTypes.image)
-            .AsParallel().ForAll(c => ((ImageLinePart)c).SetImage(Entries, File)));
+            var tasks = Lines.SelectMany(a => a.Parts.Where(b => b.Type == LinePartTypes.image).Select(c => ((ImageLinePart)c).SetImage(Entries, File)));
+            Task.WhenAll(tasks).Wait();//hopefully
         }
     }
 }

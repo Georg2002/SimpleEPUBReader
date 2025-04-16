@@ -431,12 +431,18 @@
           "System.Net.Http": "4.3.4"
         },
         "runtime": {
-          "EPUBParser.dll": {}
+          "EPUBParser.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "JapaneseDictionary/1.0.0": {
         "runtime": {
-          "JapaneseDictionary.dll": {}
+          "JapaneseDictionary.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

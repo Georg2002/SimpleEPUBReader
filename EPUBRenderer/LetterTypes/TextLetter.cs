@@ -107,55 +107,9 @@ namespace EPUBRenderer
         }
 
         public override Rect GetMarkingRect() => new(EndPosition.X, StartPosition.Y - VertSpacing.Y, FontSize, VertSpacing.Y * 2 + FontSize);
-        private struct typefaceRun
-        {
-            public GlyphTypeface typeface;
-            public GlyphRun run;
-        }
 
-        private static Dictionary<int, typefaceRun> RunCache = new(100);
-
-        public static void DrawRuns(DrawingContext dc)
-        {
-            foreach (var run in RunCache.Values.Select(a => a.run))
-            {
-                dc.DrawGlyphRun(Brushes.Black, run);
-            }
-        }
-        public static void ClearRuns()
-        {
-            foreach (var run in RunCache.Values.Select(a => a.run))
-            {
-                var caretStops = run.CaretStops as List<bool>;
-                caretStops.Clear();
-                caretStops.Add(false);
-                run.GlyphIndices.Clear();
-                run.GlyphOffsets.Clear();
-                run.ClusterMap.Clear();
-                run.Characters.Clear();
-                run.AdvanceWidths.Clear();
-            }
-        }
-
-        private void addGlyph(GlyphRun run, GlyphTypeface gtypeface, char c)
-        {
-            ushort gi = 0;
-            if (!gtypeface.CharacterToGlyphMap.TryGetValue(Character, out gi)) gi = gtypeface.CharacterToGlyphMap['X'];
-            run.Characters.Add(c);
-            run.AdvanceWidths.Add(gtypeface.AdvanceWidths[gi]);
-            run.CaretStops.Add(false);
-            run.GlyphIndices.Add(gi);
-            //glyph offsets in visual render
-
-            if (run.GlyphIndices.Count > 1)
-            {
-                //1 offset because idk
-                run.ClusterMap.Add(0);
-            }
-        }
-
-        private int fontKey => (int)(FontSize * 10) ^ (Style.Weight == FontWeights.Normal).GetHashCode() << 16 ^ (Style.Weight == FontWeights.Bold).GetHashCode() << 17;
-        public override object GetRenderElement()
+        /*
+     public override object GetRenderElement()
         {
             typefaceRun temp;
             GlyphRun run;
@@ -187,6 +141,7 @@ namespace EPUBRenderer
             addGlyph(run, gtypeface, Character);
             return run;
         }
+        */
 
         public override string ToString() => Character.ToString();
     }

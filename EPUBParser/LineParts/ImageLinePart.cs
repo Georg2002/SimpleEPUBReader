@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -7,39 +8,17 @@ namespace EPUBParser
 {
     public class ImageLinePart : BaseLinePart
     {
-        private byte[] ImageData;
+        private ImageObject ImageData;
         public bool Inline;
 
-        public ImageSource GetImage()
+        public ImageObject GetImage()
         {
-            if (ImageData == null)
+            if (this.ImageData == null)
             {
-                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
+                Logger.Report($"image at \"{Text}\" missing", LogType.Error);
                 return null;
             }
-            BitmapImage Image = null;
-            try
-            {
-                Image = new BitmapImage();
-                using (var mem = new MemoryStream(ImageData))
-                {
-                    mem.Position = 0;
-                    Image.BeginInit();
-                    Image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                    Image.CacheOption = BitmapCacheOption.OnLoad;
-                    Image.UriSource = null;
-                    Image.StreamSource = mem;
-                    Image.EndInit();
-                }
-                Image.Freeze();
-            }
-            catch (Exception ex)
-            {
-                Logger.Report(string.Format("image from \"{0}\" couldn't be loaded", Text), LogType.Error);
-                Logger.Report(ex.Message, LogType.Error);
-            }
-
-            return Image;
+            return this.ImageData;
         }
 
         public ImageLinePart(string Path, bool Inline, LineSplitInfo info) : base(info)
@@ -48,18 +27,16 @@ namespace EPUBParser
             Type = LinePartTypes.image;
             this.Inline = Inline;
         }
-
-        public void SetImage(List<ZipEntry> Entries, ZipEntry PageEntry)
+        private static HttpClient client = new HttpClient();
+        public async Task SetImage(List<ZipEntry> Entries, ZipEntry PageEntry)
         {
-            ImageData = null;
+            byte[] data = null;
+            this.ImageData = null;
             if (Text.StartsWith("http"))
             {
                 try
                 {
-                    using (var client = new WebClient())
-                    {
-                        ImageData = client.DownloadData(Text);
-                    }
+                    data = await client.GetByteArrayAsync(this.Text);
                 }
                 catch (Exception)
                 {
@@ -68,17 +45,43 @@ namespace EPUBParser
             }
             else
             {
-                ZipEntry Entry = ZipEntry.GetEntryByPath(Entries, Text, PageEntry);
-                if (Entry != null)
+                ZipEntry entry = ZipEntry.GetEntryByPath(Entries, Text, PageEntry);
+                if (entry is null)
                 {
-                    ImageData = Entry.Content;
+                    Logger.Report($"Image from \"{Text}\" not found", LogType.Error);
+                    return;
                 }
+                data = entry.Content;
             }
-            if (ImageData == null)
+            try
+            {
+                double width, height;
+                using (var memStream = new MemoryStream(data))
+                {
+                    var decoder = BitmapDecoder.Create(memStream, BitmapCreateOptions.None, BitmapCacheOption.Default);
+                    var frame = decoder.Frames.First();
+                    width = frame.PixelWidth;
+                    height = frame.PixelHeight;
+
+                }
+                this.ImageData = new()
+                {
+                    Data = data,
+                    Width = width,
+                    Height = height
+                };
+            }
+            catch (Exception)
             {
                 Logger.Report(string.Format("Image from \"{0}\" not found", Text), LogType.Error);
-                return;
             }
         }
+    }
+
+    public class ImageObject
+    {
+        public byte[] Data;
+        public double Width;
+        public double Height;
     }
 }

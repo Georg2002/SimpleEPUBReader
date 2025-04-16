@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using EPUBRenderer;
 using Microsoft.Win32;
 using System.Globalization;
+using System.Windows.Interop;
 
 namespace EPUBReader
 {
@@ -34,6 +35,8 @@ namespace EPUBReader
         private bool FunctionsLocked = false;
         private readonly MouseManager MouseManager;
         public byte ColorIndex = 1;
+
+        //marking colors copied to c++ parts
         private const byte Alpha = 100;
         private bool DictionaryActive = false;
         readonly SolidColorBrush[] MarkingColors = new[] {null,

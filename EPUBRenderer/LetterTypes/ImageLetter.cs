@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using EPUBParser;
+using System.Windows;
 using System.Windows.Media;
 using Point = System.Windows.Point;
 
@@ -6,10 +7,10 @@ namespace EPUBRenderer
 {
     internal class ImageLetter : Letter
     {
-        public ImageSource Image;
+        public ImageObject Image;
         public bool Inline;
         public override float FontSize => (float)Width;
-        public ImageLetter(ImageSource Image, bool Inline, WordInfo wordInfo) : base(wordInfo)
+        public ImageLetter(ImageObject Image, bool Inline, WordInfo wordInfo) : base(wordInfo)
         {
             Type = LetterTypes.Image;
             this.Inline = Inline;

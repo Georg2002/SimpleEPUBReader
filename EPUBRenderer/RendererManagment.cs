@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using EPUBParser;
 using EPUBRenderer;
@@ -12,7 +13,7 @@ using Point = System.Windows.Point;
 
 namespace EPUBRenderer
 {
-    public partial class Renderer : FrameworkElement
+    public partial class Renderer : HwndHost
     {
         public RenderBook CurrBook;
         Vector PageSize;
@@ -28,7 +29,7 @@ namespace EPUBRenderer
         {
             SizeChanged += Renderer_SizeChanged;
             MinHeight = 100;
-            MinWidth = 100;           
+            MinWidth = 100;
         }
 
         public void MoveSelection(int front, int end)
@@ -101,7 +102,7 @@ namespace EPUBRenderer
         {
             if (string.IsNullOrEmpty(Path) || !File.Exists(Path) || !Path.ToLower().EndsWith(".epub"))
             {
-                System.Windows.MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             SelectionStart = PosDef.InvalidPosition;
@@ -259,7 +260,7 @@ namespace EPUBRenderer
         private void Refresh()
         {
             Rerender = true;
-            InvalidateVisual();
+            this.InvalidateVisual();
         }
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {

@@ -44,8 +44,8 @@
             <local:DictControl  Margin="{Binding ElementName=Bar, Path=Margin, Converter={StaticResource ThicknessConverter }}" x:Name="DictControl" Grid.Column="3"/>
             <local:MenuControl x:Name="Menu" Visibility="Collapsed" Grid.ColumnSpan="4"/>
         </Grid>
-        <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="10"/>
-        <Border x:Name="Bar" VerticalAlignment="Top" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="0">
+            <local:PagesControl Visibility="Collapsed" VerticalAlignment="Top" x:Name="PagesControl" Height="{Binding ElementName=Bar, Path=ActualHeight, Mode=OneTime}" HorizontalAlignment="Stretch" Panel.ZIndex="-1"/>
+        <Border x:Name="Bar" VerticalAlignment="Top" Margin="0,-60,0,0" Background="{Binding ElementName=OpenButton, Path=Background, Mode=OneTime}" Panel.ZIndex="100">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
@@ -64,8 +64,8 @@
                     <Border Style="{StaticResource BorderStyle}">
                         <TextBlock Text="Open"/>
                     </Border>
-                </Button>           
-               
+                </Button>
+
                 <Button Click="Library_Click" Grid.Column="2" Style="{StaticResource MenuButtonStyle}">
                     <Border Style="{StaticResource BorderStyle}">
                         <TextBlock Text="Library"/>
