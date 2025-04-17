@@ -25,9 +25,9 @@ namespace EPUBRenderer
 
         public Renderer()
         {
-            SizeChanged += Renderer_SizeChanged;
-            MinHeight = 100;
-            MinWidth = 100;
+            SizeChanged += this.Renderer_SizeChanged;
+            this.MinHeight = 100;
+            this.MinWidth = 100;
         }
 
         public void MoveSelection(int front, int end)
@@ -36,33 +36,31 @@ namespace EPUBRenderer
             {
                 return;
             }
-            RemoveSelection();
+            this.RemoveSelection();
             if (SelectionStart > SelectionEnd)
             {
-                var X = SelectionStart;
-                SelectionStart = SelectionEnd;
-                SelectionEnd = X;
+                (SelectionEnd, SelectionStart) = (SelectionStart, SelectionEnd);
             }
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
             var length = CurrBook.PageFiles[SelectionStart.FileIndex].Content.Count;
-            MoveSelectionPoints(front, end, length);
+            this.MoveSelectionPoints(front, end, length);
 
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
             Letter EndLetter = CurrBook.GetLetter(SelectionEnd);
             if (StartLetter == null || EndLetter == null)
             {
-                SelectionEnd = EndOld;
-                SelectionStart = StartOld;
+                this.SelectionEnd = EndOld;
+                this.SelectionStart = StartOld;
             }
             //revert if overtook
             if (SelectionStart > SelectionEnd)
             {
-                SelectionStart = StartOld;
-                SelectionEnd = EndOld;
+                this.SelectionStart = StartOld;
+                this.SelectionEnd = EndOld;
             }
             CurrBook.AddSelection(SelectionStart, SelectionEnd);
-            Refresh();
+            this.Refresh();
         }
 
         private void MoveSelectionPoints(int front, int end, int letterCount)
@@ -73,14 +71,14 @@ namespace EPUBRenderer
             else if (front < 0) SelectionStart.Decrement();
             if (SelectionStart.FileIndex == -1)
             {
-                SelectionStart = StartOld;
+                this.SelectionStart = StartOld;
                 return;
             }
             if (end > 0) SelectionEnd.Increment(letterCount);
             else if (end < 0) SelectionEnd.Decrement();
             if (SelectionEnd.FileIndex == -1)
             {
-                SelectionEnd = EndOld;
+                this.SelectionEnd = EndOld;
                 return;
             }
 
@@ -94,7 +92,7 @@ namespace EPUBRenderer
                 var EndTL = (TextLetter)EndLetter;
                 if (!StartTL.IsRuby && !EndTL.IsRuby) return;
             }
-            MoveSelectionPoints(front, end, letterCount);
+            this.MoveSelectionPoints(front, end, letterCount);
         }
         public void LoadBook(string Path, DateTime DateAdded, PosDef Position = new PosDef(), List<MrkDef> Markings = null)
         {
@@ -103,19 +101,42 @@ namespace EPUBRenderer
                 MessageBox.Show($"Path {Path} invalid", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            SelectionStart = PosDef.InvalidPosition;
-            SelectionEnd = PosDef.InvalidPosition;
-            Markings = Markings ?? new List<MrkDef>();
+            this.SelectionStart = PosDef.InvalidPosition;
+            this.SelectionEnd = PosDef.InvalidPosition;
+            Markings ??= new List<MrkDef>();
             Epub epub = new Epub(Path);
-            CurrBook = new RenderBook(epub, DateAdded);
-            SetMarkings(Markings);
+            this.CurrBook = new RenderBook(epub, DateAdded);
+            this.SetMarkings(Markings);
             CurrBook.Position(PageSize);
-            OpenPage(Position);
+            this.OpenPage(Position);
         }
 
         private void SetMarkings(List<MrkDef> Markings)
         {
             CurrBook.SetMarkings(Markings);
+        }
+        private void LoadAdjacentPages()
+        {
+
+            void load(int file, int page)
+            {
+                foreach (var textLetter in CurrBook.PageFiles[file].Pages[page].Content.Where(a => a is TextLetter).Cast<TextLetter>())
+                {
+                    (var typeface, var index) = textLetter.GetRenderingInfo();
+                    GetAdvanceWidth(index, typeface);
+                }
+            }
+
+            (int nextFile, int nextPage) = this.GetFileAndPageForSwitch(1);
+            (int prevFile, int prevPage) = this.GetFileAndPageForSwitch(-1);
+
+            Task.Run(() =>
+             {
+                 Thread.Sleep(2000);
+                 load(nextFile, nextPage);
+                 Thread.Sleep(2000);
+                 load(prevFile, prevPage);
+             });
         }
 
         public void OpenPage(PosDef Position)
@@ -123,16 +144,15 @@ namespace EPUBRenderer
             if (CurrBook == null) return;
             CurrBook.CurrPos = Position;
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
-            ShownPage = PageFile.Pages.Find(a => a.Within(Position));
-            Refresh();
+            this.ShownPage = PageFile.Pages.Find(a => a.Within(Position));
+            this.Refresh();
+            this.LoadAdjacentPages();
         }
-
-        public void Switch(int Dir)
+        private Tuple<int, int> GetFileAndPageForSwitch(int dir)
         {
-            if (CurrBook == null) return;
             int FileIndex = CurrBook.CurrPos.FileIndex;
             int PageIndex = CurrBook.PageFiles[FileIndex].Pages.IndexOf(ShownPage);
-            PageIndex += Dir;
+            PageIndex += dir;
             while (PageIndex < 0 || PageIndex >= CurrBook.PageFiles[FileIndex].Pages.Count)
             {
                 if (PageIndex < 0)
@@ -149,16 +169,22 @@ namespace EPUBRenderer
                 else
                 {
                     FileIndex++;
-                    if (FileIndex >= CurrBook.PageFiles.Count)
+                    if (FileIndex >= CurrBook.PageFiles.Length)
                     {
-                        FileIndex = CurrBook.PageFiles.Count - 1;
+                        FileIndex = CurrBook.PageFiles.Length - 1;
                         PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count - 1;
                         break;
                     }
                     PageIndex -= CurrBook.PageFiles[FileIndex - 1].Pages.Count;
                 }
             }
-            OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
+            return new(FileIndex, PageIndex);
+        }
+        public void Switch(int Dir)
+        {
+            if (CurrBook == null) return;
+            (var FileIndex, var PageIndex) = this.GetFileAndPageForSwitch(Dir);
+            this.OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
         }
 
         private void SetCurrPos(PosDef pos)
@@ -171,8 +197,8 @@ namespace EPUBRenderer
             bool Valid = false;
             if (CurrBook != null)
             {
-                FirstHit = ShownPage.Intersect(relPoint);
-                SetCurrPos(FirstHit);
+                this.FirstHit = ShownPage.Intersect(relPoint);
+                this.SetCurrPos(FirstHit);
                 Valid = !FirstHit.IsInvalid;
             }
             return Valid;
@@ -181,16 +207,16 @@ namespace EPUBRenderer
         public void DrawTempMarking(Point relPoint, byte ColorIndex)
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
-            SecondHit = ShownPage.Intersect(relPoint);
-            SetCurrPos(SecondHit);
+            this.SecondHit = ShownPage.Intersect(relPoint);
+            this.SetCurrPos(SecondHit);
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
-            Refresh();
+            this.Refresh();
         }
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
-            DrawTempMarking(relPoint, ColorIndex);
-            SecondHit = PosDef.InvalidPosition;
+            this.DrawTempMarking(relPoint, ColorIndex);
+            this.SecondHit = PosDef.InvalidPosition;
         }
 
         public void RemoveMarking(Point relPoint)
@@ -198,12 +224,12 @@ namespace EPUBRenderer
             if (CurrBook != null)
             {
                 PosDef Hit = ShownPage.Intersect(relPoint);
-                SetCurrPos(Hit);
+                this.SetCurrPos(Hit);
                 if (Hit.IsInvalid) return;
                 (PosDef A, PosDef B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
                 CurrBook.RemoveMarking(A, B);
             }
-            Refresh();
+            this.Refresh();
         }
 
         public bool StartSelection(Point relPoint)
@@ -213,7 +239,7 @@ namespace EPUBRenderer
             {
                 var NewStart = ShownPage.Intersect(relPoint);
                 Valid = NewStart.FileIndex != -1;
-                if (Valid) SelectionStart = NewStart;
+                if (Valid) this.SelectionStart = NewStart;
             }
             return Valid;
         }
@@ -226,10 +252,10 @@ namespace EPUBRenderer
 
         public void ContinueSelection(Point relPoint)
         {
-            Refresh();
-            RemoveSelection();
-            SelectionEnd = ShownPage.Intersect(relPoint);
-            SetCurrPos(SelectionEnd);
+            this.Refresh();
+            this.RemoveSelection();
+            this.SelectionEnd = ShownPage.Intersect(relPoint);
+            this.SetCurrPos(SelectionEnd);
             if (!SelectionStart.IsInvalid && !SelectionEnd.IsInvalid) CurrBook.AddSelection(SelectionStart, SelectionEnd);
         }
 
@@ -244,31 +270,31 @@ namespace EPUBRenderer
         public void SetChapter(int chapterIndex)
         {
             PosDef Pos = CurrBook.GetChapterPos(chapterIndex);
-            OpenPage(Pos);
+            this.OpenPage(Pos);
         }
         public LibraryBook GetCurrentBook() => CurrBook?.GetLibraryBook() ?? new LibraryBook() { CurrPos = PosDef.InvalidPosition };
 
         public void DeactivateSelection()
         {
-            RemoveSelection();
-            SelectionStart = PosDef.InvalidPosition;
-            SelectionEnd = PosDef.InvalidPosition;
+            this.RemoveSelection();
+            this.SelectionStart = PosDef.InvalidPosition;
+            this.SelectionEnd = PosDef.InvalidPosition;
         }
 
         private void Refresh()
         {
-            Rerender = true;
-            InvalidateVisual();            
+            this.Rerender = true;
+            this.InvalidateVisual();
         }
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            PageSize = new Vector(ActualWidth, ActualHeight);
+            this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
             if (CurrBook != null)
             {
                 CurrBook.Position(PageSize);
-                OpenPage(CurrBook.CurrPos);
+                this.OpenPage(CurrBook.CurrPos);
             }
-            Rerender = true;
+            this.Rerender = true;
         }
     }
 }

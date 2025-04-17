@@ -23,8 +23,8 @@ namespace EPUBParser
         {
             PageSettings = new EpubSettings();
             Lines = new List<EpubLine>();
-            Name = File.Name;
-            FullName = File.FullName;
+            this.Name = File.Name;
+            this.FullName = File.FullName;
             Logger.Report(string.Format("Parsing page \"{0}\"", File.Name), LogType.Info);
             var doc = HTMLParser.Parse(File);
 

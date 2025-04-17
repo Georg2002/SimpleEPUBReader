@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace EPUBRenderer
 {
@@ -12,42 +13,38 @@ namespace EPUBRenderer
     {
         public DateTime DateAdded;
         readonly private Epub epub;
-        internal List<PageFile> PageFiles;
+        internal PageFile[] PageFiles;
         public PosDef CurrPos;
-        public string Title => epub == null ? "" : epub.Settings.Title;
+        public string Title => epub == null ? "" : this.epub.Settings.Title;
 
         public RenderBook(Epub epub, DateTime DateAdded)
         {
             this.epub = epub;
             this.DateAdded = DateAdded;
-            PageFiles = new List<PageFile>();
-            foreach (var Page in epub.Pages) PageFiles.Add(new PageFile(Page, epub.CSSExtract));
+            PageFiles = new PageFile[this.epub.Pages.Count];
+            Parallel.For(0, this.epub.Pages.Count,(i)=>{               
+                    this.PageFiles[i] = new PageFile(this.epub.Pages[i], this.epub.CSSExtract);
+            });
         }
-        bool initialized = false;
         internal void Position(Vector pageSize)
         {
             void pageOp(int a)
             {
                 PageFiles[a].CalculatePages(pageSize, a);
-               // if (!initialized)
-               // {
-              //      foreach (var letter in PageFiles[a].Content.Where(a => a.Type == LetterTypes.Letter)) letter.GetRenderElement();
-               // }
             }
 #if (DEBUG)
-            for (int i = 0; i < PageFiles.Count; i++) pageOp(i);
+            for (int i = 0; i < PageFiles.Length; i++) pageOp(i);
 #else
-            Parallel.For(0, PageFiles.Count, a => pageOp(a));
+            Parallel.For(0, this.PageFiles.Length, a => pageOp(a));
 #endif
-            initialized = true;
         }
 
-        internal void RemoveMarking(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);
+        internal void RemoveMarking(PosDef start, PosDef end) => this.Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);
 
-        internal void AddMarking(PosDef start, PosDef end, byte colInd) => Iterate(start, end, (a, b) => a.MarkingColorIndex = colInd);
+        internal void AddMarking(PosDef start, PosDef end, byte colInd) => this.Iterate(start, end, (a, b) => a.MarkingColorIndex = colInd);
 
         private bool Valid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Letter >= 0 &&
-                Pos.FileIndex < PageFiles.Count &&
+                Pos.FileIndex < this.PageFiles.Length &&
                 Pos.Letter < PageFiles[Pos.FileIndex].Content.Count;
 
         internal void SetMarkings(List<MrkDef> markings)
@@ -55,14 +52,14 @@ namespace EPUBRenderer
             foreach (var Marking in markings)
             {
                 var Pos = Marking.Pos;
-                if (Valid(Pos)) PageFiles[Pos.FileIndex].Content[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
+                if (this.Valid(Pos)) PageFiles[Pos.FileIndex].Content[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
             }
         }
 
         internal Letter GetLetter(PosDef Pos)
         {
             if (Pos == PosDef.InvalidPosition) return null;
-            if (Pos.FileIndex < PageFiles.Count && Pos.FileIndex >= 0)
+            if (Pos.FileIndex < this.PageFiles.Length && Pos.FileIndex >= 0)
             {
                 var letters = PageFiles[Pos.FileIndex].Content;
                 if (Pos.Letter < letters.Count && Pos.Letter >= 0) return letters[Pos.Letter];
@@ -90,7 +87,7 @@ namespace EPUBRenderer
             }
         }
 
-        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage) => ShownPage.GetConnectedMarkings(Pos, PageFiles[CurrPos.FileIndex].Content);
+        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage) => ShownPage.GetConnectedMarkings(Pos, PageFiles[this.CurrPos.FileIndex].Content);
 
         internal int GetPageCount() => this.PageFiles.Sum(a => a.Pages.Count);
 
@@ -115,23 +112,23 @@ namespace EPUBRenderer
         internal List<string> GetChapters()
         {
             var Res = new List<string>();
-            if (epub.toc == null) return Res;
-            foreach (var Chapter in epub.toc.Chapters) Res.Add(Chapter.Title);
+            if (this.epub.toc == null) return Res;
+            foreach (var Chapter in this.epub.toc.Chapters) Res.Add(Chapter.Title);
             return Res;
         }
 
-        internal LibraryBook GetLibraryBook() => new LibraryBook
+        internal LibraryBook GetLibraryBook() => new()
         {
             CurrPos = CurrPos,
-            FilePath = epub.FilePath,
-            Title = epub.Settings.Title,
-            Markings = GetMarkings(),
+            FilePath = this.epub.FilePath,
+            Title = this.epub.Settings.Title,
+            Markings = this.GetMarkings(),
             DateAdded = DateAdded
         };
         private List<MrkDef> GetMarkings()
         {
             var Markings = new List<MrkDef>();
-            Iterate(new PosDef(0, 0), GetLastPos(), (a, b) =>
+            this.Iterate(new PosDef(0, 0), this.GetLastPos(), (a, b) =>
               {
                   if (a.MarkingColorIndex != 0) Markings.Add(new MrkDef(b, a.MarkingColorIndex));
               });
@@ -142,13 +139,8 @@ namespace EPUBRenderer
         {
             string Text = "";
             if (selectionStart == PosDef.InvalidPosition || selectionEnd == PosDef.InvalidPosition) return Text;
-            if (selectionEnd < selectionStart)
-            {
-                var x = selectionEnd;
-                selectionEnd = selectionStart;
-                selectionStart = x;
-            }
-            Iterate(selectionStart, selectionEnd, (a, b) =>
+            if (selectionEnd < selectionStart) (selectionStart, selectionEnd) = (selectionEnd, selectionStart);         
+            this.Iterate(selectionStart, selectionEnd, (a, b) =>
             {
                 if (a.Type == LetterTypes.Letter)
                 {
@@ -159,20 +151,20 @@ namespace EPUBRenderer
             return Text.Trim(CharInfo.TrimCharacters);
         }
 
-        internal void AddSelection(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.DictSelected = true);
+        internal void AddSelection(PosDef start, PosDef end) => this.Iterate(start, end, (a, b) => a.DictSelected = true);
 
-        internal void RemoveSelection(PosDef start, PosDef end) => Iterate(start, end, (a, b) => a.DictSelected = false);
+        internal void RemoveSelection(PosDef start, PosDef end) => this.Iterate(start, end, (a, b) => a.DictSelected = false);
 
         internal PosDef GetLastPos()
         {
-            var lastFile = PageFiles[PageFiles.Count - 1];
-            return new PosDef(PageFiles.Count - 1, lastFile.Content.Count - 1);
+            var lastFile = this.PageFiles[^1];
+            return new PosDef(this.PageFiles.Length - 1, lastFile.Content.Count - 1);
         }
 
         internal PosDef GetChapterPos(int chapterIndex)
         {
-            var Chapter = epub.toc.Chapters[chapterIndex];
-            var Index = epub.Pages.FindIndex(a => a.FullName == Chapter.Source);
+            var Chapter = this.epub.toc.Chapters[chapterIndex];
+            var Index = this.epub.Pages.FindIndex(a => a.FullName == Chapter.Source);
             var Pos = new PosDef(Index, 0);
             if (string.IsNullOrEmpty(Chapter.Jumppoint)) return Pos;
             var Page = PageFiles[Index];

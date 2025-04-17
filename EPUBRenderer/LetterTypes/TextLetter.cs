@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using JapaneseDictionary;
 
@@ -8,15 +9,15 @@ namespace EPUBRenderer
 {
     internal class TextLetter : Letter
     {
-        public FontWeight Weight;
-        public Typeface Typeface;
+        private GlyphTypeface Typeface => PageFile.Typefaces[this.Style.Weight].Item1;
+        private GlyphTypeface BackupTypeface => PageFile.Typefaces[this.Style.Weight].Item2;
+
         public char Character;
 
         public Vector Offset;
-        public float RelScale = 1;
         public bool Rotated => this.Rotation != 0;
-        public double Rotation = 0;
-
+        public double Rotation;
+        public float RelScale = 1;
         public char OrigChar;
 
         private static readonly Vector HitboxExpansion = new((LineDist - StandardFontSize) / 2, 0);
@@ -30,21 +31,17 @@ namespace EPUBRenderer
         {
             this.Character = character;
             Type = LetterTypes.Letter;
-            var Style = wordInfo.Style;
-            this.Weight = Style.Weight;
-            Typeface = Style.Typeface;
             this.OrigChar = this.Character;
 
             if (CharInfo.SpecialCharacters.ContainsKey(this.Character))
             {
-                var Info = CharInfo.SpecialCharacters[this.Character];
-                Offset = Info.Offset;
-                RelScale = Info.Scaling;
-                this.Rotation = Info.Rotation;
-                this.Character = Info.Replacement;
+                var info = CharInfo.SpecialCharacters[this.Character];
+                Offset = info.Offset;
+                RelScale = info.Scaling;
+                this.Rotation = info.Rotation;
+                this.Character = info.Replacement;
             }
         }
-
         public override bool Position(LetterPlacementInfo Info)
         {
             var PageSize = Info.PageSize;
@@ -52,78 +49,102 @@ namespace EPUBRenderer
             var NewLine = Info.State == PositionState.Newline;
 
             if (IsRuby)
-            {
-                var MainWordFontSize = PrevWord.Letters.Last().FontSize;
-                FontSize = RubyFontSize * Style.RelativeFontSize;
+            {         
+                var MainWordFontSize = this.OwnWord.Prev.Letters.Last().FontSize;
+                this.FontSize = RubyFontSize * Style.RelativeFontSize;
                 float RubyCount = OwnWord.LetterCount;
-                float TextCount = PrevWord.LetterCount;
+                float TextCount = this.OwnWord.Prev.LetterCount;
                 VertSpacing = new Vector();
                 VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * MainWordFontSize / 2, 0);
 
-                double TextLength = PrevWord.Length();
+                double TextLength = this.OwnWord.Prev.Length();
                 double RubyLength = OwnWord.LetterCount * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
                 if (!PrevLetter.IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
                 else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
-                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                if (IsWordEnd) NextWritePos = PrevWord.Letters.Last().NextWritePos;
-                else NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
+                if (IsWordEnd) NextWritePos = this.OwnWord.Prev.Letters.Last().NextWritePos;
+                else NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
                 _HitboxStart = OutsideVector;
                 _HitboxEnd = OutsideVector;
                 return true;
             }
             else
             {
-                FontSize = StandardFontSize * Style.RelativeFontSize;
+                this.FontSize = StandardFontSize * Style.RelativeFontSize;
                 StartPosition = IsPageStart ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
                 VertSpacing = new Vector();
-                if (NextWord != null && NextWord.Type == WordTypes.Ruby)
+                if (this.OwnWord.Next != null && this.OwnWord.Next.Type == WordTypes.Ruby)
                 {
-                    float RubyCount = NextWord.LetterCount;
+                    float RubyCount = this.OwnWord.Next.LetterCount;
                     float TextCount = OwnWord.LetterCount;
                     VertSpacing.Y = Math.Max((RubyCount * RubyScale / TextCount - 1) * StandardFontSize / 2, 0);
                 }
 
-                StartPosition = NewLine ? new Vector(StartPosition.X - GetNewLineDist(), 0) : StartPosition;
+                StartPosition = NewLine ? new Vector(StartPosition.X - this.GetNewLineDist(), 0) : StartPosition;
                 StartPosition += VertSpacing;
-                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+                EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
 
                 if (TightFit && EndPosition.Y > PageSize.Y)
                 {
                     StartPosition.Y = 0;
                     StartPosition.X -= LineDist;
-                    EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+                    EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
                 }
-                NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
                 _HitboxStart = StartPosition + HitboxExpansion - VertSpacing;
                 _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;
-                return InsidePageVert(PageSize);
+                return this.InsidePageVert(PageSize);
             }
         }
 
         public override Rect GetMarkingRect() => new()
         {
-            Y = StartPosition.Y - VertSpacing.Y,
+            Y = this.StartPosition.Y - this.VertSpacing.Y,
             X = EndPosition.X,
-            Width = FontSize,
-            Height = VertSpacing.Y * 2 + FontSize
+            Width = this.FontSize,
+            Height = this.VertSpacing.Y * 2 + this.FontSize
         };
-
-        private static Dictionary<int, FormattedText> FormattedTextCache = new(4000);
-        private int textKey => (this.Character << 16) | ((UInt16)this.FontSize);
-        public override object GetRenderElement()
+        public Tuple<GlyphTypeface, ushort> GetRenderingInfo()
         {
-            var key = this.textKey;
-            FormattedText res;
-            if (FormattedTextCache.TryGetValue(key, out res)) return res;
+            var usedTf = this.Typeface;
+            if (!this.Typeface.CharacterToGlyphMap.TryGetValue(this.Character, out var glyphIndex))
+            {
+                usedTf = this.BackupTypeface;
+                if (!this.BackupTypeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
+                {
+                    glyphIndex = this.Typeface.CharacterToGlyphMap['X'];
+                    usedTf = this.Typeface;
+                }
+            }
+            return new(usedTf, glyphIndex);
 
-            res = new FormattedText(Character.ToString(), System.Globalization.CultureInfo.InvariantCulture,
-             FlowDirection.RightToLeft, Typeface, FontSize * RelScale, Brushes.Black, 1)
-            { TextAlignment = TextAlignment.Center };
-            FormattedTextCache[key] = res;
-            return res;
         }
+        public GlyphRun CreateGlyphRun(Point baselineOrigin)
+        {
 
+            var glyphIndices = new ushort[1];
+            var advanceWidths = new double[1];
+
+            var usedTf = this.Typeface;
+
+            if (!this.Typeface.CharacterToGlyphMap.TryGetValue(this.Character, out var glyphIndex))
+            {
+                usedTf = this.BackupTypeface;
+                if (!this.BackupTypeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
+                {
+                    glyphIndex = this.Typeface.CharacterToGlyphMap['X'];
+                    usedTf = this.Typeface;
+                }
+            }
+            glyphIndices[0] = glyphIndex;
+            advanceWidths[0] = this.Typeface.AdvanceWidths[glyphIndex] * this.FontSize * this.RelScale;
+
+            return new GlyphRun(
+        usedTf, 0,false, this.FontSize * RelScale, 1,
+        glyphIndices, baselineOrigin, advanceWidths,
+        null, null, null, null, null, null);
+        }
         public override string ToString() => Character.ToString();
     }
 }

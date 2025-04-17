@@ -61,25 +61,42 @@ namespace EPUBParser
                 case "h5":
                 case "h6":
                     info.ActiveClasses.Add(Node.Name);
-                    foreach (var c in Node.ChildNodes) AddAppropriatePart(c, info);
+                    foreach (var c in Node.ChildNodes) this.AddAppropriatePart(c, info);
                     Parts.Add(new BreakLinePart(info));
                     info.ActiveClasses.Remove(Node.Name);
                     break;
                 case "#text":
                 case "nav":
-                    Text = Node.InnerText;
-                    if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text, info));
+                    Text = Node.InnerText.Trim();
+                    if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text.Trim(), info));
                     break;
                 case "ruby":
                     if (Node.ChildNodes.Count >= 2)
-                    {
+                    {                     
                         foreach (var Child in Node.ChildNodes)
                         {
+                            /*
+                             * <ruby>
+                                 漢 <rp>(</rp><rt>Kan</rt><rp>)</rp> 字 <rp>(</rp><rt>ji</rt><rp>)</rp>
+                                </ruby>
+                             */
+                            bool bracketIncoming = false;
+                            if (Child.Name == "rp")
+                            {
+                                bracketIncoming = true;
+                                continue;
+                            }
+                            if (bracketIncoming)
+                            {
+                                bracketIncoming = false;
+                                continue;
+                            }
+                            info.Splittable = false;
                             if (Child.Name == "rt") info.IsRuby = true;
                             else info.Splittable = false;
-                            AddAppropriatePart(Child, info);
+                            this.AddAppropriatePart(Child, info);
                             if (Child.Name == "rt") info.IsRuby = false;
-                            else info.Splittable = true;
+                            info.Splittable = true;
                         }
                     }
                     else

@@ -26,40 +26,38 @@ namespace EPUBRenderer
     {
         internal WordStyle Style;
         internal bool IsRuby;
-        internal bool IsWordEnd;
     }
     internal class Letter
     {
-        public virtual float FontSize { get; set; }
+        public float FontSize;
         public const float StandardFontSize = 19;//19
         public const float RubyScale = 0.7f;//0.7
         public const float RubyFontSize = RubyScale * StandardFontSize;
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
-        public static readonly Vector OutsideVector = new Vector(-100000, -100000);
+        public static readonly Vector OutsideVector = new(-100000, -100000);
+       
         internal bool IsRuby;
         internal bool IsWordEnd;
-        internal WordStyle Style;
-        internal Word PrevWord;
-        internal Word OwnWord;
-        internal Word NextWord;
-        public Letter PrevLetter;
         internal bool IsPageStart;
+
+        internal WordStyle Style;
+        internal Word OwnWord;
+        public Letter PrevLetter;
         public Letter(WordInfo wordInfo)
         {
             this.IsRuby = wordInfo.IsRuby;
-            this.IsWordEnd = wordInfo.IsWordEnd;
             this.Style = wordInfo.Style;
         }
-        public float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
-        public float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
+        public static float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
+        public static float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
 
 
         public bool DictSelected;
         public Vector StartPosition;
         public Vector EndPosition;
-        public virtual Vector HitboxStart => StartPosition;
-        public virtual Vector HitboxEnd => EndPosition;
+        public virtual Vector HitboxStart => this.StartPosition;
+        public virtual Vector HitboxEnd => this.EndPosition;
         public Vector Middle => (this.HitboxStart + this.HitboxEnd) / 2;
         public Vector NextWritePos;
         public LetterTypes Type;
@@ -67,15 +65,14 @@ namespace EPUBRenderer
         internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
 
         public virtual bool Position(LetterPlacementInfo Info) => false;
-        internal bool Inside(Point relPoint) => relPoint.X < HitboxStart.X && relPoint.Y > HitboxStart.Y && relPoint.X > HitboxEnd.X && relPoint.Y < HitboxEnd.Y;
-        public virtual object GetRenderElement() => null;
+        internal bool Inside(Point relPoint) => relPoint.X < this.HitboxStart.X && relPoint.Y > this.HitboxStart.Y && relPoint.X > this.HitboxEnd.X && relPoint.Y < this.HitboxEnd.Y;
 
         //arranged to avoid negative numbers
-        public virtual Rect GetMarkingRect() => new Rect(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
+        public virtual Rect GetMarkingRect() => new(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
         public override string ToString() => Type.ToString();
         public bool InsidePageVert(Vector PageSize) => EndPosition.Y <= PageSize.Y;
         public bool InsidePageHor(Vector PageSize) => EndPosition.X >= 0;
-        public bool InsidePage(Vector PageSize) => InsidePageHor(PageSize) && InsidePageVert(PageSize);
+        public bool InsidePage(Vector PageSize) => this.InsidePageHor(PageSize) && this.InsidePageVert(PageSize);
 
         public (Vector, Vector) GetNeutralStartingPosition(LetterPlacementInfo Info)
         {

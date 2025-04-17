@@ -10,21 +10,33 @@
 
   <ItemGroup>
     <None Remove="Fonts\Hiragino-Sans-GB-W3.otf" />
+    <None Remove="Fonts\NotoSansJP-Black.ttf" />
+    <None Remove="Fonts\NotoSansJP-Bold.ttf" />
+    <None Remove="Fonts\NotoSansJP-ExtraBold.ttf" />
+    <None Remove="Fonts\NotoSansJP-ExtraLight.ttf" />
+    <None Remove="Fonts\NotoSansJP-Light.ttf" />
+    <None Remove="Fonts\NotoSansJP-Medium.ttf" />
+    <None Remove="Fonts\NotoSansJP-Regular.ttf" />
+    <None Remove="Fonts\NotoSansJP-SemiBold.ttf" />
+    <None Remove="Fonts\NotoSansJP-Thin.ttf" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Fonts\Hiragino-Sans-GB-W3.otf" />
+    <Resource Include="Fonts\NotoSansJP-Black.ttf" />
+    <Resource Include="Fonts\NotoSansJP-Bold.ttf" />
+    <Resource Include="Fonts\NotoSansJP-ExtraBold.ttf" />
+    <Resource Include="Fonts\NotoSansJP-ExtraLight.ttf" />
+    <Resource Include="Fonts\NotoSansJP-Light.ttf" />
+    <Resource Include="Fonts\NotoSansJP-Medium.ttf" />
+    <Resource Include="Fonts\NotoSansJP-Regular.ttf" />
+    <Resource Include="Fonts\NotoSansJP-SemiBold.ttf" />
+    <Resource Include="Fonts\NotoSansJP-Thin.ttf" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />
     <ProjectReference Include="..\JapaneseDictionary\JapaneseDictionary.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>

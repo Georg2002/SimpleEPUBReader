@@ -12,12 +12,12 @@ namespace EPUBRenderer
     internal class PageFile
     {
         public List<Letter> Content = new();
-        public List<RenderPage> Pages = new List<RenderPage>();
+        public List<RenderPage> Pages = new();
         private int UsedCachePages = 0;
-        private List<RenderPage> CachedPages = new List<RenderPage>();
+        private readonly List<RenderPage> CachedPages = new();
         internal int Index;
 
-        public PageFile(EpubPage page, CSSExtract CSS) => CreateContent(page, CSS);
+        public PageFile(EpubPage page, CSSExtract CSS) => this.CreateContent(page, CSS);
 
         private RenderPage GetFreshPage()
         {
@@ -28,21 +28,21 @@ namespace EPUBRenderer
         public void CalculatePages(Vector PageSize, int Index)
         {
             this.Index = Index;
-            Pages.Clear();
+            Pages = new();
             UsedCachePages = 0;
-            var CurrentPage = GetFreshPage();
+            var CurrentPage = this.GetFreshPage();
 
             //fit using indexes without creating new objects
             void FitWords(PageExtractDef extract)
             {
                 CurrentPage.Extract = extract;
                 var fitLetters = CurrentPage.Position(PageSize);
-                if (fitLetters < extract.length)
+                if (fitLetters < extract.Length)
                 {
                     var (fittingExtract, overflowExtract) = extract.Split(fitLetters);
                     CurrentPage.Extract.endLetter = fittingExtract.endLetter;
                     Pages.Add(CurrentPage);
-                    CurrentPage = GetFreshPage();
+                    CurrentPage = this.GetFreshPage();
                     FitWords(overflowExtract);
                 }
                 else
@@ -59,7 +59,9 @@ namespace EPUBRenderer
 
         public override string ToString() => string.Join("", Content.Select(a => a.ToString()));
 
-        private WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
+        public static Dictionary<FontWeight, Tuple<GlyphTypeface, GlyphTypeface>> Typefaces = new();
+        private static readonly object lockObj = new();
+        private static WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {
             var NewStyle = new WordStyle();
             if (Part.ActiveClasses == null) return NewStyle;
@@ -88,8 +90,17 @@ namespace EPUBRenderer
                     }
                 }
             }
-            NewStyle.Typeface = new Typeface(CharInfo.StandardFont, FontStyles.Normal,
-            NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFont);
+            if (!Typefaces.ContainsKey(NewStyle.Weight))
+            {
+                var tf = new Typeface(CharInfo.StandardFont, FontStyles.Normal, NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFont);
+                if (!tf.TryGetGlyphTypeface(out GlyphTypeface typeface)) throw new Exception("Can't get glyph typeface");
+                var backupTf = new Typeface(CharInfo.StandardFallbackFont, FontStyles.Normal, NewStyle.Weight, new FontStretch());
+                if (!backupTf.TryGetGlyphTypeface(out GlyphTypeface backupTypeface)) throw new Exception("Can't get backup glyph typeface");
+                lock (lockObj)
+                {
+                    Typefaces[NewStyle.Weight] = new(typeface, backupTypeface);
+                }
+            }
             return NewStyle;
         }
 
@@ -110,20 +121,18 @@ namespace EPUBRenderer
                         break;
                     case LinePartTypes.normal:
                         lastImage = false;//removes trailing breaks after image
-                        var TextPart = (TextLinePart)Part;
+                        var TextPart = (TextLinePart)Part;                   
                         Letter prevLetter = Content.LastOrDefault();
                         char prevChar = 'a';//random character not in LineBreaks dicts
                         foreach (var Character in TextPart.Text)
                         {
-                            bool NewWordBefore = TextPart.Splittable && CharInfo.PossibleLineBreaksBefore.Contains(Character);
-                            bool NewWordAfter = TextPart.Splittable && CharInfo.PossibleLineBreaksAfter.Contains(prevChar) && !CharInfo.PossibleLineBreaksAfter.Contains(Character);
-
                             var letter = new TextLetter(Character, wordInfo);
-                            if (NewWordBefore)
-                            {
-                                if (prevLetter != null) prevLetter.IsWordEnd = true;
-                            }
-                            else if (NewWordAfter) letter.IsWordEnd = true;
+                            
+                            bool NewWordBefore = TextPart.Splittable && CharInfo.PossibleLineBreaksBefore.Contains(Character);
+                            bool NewWordAfter = TextPart.Splittable && CharInfo.PossibleLineBreaksAfter.Contains(Character);
+
+                            if (NewWordBefore && prevLetter != null) prevLetter.IsWordEnd = true;
+                            if (NewWordAfter) letter.IsWordEnd = true;
                             Content.Add(prevLetter = letter);
                             prevChar = Character;
                         }
@@ -145,13 +154,13 @@ namespace EPUBRenderer
             //get word references
             PageExtractDef extract = new();
             List<int> indexes = new();
-            for (int i = 0; i < Content.Count; i++) if (Content[i].IsWordEnd) indexes.Add(i);
+            for (int i = 0; i < Content.Count; i++) if (this.Content[i].IsWordEnd) indexes.Add(i);
             List<Word> words = new(indexes.Count);
 
             foreach (var i in indexes)
             {
                 extract.endLetter = i;
-                words.Add(new Word(Content, extract));
+                words.Add(new Word(this.Content, extract));
                 extract.startLetter = i + 1;
             }
             {//scope for prevLetter
@@ -164,8 +173,8 @@ namespace EPUBRenderer
                     foreach (var letter in own.Letters)
                     {
                         letter.OwnWord = own;
-                        letter.PrevWord = prev;
-                        letter.NextWord = next;
+                        letter.OwnWord.Prev = prev;
+                        letter.OwnWord.Next = next;
                         letter.PrevLetter = prevLetter;
                         prevLetter = letter;
                     }

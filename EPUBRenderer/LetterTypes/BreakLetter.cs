@@ -21,21 +21,16 @@ namespace EPUBRenderer
             }
             else
             {
-                StartPosition = PrevLetter.NextWritePos;
+                StartPosition = this.PrevLetter.NextWritePos;
                 EndPosition = StartPosition + new Vector(-StandardFontSize, 0);
             }
-            if (!IsPageStart && PrevLetter.Type == LetterTypes.Image)
+            if (!IsPageStart && this.PrevLetter.Type == LetterTypes.Image)
             {
                 //ignores the first break after an image in order to remove redundant breaks
                 NextWritePos = StartPosition;
             }
-            else NextWritePos = new Vector(StartPosition.X - GetNewLineDist(), 0);          
+            else NextWritePos = new Vector(this.StartPosition.X - this.GetNewLineDist(), 0);          
             return true;
-        }
-
-        public override object GetRenderElement()
-        {
-            return null;
         }
     }
 }

@@ -14,9 +14,4 @@
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="System.IO.Compression" />
-  </ItemGroup>
-
 </Project>

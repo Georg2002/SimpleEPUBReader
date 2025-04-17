@@ -11,15 +11,15 @@ namespace EPUBRenderer
 {
     internal static class PosDefExtension
     {
-        internal static IEnumerable<Letter> GetExtract(this IEnumerable<Letter> content, PageExtractDef extract) => content.Skip(extract.startLetter).Take(extract.length);
+        internal static IEnumerable<Letter> GetExtract(this IEnumerable<Letter> content, PageExtractDef extract) => content.Skip(extract.startLetter).Take(extract.Length);
     }
     public struct PageExtractDef
     {
         public int startLetter;
         public int endLetter;
-        public int length => endLetter - startLetter + 1;
+        public readonly int Length => endLetter - startLetter + 1;
 
-        internal (PageExtractDef front, PageExtractDef rear) Split(int letterCount)
+        internal readonly (PageExtractDef front, PageExtractDef rear) Split(int letterCount)
         {
             PageExtractDef front = new PageExtractDef();
             PageExtractDef rear = new PageExtractDef();
@@ -39,7 +39,7 @@ namespace EPUBRenderer
         [XmlText]
         public string ShrtTxt
         {
-            get => $"{FileIndex}|{Letter}";
+            readonly get => $"{FileIndex}|{Letter}";
             set
             {
                 var Numbers = value.Split('|');
@@ -59,7 +59,7 @@ namespace EPUBRenderer
             this.Letter = Letter;
         }
 
-        public static readonly PosDef InvalidPosition = new PosDef(-1, -1);
+        public static readonly PosDef InvalidPosition = new(-1, -1);
 
         public static bool operator <(PosDef A, PosDef B)
         {
@@ -77,14 +77,14 @@ namespace EPUBRenderer
         public static bool operator ==(PosDef A, PosDef B) => A.FileIndex == B.FileIndex && A.Letter == B.Letter;
 
         public static bool operator !=(PosDef A, PosDef B) => !(A == B);
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             var other = obj as PosDef?;
             if (other == null) return false;
             return other == this;
         }
-        public override int GetHashCode() => (FileIndex << 21) | Letter;//100% unique up to 1024 pages and 1 million letters
-        public override string ToString() => $"{FileIndex}|{Letter}";
+        public override readonly int GetHashCode() => (FileIndex << 21) | Letter;//100% unique up to 1024 pages and 1 million letters
+        public override readonly string ToString() => $"{FileIndex}|{Letter}";
 
         internal void Increment(int letterCount)
         {
@@ -107,6 +107,6 @@ namespace EPUBRenderer
                 FileIndex = PosDef.InvalidPosition.FileIndex;
             }
         }
-        internal bool IsInvalid => this.FileIndex == -1 || this.Letter == -1;
+        internal readonly bool IsInvalid => this.FileIndex == -1 || this.Letter == -1;
     }
 }

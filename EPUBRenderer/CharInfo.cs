@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,17 +11,17 @@ namespace EPUBRenderer
 {
     public static class CharInfo
     {
-        public readonly static FontFamily StandardFallbackFont = new FontFamily("Global User Interface");
+        public readonly static FontFamily StandardFallbackFont = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Noto"));//"GlobalUserInterface.CompositeFont");//"Times New Roman");//
         public readonly static FontFamily StandardFont = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Hiragino"));
-        public readonly static Typeface StandardTypeface = new Typeface(StandardFont, FontStyles.Normal,
+        public readonly static Typeface StandardTypeface = new(StandardFont, FontStyles.Normal,
    FontWeights.Normal, new FontStretch(), StandardFallbackFont);
 
-        public static char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
-        public static char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
-        public static char[] TrimCharacters = PossibleLineBreaksAfter.Concat(PossibleLineBreaksBefore).ToArray();
+        public static readonly char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
+        public static readonly char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
+        public static readonly char[] TrimCharacters = PossibleLineBreaksAfter.Concat(PossibleLineBreaksBefore).ToArray();
 
-        private static readonly SpecialCharacter Wiggle = new SpecialCharacter(new Vector(0.02, -0.26), 1.34f, '〜', rotation: 91.5);
-        private static readonly SpecialCharacter Questionmark = new SpecialCharacter(new Vector(0.21, 0), 1, '？');
+        private static readonly SpecialCharacter Wiggle = new(new Vector(0.02, -0.26), 1.34f, '〜', rotation: 91.5);
+        private static readonly SpecialCharacter Questionmark = new(new Vector(0.21, 0), 1, '？');
 
         public const float FontOffset = 0.24f;//0.24
 

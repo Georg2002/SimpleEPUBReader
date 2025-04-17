@@ -12,18 +12,15 @@ namespace EPUBParser
     public class Epub
     {
         public string FilePath;
-        public List<EpubPage> Pages;
+        public List<EpubPage> Pages = new();
         public PackageInfo Package;
         public TocInfo toc;
-        public EpubSettings Settings;
-        public CSSExtract CSSExtract;
+        public EpubSettings Settings = new();
+        public CSSExtract CSSExtract = new();
 
         public Epub(string FilePath)
         {
             this.FilePath = FilePath;
-            Pages = new List<EpubPage>();
-            Settings = new EpubSettings();
-            CSSExtract = new CSSExtract();
             Logger.Report(string.Format("parsing epub file at \"{0}\"", FilePath), LogType.Info);
 
             if (!File.Exists(FilePath))
@@ -48,6 +45,7 @@ namespace EPUBParser
             Settings.Title = Package.Title;
             Settings.Language = Package.Language;
 
+
             foreach (var ManifestItem in Package.Manifest)
             {
                 ZipEntry File = ZipEntry.GetEntryByPath(Files, ManifestItem.Path, PackageFile);
@@ -60,7 +58,7 @@ namespace EPUBParser
                             else toc.AddChaptersFromNav(File, Files);
 
                         }
-                        Pages.Add(new EpubPage(File, Settings, Files));
+                        this.Pages.Add(new EpubPage(File, Settings, Files));
                         break;
                     case MediaType.toc:
                         toc = new TocInfo(File, Files, fromNav: false);
@@ -78,13 +76,15 @@ namespace EPUBParser
                         break;
                 }
             }
+
+
             if (toc == null)
             {
                 Logger.Report("toc not set", LogType.Error);
             }
         }
 
-        private ZipEntry GetFile(List<ZipEntry> Files, string[] PossibleNames)
+        private static ZipEntry GetFile(List<ZipEntry> Files, string[] PossibleNames)
         {
             foreach (var Name in PossibleNames)
             {

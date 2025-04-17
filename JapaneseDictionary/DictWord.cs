@@ -27,12 +27,12 @@ namespace JapaneseDictionary
         {
             Type = (VocabType)Convert.ToInt32(Reader.ReadLine());
             WrittenForms = GetWordArray(Reader, tempList);
-            Readings = GetWordArray(Reader, tempList);
+            this.Readings = GetWordArray(Reader, tempList);
             Meanings = GetWordArray(Reader, tempList);
             tempList.Clear();
         }
 
-        private string[] GetWordArray(StreamReader Reader, List<string> TempList)
+        private static string[] GetWordArray(StreamReader Reader, List<string> TempList)
         {            
             while (true)
             {
