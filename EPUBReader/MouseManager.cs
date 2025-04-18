@@ -113,7 +113,7 @@ namespace EPUBReader
                 if (Liftup) MarkingInProgress = false;
                 if (Draw && Delta > 0)
                 {
-                    Renderer.ContinueSelection(RelPoint);
+                 Renderer.ContinueSelection(RelPoint);
                     MainWindow.Lookup(Renderer.GetSelection());
                 }
             }

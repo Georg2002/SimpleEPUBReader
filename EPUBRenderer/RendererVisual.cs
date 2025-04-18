@@ -34,8 +34,6 @@ namespace EPUBRenderer
             bool SingleImage = ShownPage.IsSingleImage();
 
             {
-                Stopwatch overall = new Stopwatch();
-                Stopwatch specialSw = new Stopwatch();
 
                 var offsets = new List<Point>();
                 var glyphs = new List<ushort>();
@@ -66,7 +64,6 @@ namespace EPUBRenderer
 
                 float prevFontSize = -1;
 
-                overall.Start();
                 foreach (TextLetter textLetter in ShownPage.Content.Where(a => a is TextLetter).Cast<TextLetter>())
                 {
                     (var letterTf, var glyphIndex) = textLetter.GetRenderingInfo();
@@ -82,12 +79,10 @@ namespace EPUBRenderer
                     if (textLetter.Rotated)
                     {
                         push();
-                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));
+                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));                        
                     }
-                    specialSw.Start();
                                      
                     var width = Renderer.GetAdvanceWidth(glyphIndex, tf);
-                    specialSw.Stop();
                     var ul = 0.1;
                     offsets.Add(new Point(drawPos.X - size * (1 + width) / 2, -textLetter.FontSize * (1 - ul) - drawPos.Y));
                     glyphs.Add(glyphIndex);
@@ -106,11 +101,6 @@ namespace EPUBRenderer
 
                     if (textLetter.OwnWord.Letters.Last() == textLetter) push();
                 }
-
-                overall.Stop();
-                Debug.WriteLine(overall.ElapsedMilliseconds);
-                Debug.WriteLine(specialSw.ElapsedMilliseconds);
-                Debug.WriteLine(specialSw.ElapsedMilliseconds * 100 / (overall.ElapsedMilliseconds + 1) + "%");
             }
 
 

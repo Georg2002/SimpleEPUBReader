@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using EPUBParser;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using EPUBParser;
 
 namespace EPUBRenderer
 {
@@ -120,11 +115,12 @@ namespace EPUBRenderer
 
             void load(int file, int page)
             {
-                foreach (var textLetter in CurrBook.PageFiles[file].Pages[page].Content.Where(a => a is TextLetter).Cast<TextLetter>())
+                var letters = CurrBook.PageFiles[file].Pages[page].Content.Where(a => a is TextLetter).Cast<TextLetter>();
+                Parallel.ForEach( letters, new ParallelOptions() { MaxDegreeOfParallelism=3}, (textLetter) =>
                 {
                     (var typeface, var index) = textLetter.GetRenderingInfo();
                     GetAdvanceWidth(index, typeface);
-                }
+                });               
             }
 
             (int nextFile, int nextPage) = this.GetFileAndPageForSwitch(1);
@@ -132,9 +128,9 @@ namespace EPUBRenderer
 
             Task.Run(() =>
              {
-                 Thread.Sleep(2000);
+                 Thread.Sleep(1000);
                  load(nextFile, nextPage);
-                 Thread.Sleep(2000);
+                 Thread.Sleep(1000);
                  load(prevFile, prevPage);
              });
         }
@@ -252,7 +248,7 @@ namespace EPUBRenderer
 
         public void ContinueSelection(Point relPoint)
         {
-            this.Refresh();
+            Application.Current.Dispatcher.Invoke(() => this.Refresh());
             this.RemoveSelection();
             this.SelectionEnd = ShownPage.Intersect(relPoint);
             this.SetCurrPos(SelectionEnd);

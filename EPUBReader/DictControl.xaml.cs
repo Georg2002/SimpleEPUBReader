@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using JapaneseDictionary;
 
 namespace EPUBReader
@@ -49,18 +38,19 @@ namespace EPUBReader
             }
         }
 
-        public async void SelectionChanged(string Text)
+        private static object LockObject;
+        public async void SelectionChanged(string text)
         {
             if (!Active) return;
-            if (txtSelection.Text == Text) return;
-            txtSelection.Text = Text;
-            var Results = await Dict.Lookup(Text);
+            if (txtSelection.Text == text) return;
+            Dispatcher.Invoke(() => txtSelection.Text = text);
+            var Results = await Dict.Lookup(text);
             List.Items.Clear();
             foreach (var Result in Results)
             {
                 List.Items.Add(new DictResultStruct(Result));
             }
-        }
+        }     
 
         private void MoveSelection(int Front, int End)
         {

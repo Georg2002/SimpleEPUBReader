@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EPUBRenderer
 {
-    internal enum WordTypes
+    internal enum WordTypes : sbyte
     {
         Normal, Ruby
     }

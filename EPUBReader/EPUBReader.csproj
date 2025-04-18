@@ -6,7 +6,12 @@
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
      <LangVersion>10</LangVersion>
+     <ApplicationIcon>iconTransparent.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="iconTransparent.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />

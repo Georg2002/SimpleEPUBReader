@@ -40,7 +40,7 @@ namespace JapaneseDictionary
                 {
                     Dict.Add(entry.Key, entry.Value.ToArray());
                 }
-            });
+            });            
         }
 
         public async Task<List<DictWord>> Lookup(string text)

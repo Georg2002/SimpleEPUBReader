@@ -8,11 +8,11 @@ using System.Windows.Media;
 
 namespace EPUBRenderer
 {
-    internal enum LetterTypes
+    internal enum LetterTypes : sbyte
     {
         Letter, Image, Break, Marker
     }
-    public enum PositionState
+    public enum PositionState : sbyte
     {
         Normal, Newline, NormalAfterNewline, TightFit, Final
     }
@@ -36,10 +36,13 @@ namespace EPUBRenderer
         public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
         public const float RubyOffset = 0.93f * LineDist;
         public static readonly Vector OutsideVector = new(-100000, -100000);
-       
+
+        public bool DictSelected;
         internal bool IsRuby;
         internal bool IsWordEnd;
         internal bool IsPageStart;
+        public byte MarkingColorIndex;
+        internal readonly static Brush DictSelectionColor;
 
         internal WordStyle Style;
         internal Word OwnWord;
@@ -53,7 +56,7 @@ namespace EPUBRenderer
         public static float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
 
 
-        public bool DictSelected;
+       
         public Vector StartPosition;
         public Vector EndPosition;
         public virtual Vector HitboxStart => this.StartPosition;
@@ -61,9 +64,11 @@ namespace EPUBRenderer
         public Vector Middle => (this.HitboxStart + this.HitboxEnd) / 2;
         public Vector NextWritePos;
         public LetterTypes Type;
-        public byte MarkingColorIndex;
-        internal static Brush DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
-
+        static Letter()
+        {
+            DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
+            DictSelectionColor.Freeze();
+        }
         public virtual bool Position(LetterPlacementInfo Info) => false;
         internal bool Inside(Point relPoint) => relPoint.X < this.HitboxStart.X && relPoint.Y > this.HitboxStart.Y && relPoint.X > this.HitboxEnd.X && relPoint.Y < this.HitboxEnd.Y;
 

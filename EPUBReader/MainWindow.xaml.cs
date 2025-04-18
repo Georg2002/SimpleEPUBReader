@@ -90,16 +90,14 @@ namespace EPUBReader
             }
             if (Save.WindowSize.X != 0 && Save.WindowSize.Y != 0)
             {
-#if DEBUG
-                Height = 750;
-                Width = 1170;
-#else
+
+                //Height = 750;
+               // Width = 1170;
                 if (Save.WindowSize.Y >= MinHeight && Save.WindowSize.X >= MinWidth)
                 {
                     Height = Save.WindowSize.Y;
                     Width = Save.WindowSize.X;
                 }
-#endif
             }
             if (Save.Fullscreen) Fullscreen_Click(null, null);
             if (Save.DictOpen) Dict_Click(null, null);
@@ -124,6 +122,7 @@ namespace EPUBReader
             Renderer.LoadBook(Book.FilePath, Book.DateAdded, Book.CurrPos, Book.Markings);
             SetTitle();
             if (Menu.Visibility == Visibility.Visible) Library_Click(null, null);
+            GC.Collect();//maybe helps collect the old book here?
         }
 
         internal void Lookup(string Text) => DictControl.SelectionChanged(Text);
@@ -181,14 +180,10 @@ namespace EPUBReader
 
         private void SetTitle()
         {
-
-#if DEBUG
-            const string PresetText = "Debug mode active, start window size preset";
-            if (Renderer.CurrBook == null) Title = PresetText;
-            else Title = Renderer.CurrBook.Title + "; " + PresetText;
-#else
+            //const string PresetText = "Debug mode active, start window size preset";
+           // if (Renderer.CurrBook == null) Title = PresetText;
+            //else Title = Renderer.CurrBook.Title + "; " + PresetText;
             Title = Renderer.CurrBook == null ? "Epub Reader 2" : Renderer.CurrBook.Title;
-#endif
             txtTitle.Text = Title;
         }
 

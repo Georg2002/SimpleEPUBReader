@@ -20,7 +20,7 @@ namespace EPUBRenderer
         public static readonly char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
         public static readonly char[] TrimCharacters = PossibleLineBreaksAfter.Concat(PossibleLineBreaksBefore).ToArray();
 
-        private static readonly SpecialCharacter Wiggle = new(new Vector(0.02, -0.26), 1.34f, '〜', rotation: 91.5);
+        private static readonly SpecialCharacter Wiggle = new(new Vector(0.1, 0), 1.25f, '〜', rotation: 91.5);//0.02, -0.26
         private static readonly SpecialCharacter Questionmark = new(new Vector(0.21, 0), 1, '？');
 
         public const float FontOffset = 0.24f;//0.24
