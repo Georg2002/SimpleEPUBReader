@@ -49,21 +49,24 @@ namespace EPUBRenderer
             var NewLine = Info.State == PositionState.Newline;
 
             if (IsRuby)
-            {         
-                var MainWordFontSize = this.OwnWord.Prev.Letters.Last().FontSize;
+            {
+                var prevWord = this.OwnWord.Prev;
+                if (prevWord.Letters.Count() == 1 && prevWord.Letters.First() is MarkerLetter) prevWord = prevWord.Prev;//marker inbetween               
+
+                var MainWordFontSize = prevWord.Letters.Last().FontSize;
                 this.FontSize = RubyFontSize * Style.RelativeFontSize;
                 float RubyCount = OwnWord.LetterCount;
-                float TextCount = this.OwnWord.Prev.LetterCount;
+                float TextCount = prevWord.LetterCount;
                 VertSpacing = new Vector();
                 VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * MainWordFontSize / 2, 0);
 
-                double TextLength = this.OwnWord.Prev.Length();
+                double TextLength = prevWord.Length();
                 double RubyLength = OwnWord.LetterCount * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
-                if (!PrevLetter.IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
+                if (this.OwnWord.Letters.First() == this) StartPosition = prevWord.Letters.Last().EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
                 else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
-                if (IsWordEnd) NextWritePos = this.OwnWord.Prev.Letters.Last().NextWritePos;
+                if (IsWordEnd) NextWritePos = prevWord.Letters.Last().NextWritePos;
                 else NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
                 _HitboxStart = OutsideVector;
                 _HitboxEnd = OutsideVector;

@@ -66,7 +66,7 @@ namespace EPUBRenderer
                 Local.Increment(Extract.Length);
                 if (Local.FileIndex == -1) break;
                 Letter = this.GetLocal(Local);
-                if (Letter.MarkingColorIndex == ColorIndex || Letter.Type == LetterTypes.Break) End.Increment(allContent.Count); 
+                if (Letter.MarkingColorIndex == ColorIndex || Letter.Type == LetterTypes.Break) End.Increment(allContent.Count);
                 else break;
             }
             while (true);
@@ -102,6 +102,7 @@ namespace EPUBRenderer
             for (int i = 0; i < this.Content.Count(); i++)
             {
                 var letter = this.Content.ElementAt(i);
+
                 letter.IsPageStart = i == 0;
                 bool LetterFit = letter.Position(Info);
                 if (Info.State == PositionState.Newline) Info.State++;//only one newline
@@ -109,7 +110,11 @@ namespace EPUBRenderer
                 {
                     Info.State++;
                     i = FitCount - 1;//++ right after
-                    if (Info.State == PositionState.Final) return FitCount;
+                    if (Info.State == PositionState.Final)
+                    {
+                        if (FitCount == 0) return 1;//always 1 at least
+                        else return FitCount;
+                    }
                     continue;
                 }
                 if (letter.IsWordEnd)

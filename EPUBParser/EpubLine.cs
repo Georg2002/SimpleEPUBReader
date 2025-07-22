@@ -72,7 +72,7 @@ namespace EPUBParser
                     break;
                 case "ruby":
                     if (Node.ChildNodes.Count >= 2)
-                    {                     
+                    {
                         foreach (var Child in Node.ChildNodes)
                         {
                             /*
@@ -150,6 +150,9 @@ namespace EPUBParser
                     var Image = new ImageLinePart(Link, Inline, info);
                     //Set later to allow parallelization
                     Parts.Add(Image);
+                    break;
+                case "ops:default":
+                    Logger.Report("Switch statement found, ignoring default", LogType.Info);
                     break;
                 default:
                     Logger.Report(string.Format("unknown element \"{2}\" in \"{1}\" in line \"{0}\""
