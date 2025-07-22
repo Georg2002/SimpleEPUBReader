@@ -23,7 +23,7 @@ namespace JapaneseDictionary
             DictTask = Task.Run(() =>
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                var resourcePath = Path.Combine(assembly.Location, @"..\Resources\Dict.txt");
+                var resourcePath = Path.Combine(assembly.Location, "..", "Resources", "Dict.txt");
                 var TDict = new Dictionary<char, List<DictWord>>();
                 var tempList = new List<string>(20);
                 var tempCharList = new List<char>(20);
