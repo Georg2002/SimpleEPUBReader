@@ -114,7 +114,7 @@ namespace JapaneseDictionary
            new Inflection("こず","くる"),
 
            //nu-negation
-            new Inflection("ぬ","ない"), new Inflection("せぬ","する"),
+           new Inflection("ぬ","ない"), new Inflection("せぬ","する"),
            new Inflection("こぬ","くる"),
 
            //causative         

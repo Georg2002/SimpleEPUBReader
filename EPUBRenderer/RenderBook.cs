@@ -22,8 +22,9 @@ namespace EPUBRenderer
             this.epub = epub;
             this.DateAdded = DateAdded;
             PageFiles = new PageFile[this.epub.Pages.Count];
-            Parallel.For(0, this.epub.Pages.Count,(i)=>{               
-                    this.PageFiles[i] = new PageFile(this.epub.Pages[i], this.epub.CSSExtract);
+            Parallel.For(0, this.epub.Pages.Count, (i) =>
+            {
+                this.PageFiles[i] = new PageFile(this.epub.Pages[i], this.epub.CSSExtract);
             });
         }
         internal void Position(Vector pageSize)
@@ -41,7 +42,16 @@ namespace EPUBRenderer
 
         internal void RemoveMarking(PosDef start, PosDef end) => this.Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);
 
-        internal void AddMarking(PosDef start, PosDef end, byte colInd) => this.Iterate(start, end, (a, b) => a.MarkingColorIndex = colInd);
+        internal void AddMarking(PosDef start, PosDef end, byte colInd)
+        {
+            StringBuilder sb = new();
+            this.Iterate(start, end, (a, b) =>
+            {
+                a.MarkingColorIndex = colInd;
+                if (a is TextLetter textLetter) sb.Append(textLetter.OrigChar);
+            });
+            if (sb.Length > 0) Clipboard.SetText(sb.ToString());
+        }
 
         private bool Valid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Letter >= 0 &&
                 Pos.FileIndex < this.PageFiles.Length &&
@@ -139,7 +149,7 @@ namespace EPUBRenderer
         {
             string Text = "";
             if (selectionStart == PosDef.InvalidPosition || selectionEnd == PosDef.InvalidPosition) return Text;
-            if (selectionEnd < selectionStart) (selectionStart, selectionEnd) = (selectionEnd, selectionStart);         
+            if (selectionEnd < selectionStart) (selectionStart, selectionEnd) = (selectionEnd, selectionStart);
             this.Iterate(selectionStart, selectionEnd, (a, b) =>
             {
                 if (a.Type == LetterTypes.Letter)
