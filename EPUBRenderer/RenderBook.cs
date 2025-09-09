@@ -50,7 +50,18 @@ namespace EPUBRenderer
                 a.MarkingColorIndex = colInd;
                 if (a is TextLetter textLetter) sb.Append(textLetter.OrigChar);
             });
-            if (sb.Length > 0) Clipboard.SetText(sb.ToString());
+            if (sb.Length > 0)
+            {
+                //to fix https://github.com/Georg2002/SimpleEPUBReader/issues/3
+                try
+                {
+                    Clipboard.SetDataObject(sb.ToString(), true);
+                }
+                catch
+                {
+                    //nothing I guess?
+                }           
+            }
         }
 
         private bool Valid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Letter >= 0 &&
