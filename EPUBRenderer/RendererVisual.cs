@@ -19,7 +19,7 @@ namespace EPUBRenderer
         private static readonly object LockObject = new();
         private static double GetAdvanceWidth(ushort index, GlyphTypeface tf)
         {
-            if (WidthDict.TryGetValue(new (tf, index), out var width)) return width;
+            if (WidthDict.TryGetValue(new(tf, index), out var width)) return width;
             width = tf.AdvanceWidths[index];
             lock (LockObject)
             {
@@ -79,9 +79,9 @@ namespace EPUBRenderer
                     if (textLetter.Rotated)
                     {
                         push();
-                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));                        
+                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));
                     }
-                                     
+
                     var width = Renderer.GetAdvanceWidth(glyphIndex, tf);
                     var ul = 0.1;
                     offsets.Add(new Point(drawPos.X - size * (1 + width) / 2, -textLetter.FontSize * (1 - ul) - drawPos.Y));

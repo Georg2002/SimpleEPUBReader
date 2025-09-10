@@ -70,7 +70,7 @@ namespace EPUBRenderer
             DictSelectionColor.Freeze();
         }
         public virtual bool Position(LetterPlacementInfo Info) => false;
-        internal bool Inside(Point relPoint) => relPoint.X < this.HitboxStart.X && relPoint.Y > this.HitboxStart.Y && relPoint.X > this.HitboxEnd.X && relPoint.Y < this.HitboxEnd.Y;
+        internal bool Inside(Point relPoint) => relPoint.X <= this.HitboxStart.X && relPoint.Y >= this.HitboxStart.Y && relPoint.X >= this.HitboxEnd.X && relPoint.Y <= this.HitboxEnd.Y;
 
         //arranged to avoid negative numbers
         public virtual Rect GetMarkingRect() => new(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);

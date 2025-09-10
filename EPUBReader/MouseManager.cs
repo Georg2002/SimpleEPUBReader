@@ -147,7 +147,7 @@ namespace EPUBReader
                     if (Draw) Renderer.FinishMarking(RelPoint, MainWindow.ColorIndex);
                     MarkingInProgress = false;
                 }
-                else if (Draw && Delta > 0) Renderer.DrawTempMarking(RelPoint, MainWindow.ColorIndex);
+                else if (Draw && Delta > 0) Renderer.DrawTempMarking(RelPoint, MainWindow.ColorIndex, ignoreInterval:false);
             }
             else
             {

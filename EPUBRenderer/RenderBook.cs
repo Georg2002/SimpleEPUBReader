@@ -48,7 +48,7 @@ namespace EPUBRenderer
             this.Iterate(start, end, (a, b) =>
             {
                 a.MarkingColorIndex = colInd;
-                if (a is TextLetter textLetter) sb.Append(textLetter.OrigChar);
+                if (a is TextLetter textLetter && !textLetter.IsRuby) sb.Append(textLetter.OrigChar);
             });
             if (sb.Length > 0)
             {

@@ -1,4 +1,5 @@
 ﻿using EPUBParser;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -116,11 +117,11 @@ namespace EPUBRenderer
             void load(int file, int page)
             {
                 var letters = CurrBook.PageFiles[file].Pages[page].Content.Where(a => a is TextLetter).Cast<TextLetter>();
-                Parallel.ForEach( letters, new ParallelOptions() { MaxDegreeOfParallelism=3}, (textLetter) =>
+                Parallel.ForEach(letters, new ParallelOptions() { MaxDegreeOfParallelism = 3 }, (textLetter) =>
                 {
                     (var typeface, var index) = textLetter.GetRenderingInfo();
                     GetAdvanceWidth(index, typeface);
-                });               
+                });
             }
 
             (int nextFile, int nextPage) = this.GetFileAndPageForSwitch(1);
@@ -187,7 +188,6 @@ namespace EPUBRenderer
         {
             if (CurrBook != null && !pos.IsInvalid) CurrBook.CurrPos = pos;
         }
-
         public bool StartMarking(Point relPoint)
         {
             bool Valid = false;
@@ -200,10 +200,16 @@ namespace EPUBRenderer
             return Valid;
         }
 
-        public void DrawTempMarking(Point relPoint, byte ColorIndex)
+        private DateTime lastTempMarkDraw = DateTime.MinValue;
+        public void DrawTempMarking(Point relPoint, byte ColorIndex, bool ignoreInterval=false)
         {
+            var newSecondHit = ShownPage.Intersect(relPoint);
+            if (newSecondHit == this.SecondHit) return;
+            if (!ignoreInterval && DateTime.Now.Subtract(lastTempMarkDraw).TotalMilliseconds < 1 / 60.0) return;
+            lastTempMarkDraw = DateTime.Now;
+
             CurrBook.RemoveMarking(FirstHit, SecondHit);
-            this.SecondHit = ShownPage.Intersect(relPoint);
+            this.SecondHit = newSecondHit;
             this.SetCurrPos(SecondHit);
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
             this.Refresh();
@@ -211,7 +217,7 @@ namespace EPUBRenderer
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
-            this.DrawTempMarking(relPoint, ColorIndex);
+            this.DrawTempMarking(relPoint, ColorIndex, ignoreInterval:true);
             this.SecondHit = PosDef.InvalidPosition;
         }
 
