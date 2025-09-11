@@ -66,7 +66,7 @@ namespace EPUBParser
                     Logger.Report("text node not found, can't set chapter", LogType.Error);
                     continue;
                 }
-                NewChapter.Title = TextNode.InnerText;
+                NewChapter.Title = TextNode.InnerText.Trim();
 
                 var SourceNode = navPointNode.Descendants("content").FirstOrDefault();
                 if (SourceNode == null)
@@ -130,7 +130,7 @@ namespace EPUBParser
             foreach (var linkNode in linkNodes)
             {
                 var NewChapter = new ChapterDefinition();
-                NewChapter.Title = linkNode.InnerText;
+                NewChapter.Title = linkNode.InnerText.Trim();
                 string source = HTMLParser.SafeAttributeGet(linkNode, "href");
                 if (string.IsNullOrEmpty(source))
                 {

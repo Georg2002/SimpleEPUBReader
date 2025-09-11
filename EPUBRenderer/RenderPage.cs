@@ -14,21 +14,21 @@ namespace EPUBRenderer
     {
         public PageFile Page;
         public PageExtractDef Extract;
-        public IEnumerable<Letter> Content => Page.Content.Skip(Extract.startLetter).Take(Extract.length);
-        public PosDef StartPos => new PosDef(Page.Index, Extract.startLetter);
-        public PosDef EndPos => new PosDef(Page.Index, Extract.endLetter);
+        public IEnumerable<Letter> Content => Page.Content.Skip(Extract.startLetter).Take(Extract.Length);
+        public PosDef StartPos => new(Page.Index, Extract.startLetter);
+        public PosDef EndPos => new(Page.Index, Extract.endLetter);
         public RenderPage(PageFile page) => this.Page = page;
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder(Extract.length + 100);
-            foreach (Letter letter in Content) sb.Append(letter.ToString());
+            StringBuilder sb = new StringBuilder(Extract.Length + 100);
+            foreach (Letter letter in this.Content) sb.Append(letter.ToString());
             return sb.ToString();
         }
 
         internal bool IsSingleImage()
         {
             bool ImageFound = false;
-            foreach (var letter in Content)
+            foreach (var letter in this.Content)
             {
                 if (letter.Type == LetterTypes.Letter) return false;
                 else if (letter.Type == LetterTypes.Image)
@@ -39,7 +39,7 @@ namespace EPUBRenderer
             }
             return true;
         }
-        public bool Within(PosDef Pos) => Pos >= StartPos && Pos <= EndPos;
+        public bool Within(PosDef Pos) => Pos >= this.StartPos && Pos <= this.EndPos;
 
         private Letter GetLocal(PosDef Local) => Page.Content[Local.Letter + Extract.startLetter];
 
@@ -47,27 +47,27 @@ namespace EPUBRenderer
         {
             PosDef Start = Pos;
             PosDef End = Pos;
-            Start.FileIndex = End.FileIndex = StartPos.FileIndex;
-            var Local = ToLocal(Pos);
-            byte ColorIndex = GetLocal(Local).MarkingColorIndex;
+            Start.FileIndex = End.FileIndex = this.StartPos.FileIndex;
+            var Local = this.ToLocal(Pos);
+            byte ColorIndex = this.GetLocal(Local).MarkingColorIndex;
             if (ColorIndex == 0) return new Tuple<PosDef, PosDef>(PosDef.InvalidPosition, PosDef.InvalidPosition);
             Letter Letter;
             do
             {
                 Local.Decrement();
                 if (Local.FileIndex == -1) break;
-                Letter = GetLocal(Local);
+                Letter = this.GetLocal(Local);
                 if (Letter.MarkingColorIndex == ColorIndex || Letter.Type == LetterTypes.Break) Start.Decrement();
                 else break;
             }
             while (true);
-            Local = ToLocal(Pos);
+            Local = this.ToLocal(Pos);
             do
             {
-                Local.Increment(Extract.length);
+                Local.Increment(Extract.Length);
                 if (Local.FileIndex == -1) break;
-                Letter = GetLocal(Local);
-                if (Letter.MarkingColorIndex == ColorIndex || Letter.Type == LetterTypes.Break) End.Increment(allContent.Count); 
+                Letter = this.GetLocal(Local);
+                if (Letter.MarkingColorIndex == ColorIndex || Letter.Type == LetterTypes.Break) End.Increment(allContent.Count);
                 else break;
             }
             while (true);
@@ -76,23 +76,23 @@ namespace EPUBRenderer
 
         private PosDef ToLocal(PosDef Global)
         {
-            if (Global.FileIndex != StartPos.FileIndex || Global < StartPos || Global > EndPos) return PosDef.InvalidPosition;
-            return new PosDef(StartPos.FileIndex, Global.Letter - StartPos.Letter);
+            if (Global.FileIndex != this.StartPos.FileIndex || Global < this.StartPos || Global > this.EndPos) return PosDef.InvalidPosition;
+            return new PosDef(this.StartPos.FileIndex, Global.Letter - this.StartPos.Letter);
         }
         private PosDef ToGlobal(PosDef Local) => new PosDef(Local.FileIndex, Local.Letter + StartPos.Letter);
         internal PosDef Intersect(System.Windows.Point relPoint)
         {
             var i = 0;
-            foreach (var letter in Content)
+            foreach (var letter in this.Content)
             {
                 if (letter.Inside(relPoint)) break;
                 i++;
             }
-            if (i == Extract.length) return PosDef.InvalidPosition;
-            return ToGlobal(new PosDef(StartPos.FileIndex, i));
+            if (i == Extract.Length) return PosDef.InvalidPosition;
+            return this.ToGlobal(new PosDef(this.StartPos.FileIndex, i));
         }
 
-        private LetterPlacementInfo Info = new LetterPlacementInfo();//less garbage collection
+        private LetterPlacementInfo Info = new();//less garbage collection
         public int Position(Vector PageSize)
         {
             this.Info.PageSize = PageSize;
@@ -100,9 +100,10 @@ namespace EPUBRenderer
             int FitCount = 0;
             Info.AllWhitespace = true;
 
-            for (int i = 0; i < Content.Count(); i++)
+            for (int i = 0; i < this.Content.Count(); i++)
             {
-                var letter = Content.ElementAt(i);
+                var letter = this.Content.ElementAt(i);
+
                 letter.IsPageStart = i == 0;
                 bool LetterFit = letter.Position(Info);
                 if (Info.State == PositionState.Newline) Info.State++;//only one newline
@@ -110,7 +111,11 @@ namespace EPUBRenderer
                 {
                     Info.State++;
                     i = FitCount - 1;//++ right after
-                    if (Info.State == PositionState.Final) return FitCount;
+                    if (Info.State == PositionState.Final)
+                    {
+                        if (FitCount == 0) return 1;//always 1 at least
+                        else return FitCount;
+                    }
                     continue;
                 }
                 if (letter.IsWordEnd)

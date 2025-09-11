@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Point = System.Windows.Point;
@@ -143,8 +145,8 @@ namespace EPUBRenderer
 
         public void ResetSelection()
         {
-            SelectionStart = PosDef.InvalidPosition;
-            SelectionEnd = PosDef.InvalidPosition;
+            this.SelectionStart = PosDef.InvalidPosition;
+            this.SelectionEnd = PosDef.InvalidPosition;
         }
     }
 }

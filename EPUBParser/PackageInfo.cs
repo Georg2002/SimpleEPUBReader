@@ -114,37 +114,34 @@ namespace EPUBParser
         private void SetSpine(HtmlNode PackageNode)
         {
             var SpineNode = HTMLParser.SafeNodeGet(PackageNode, "spine");
-            if (SpineNode != null)
+            RightToLeft = HTMLParser.SafeAttributeGet(SpineNode, "page-progression-direction") == "rtl";
+            var SpineNodes = SpineNode.Elements("itemref");
+            if (SpineNodes == null || SpineNodes.Count() == 0)
             {
-                RightToLeft = HTMLParser.SafeAttributeGet(SpineNode, "page-progression-direction") == "rtl";
-                var SpineNodes = SpineNode.Elements("itemref");
-                if (SpineNodes == null || SpineNodes.Count() == 0)
+                Logger.Report("no spine item nodes found", LogType.Error);
+            }
+            else
+            {
+                foreach (var Node in SpineNodes)
                 {
-                    Logger.Report("no spine item nodes found", LogType.Error);
+                    var NewItem = new SpineItem
+                    {
+                        Id = HTMLParser.SafeAttributeGet(Node, "idref")
+                    };
+                    string LinearString = HTMLParser.SafeAttributeGet(Node, "linear", true);
+                    if (string.IsNullOrEmpty(LinearString))
+                    {
+                        NewItem.Linear = true;
+                    }
+                    else
+                    {
+                        NewItem.Linear = HTMLParser.SafeAttributeGet(Node, "linear") == "yes";
+                    }
+                    Spine.Add(NewItem);
                 }
-                else
+                if (!Spine.First().Linear)
                 {
-                    foreach (var Node in SpineNodes)
-                    {
-                        var NewItem = new SpineItem
-                        {
-                            Id = HTMLParser.SafeAttributeGet(Node, "idref")
-                        };
-                        string LinearString = HTMLParser.SafeAttributeGet(Node, "linear", true);
-                        if (string.IsNullOrEmpty(LinearString))
-                        {
-                            NewItem.Linear = true;
-                        }
-                        else
-                        {
-                            NewItem.Linear = HTMLParser.SafeAttributeGet(Node, "linear") == "yes";
-                        }
-                        Spine.Add(NewItem);
-                    }
-                    if (!Spine.First().Linear)
-                    {
-                        Spine = Spine.OrderBy(a => a.Id).ToList();
-                    }
+                    Spine = Spine.OrderBy(a => a.Id).ToList();
                 }
             }
         }

@@ -8,7 +8,7 @@ using EPUBRenderer;
 
 namespace EPUBRenderer
 {
-    internal enum WordTypes
+    internal enum WordTypes : sbyte
     {
         Normal, Ruby
     }
@@ -25,19 +25,22 @@ namespace EPUBRenderer
     internal class Word
     {
         public IEnumerable<Letter> Letters;
-        public int LetterCount => Extract.length;
+        public int LetterCount => this.Extract.Length;
         public PageExtractDef Extract;
         public WordTypes Type;
+        internal Word Prev;
+        internal Word Next;
+
         public Word(IEnumerable<Letter> Content, PageExtractDef extract)
         {
             Letters = Content.GetExtract(extract);
             Extract = extract;
-            Letter first = Letters.First();
+            Letter first = this.Letters.First();
             Type = first.IsRuby ? WordTypes.Ruby : WordTypes.Normal;
         }
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder(LetterCount);
+            StringBuilder sb = new StringBuilder(this.LetterCount);
             foreach (var l in Letters) sb.Append(l.ToString());
             return sb.ToString();
         }

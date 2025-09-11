@@ -27,4 +27,9 @@
     <ProjectReference Include="..\RenderSupport\RenderSupport.vcxproj" />
   </ItemGroup>
 
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
 </Project>

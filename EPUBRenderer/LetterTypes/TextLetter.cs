@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using JapaneseDictionary;
 using System.Runtime.InteropServices;
@@ -49,7 +50,6 @@ namespace EPUBRenderer
                 Character = Info.Replacement;
             }
         }
-
         public override bool Position(LetterPlacementInfo Info)
         {
             var PageSize = Info.PageSize;
@@ -58,51 +58,54 @@ namespace EPUBRenderer
 
             if (IsRuby)
             {
-                var MainWordFontSize = PrevWord.Letters.Last().FontSize;
-                FontSize = RubyFontSize * Style.RelativeFontSize;
+                var prevWord = this.OwnWord.Prev;
+                if (prevWord.Letters.Count() == 1 && prevWord.Letters.First() is MarkerLetter) prevWord = prevWord.Prev;//marker inbetween               
+
+                var MainWordFontSize = prevWord.Letters.Last().FontSize;
+                this.FontSize = RubyFontSize * Style.RelativeFontSize;
                 float RubyCount = OwnWord.LetterCount;
-                float TextCount = PrevWord.LetterCount;
+                float TextCount = prevWord.LetterCount;
                 VertSpacing = new Vector();
                 VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * MainWordFontSize / 2, 0);
 
-                double TextLength = PrevWord.Length();
+                double TextLength = prevWord.Length();
                 double RubyLength = OwnWord.LetterCount * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
-                if (!PrevLetter.IsRuby) StartPosition = PrevLetter.EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
+                if (this.OwnWord.Letters.First() == this) StartPosition = prevWord.Letters.Last().EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
                 else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
-                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
-                if (IsWordEnd) NextWritePos = PrevWord.Letters.Last().NextWritePos;
-                else NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
+                if (IsWordEnd) NextWritePos = prevWord.Letters.Last().NextWritePos;
+                else NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
                 _HitboxStart = OutsideVector;
                 _HitboxEnd = OutsideVector;
                 return true;
             }
             else
             {
-                FontSize = StandardFontSize * Style.RelativeFontSize;
+                this.FontSize = StandardFontSize * Style.RelativeFontSize;
                 StartPosition = IsPageStart ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
                 VertSpacing = new Vector();
-                if (NextWord != null && NextWord.Type == WordTypes.Ruby)
+                if (this.OwnWord.Next != null && this.OwnWord.Next.Type == WordTypes.Ruby)
                 {
-                    float RubyCount = NextWord.LetterCount;
+                    float RubyCount = this.OwnWord.Next.LetterCount;
                     float TextCount = OwnWord.LetterCount;
                     VertSpacing.Y = Math.Max((RubyCount * RubyScale / TextCount - 1) * StandardFontSize / 2, 0);
                 }
 
-                StartPosition = NewLine ? new Vector(StartPosition.X - GetNewLineDist(), 0) : StartPosition;
+                StartPosition = NewLine ? new Vector(StartPosition.X - this.GetNewLineDist(), 0) : StartPosition;
                 StartPosition += VertSpacing;
-                EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+                EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
 
                 if (TightFit && EndPosition.Y > PageSize.Y)
                 {
                     StartPosition.Y = 0;
                     StartPosition.X -= LineDist;
-                    EndPosition = StartPosition + new Vector(-FontSize, FontSize);
+                    EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
                 }
-                NextWritePos = EndPosition + new Vector(FontSize, 0) + VertSpacing;
+                NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
                 _HitboxStart = StartPosition + HitboxExpansion - VertSpacing;
                 _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;
-                return InsidePageVert(PageSize);
+                return this.InsidePageVert(PageSize);
             }
         }
 
@@ -143,6 +146,11 @@ namespace EPUBRenderer
         }
         */
 
+            return new GlyphRun(
+        usedTf, 0,false, this.FontSize * RelScale, 1,
+        glyphIndices, baselineOrigin, advanceWidths,
+        null, null, null, null, null, null);
+        }
         public override string ToString() => Character.ToString();
     }
 }
