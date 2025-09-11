@@ -57,11 +57,11 @@ void Setup(HWND wHandle, char* fontData, UINT32 fontDataLength);
 
 extern "C"
 {
-	__declspec(dllexport) HWND SetWindow(HWND parentWindow)
+	__declspec(dllexport) HWND PrepareWindow(HWND parentWindow)
 	{
 		parentHWnd = parentWindow;
-		auto style = GetWindowLongW(parentWindow, GWL_STYLE);
-		SetWindowLongW(parentWindow, GWL_STYLE, style ^ WS_CLIPCHILDREN);
+		//auto style = GetWindowLongW(parentWindow, GWL_STYLE);
+		//SetWindowLongW(parentWindow, GWL_STYLE, style ^ WS_CLIPCHILDREN);
 		wWinMain(nullptr, nullptr, nullptr, 1);
 		return windowHandle;
 	}
@@ -78,6 +78,7 @@ extern "C"
 		auto state = hwndRt->CheckWindowState();
 		hr = hwndRt->EndDraw();
 		EndPaint(windowHandle, &ps);
+		InvalidateRect(windowHandle, NULL, FALSE);
 	}
 
 

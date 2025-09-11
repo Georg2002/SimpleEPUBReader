@@ -18,6 +18,7 @@ using System.Windows.Documents;
 using System.Security.Policy;
 using System.Windows.Input;
 using EPUBParser;
+using System.Diagnostics;
 
 namespace EPUBRenderer
 {
@@ -25,7 +26,7 @@ namespace EPUBRenderer
     public partial class Renderer : HwndHost
     {
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern IntPtr SetWindow(IntPtr windowHandle);
+        public static extern IntPtr PrepareWindow(IntPtr windowHandle);
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr DestroyW();
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
@@ -45,7 +46,7 @@ namespace EPUBRenderer
         public static extern void DrawMarkingRect(bool isMarked, int colorIndex, bool isSelected, float x0, float y0, float x1, float y1);
         protected override HandleRef BuildWindowCore(HandleRef hwndParent)
         {
-            var ptr = SetWindow(hwndParent.Handle);
+            var ptr = PrepareWindow(hwndParent.Handle);
             return new HandleRef(this, ptr);
         }
         protected override void DestroyWindowCore(HandleRef hwnd)
@@ -61,10 +62,12 @@ namespace EPUBRenderer
         {
             drawImage(data, data.Length, (float)rect.Left, (float)rect.Top, (float)rect.Right, (float)rect.Bottom);
         }
-        protected override void OnRender(DrawingContext drawingContext)
+
+        private void DoRender()
         {
             if (ShownPage is null || !Rerender) return;
             BeginDraw();
+            Debug.WriteLine("Draw start");
             bool SingleImage = ShownPage.IsSingleImage();
             foreach (var Let in ShownPage.Content)
             {
@@ -115,7 +118,7 @@ namespace EPUBRenderer
                 }
 
             }
-            
+
 
             foreach (var letter in ShownPage.Content.Where(Let => Let.MarkingColorIndex != 0 || (Let.DictSelected && !Let.IsRuby)))
             {
@@ -125,7 +128,7 @@ namespace EPUBRenderer
                 DrawMarkingRect(isMarked, letter.MarkingColorIndex, isDictSelected, (float)Rect.Left, (float)Rect.Top, (float)Rect.Right, (float)Rect.Bottom);
 
                 //      if (letter.MarkingColorIndex != 0) drawingContext.DrawRectangle(MarkingColors[letter.MarkingColorIndex], null, Rect);
-                 //      if (letter.DictSelected && !letter.IsRuby) drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
+                //      if (letter.DictSelected && !letter.IsRuby) drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
             }
 
             int Total = GetPageCount();
@@ -136,7 +139,7 @@ namespace EPUBRenderer
             //  drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
             Rerender = false;
             EndDraw();
-        }
+        }    
 
         public void ResetSelection()
         {

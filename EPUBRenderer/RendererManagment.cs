@@ -260,7 +260,8 @@ namespace EPUBRenderer
         private void Refresh()
         {
             Rerender = true;
-            this.InvalidateVisual();
+            this.DoRender();
+           // this.InvalidateVisual();
         }
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -270,7 +271,8 @@ namespace EPUBRenderer
                 CurrBook.Position(PageSize);
                 OpenPage(CurrBook.CurrPos);
             }
-            Rerender = true;
+            this.Refresh();
+            //Rerender = true;
         }
     }
 }
