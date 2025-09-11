@@ -6,6 +6,7 @@ using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System.Windows.Media;
+using System.Text.Unicode;
 
 namespace EPUBRenderer
 {
@@ -61,6 +62,32 @@ namespace EPUBRenderer
 
         public static Dictionary<FontWeight, Tuple<GlyphTypeface, GlyphTypeface>> Typefaces = new();
         private static readonly object lockObj = new();
+        private static void PrepareTypeface(GlyphTypeface typeface)
+        {
+            void runRange(UnicodeRange range)
+            {
+                var start = range.FirstCodePoint;
+                var end = start + range.Length;
+                for (var c = start; c <= end; c++)
+                {
+                    typeface.CharacterToGlyphMap.TryGetValue(c, out _);
+                }
+            }
+            runRange(UnicodeRanges.CjkCompatibility);
+            runRange(UnicodeRanges.CjkCompatibilityForms);
+            runRange(UnicodeRanges.CjkCompatibilityIdeographs);
+            runRange(UnicodeRanges.CjkRadicalsSupplement);
+            runRange(UnicodeRanges.CjkStrokes);
+            runRange(UnicodeRanges.CjkSymbolsandPunctuation);
+            runRange(UnicodeRanges.CjkUnifiedIdeographs);
+            runRange(UnicodeRanges.CjkUnifiedIdeographsExtensionA);
+            runRange(UnicodeRanges.EnclosedCjkLettersandMonths);
+            runRange(UnicodeRanges.Hiragana);
+            runRange(UnicodeRanges.Katakana);
+            runRange(UnicodeRanges.GeneralPunctuation);
+            runRange(UnicodeRanges.SupplementalPunctuation);
+
+        }
         private static WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {
             var NewStyle = new WordStyle();
@@ -93,9 +120,12 @@ namespace EPUBRenderer
             if (!Typefaces.ContainsKey(NewStyle.Weight))
             {
                 var tf = new Typeface(CharInfo.StandardFont, FontStyles.Normal, NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFont);
+
                 if (!tf.TryGetGlyphTypeface(out GlyphTypeface typeface)) throw new Exception("Can't get glyph typeface");
+                PrepareTypeface(typeface);
                 var backupTf = new Typeface(CharInfo.StandardFallbackFont, FontStyles.Normal, NewStyle.Weight, new FontStretch());
                 if (!backupTf.TryGetGlyphTypeface(out GlyphTypeface backupTypeface)) throw new Exception("Can't get backup glyph typeface");
+                PrepareTypeface(backupTypeface);
                 lock (lockObj)
                 {
                     Typefaces[NewStyle.Weight] = new(typeface, backupTypeface);
@@ -121,13 +151,13 @@ namespace EPUBRenderer
                         break;
                     case LinePartTypes.normal:
                         lastImage = false;//removes trailing breaks after image
-                        var TextPart = (TextLinePart)Part;                   
+                        var TextPart = (TextLinePart)Part;
                         Letter prevLetter = Content.LastOrDefault();
                         char prevChar = 'a';//random character not in LineBreaks dicts
                         foreach (var Character in TextPart.Text)
                         {
                             var letter = new TextLetter(Character, wordInfo);
-                            
+
                             bool NewWordBefore = TextPart.Splittable && CharInfo.PossibleLineBreaksBefore.Contains(Character);
                             bool NewWordAfter = TextPart.Splittable && CharInfo.PossibleLineBreaksAfter.Contains(Character);
 
