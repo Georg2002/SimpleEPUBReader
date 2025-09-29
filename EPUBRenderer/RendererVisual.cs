@@ -28,24 +28,24 @@ namespace EPUBRenderer
     public partial class Renderer : HwndHost
     {
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern IntPtr PrepareWindow(IntPtr windowHandle);
+        private static extern IntPtr PrepareWindow(IntPtr windowHandle);
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern IntPtr DestroyW();
+        private static extern IntPtr DestroyW();
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void HandleMessages(uint msg, IntPtr wparam, IntPtr lparam);
+        private static extern void HandleMessages(uint msg, IntPtr wparam, IntPtr lparam);
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void BeginDraw();
+        private static extern void BeginDraw();
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void EndDraw();
+        private static extern void EndDraw();
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void DrawCharacter(float x, float y, uint character, float size, bool bold, float rotation);
+        private static extern void DrawCharacter(float x, float y, uint character, float size, bool bold, float rotation);
 
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void drawImage(byte[] data, int imageSize, float x0, float y0, float x1, float y1);
+        private static extern void drawImage(byte[] data, int imageSize, float x0, float y0, float x1, float y1);
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void drawMissingImage(float x0, float y0, float x1, float y1);
+        private static extern void drawMissingImage(float x0, float y0, float x1, float y1);
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void DrawMarkingRect(bool isMarked, int colorIndex, bool isSelected, float x0, float y0, float x1, float y1);
+        private static extern void DrawMarkingRect(bool isMarked, int colorIndex, bool isSelected, float x0, float y0, float x1, float y1);
         protected override HandleRef BuildWindowCore(HandleRef hwndParent)
         {
             var ptr = PrepareWindow(hwndParent.Handle);
@@ -76,7 +76,6 @@ namespace EPUBRenderer
                 switch (Let.Type)
                 {
                     case LetterTypes.Letter:
-                        var run = (GlyphRun)Let.GetRenderElement();
                         var txtLetter = (TextLetter)Let;
                         var DrawPos = Let.StartPosition + txtLetter.Offset * txtLetter.FontSize;
                         //DrawPos.Y -= txtLetter.FontSize * CharInfo.FontOffset;
@@ -87,7 +86,7 @@ namespace EPUBRenderer
                         break;
                     case LetterTypes.Image:
                         var ImgLetter = (ImageLetter)Let;
-                        var Img = (ImageObject)ImgLetter.GetRenderElement();
+                        var Img = ImgLetter.Image;
                         var StartPoint = ImgLetter.GetStartPoint();
                         var EndPoint = ImgLetter.GetEndPoint();
                         if (Img == null)
@@ -141,7 +140,7 @@ namespace EPUBRenderer
             //  drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
             Rerender = false;
             EndDraw();
-        }    
+        }
 
         public void ResetSelection()
         {

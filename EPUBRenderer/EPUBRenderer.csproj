@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-      <TargetFramework>net6.0-windows</TargetFramework>
+      <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
       <UseWPF>true</UseWPF>
     <Nullable>disable</Nullable>
@@ -25,11 +25,6 @@
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />
     <ProjectReference Include="..\JapaneseDictionary\JapaneseDictionary.csproj" />
     <ProjectReference Include="..\RenderSupport\RenderSupport.vcxproj" />
-  </ItemGroup>
-
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>

@@ -29,13 +29,8 @@ namespace EPUBRenderer
                 //ignores the first break after an image in order to remove redundant breaks
                 NextWritePos = StartPosition;
             }
-            else NextWritePos = new Vector(this.StartPosition.X - this.GetNewLineDist(), 0);          
+            else NextWritePos = new Vector(this.StartPosition.X - this.GetNewLineDist(), 0);
             return true;
-        }
-
-        public override object GetRenderElement()
-        {
-            return null;
         }
     }
 }

@@ -66,8 +66,6 @@ namespace EPUBRenderer
         public Vector Middle => (this.HitboxStart + this.HitboxEnd) / 2;
         public Vector NextWritePos;
         public LetterTypes Type;
-        public byte MarkingColorIndex;
-        internal static SolidColorBrush DictSelectionColor;
         static Letter()
         {
             DictSelectionColor = new SolidColorBrush(Color.FromArgb(100, 50, 50, 50));

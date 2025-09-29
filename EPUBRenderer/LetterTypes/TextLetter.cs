@@ -145,12 +145,6 @@ namespace EPUBRenderer
             return run;
         }
         */
-
-            return new GlyphRun(
-        usedTf, 0,false, this.FontSize * RelScale, 1,
-        glyphIndices, baselineOrigin, advanceWidths,
-        null, null, null, null, null, null);
-        }
         public override string ToString() => Character.ToString();
     }
 }

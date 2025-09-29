@@ -9,7 +9,6 @@ namespace EPUBRenderer
     {
         public ImageObject Image;
         public bool Inline;
-        public override float FontSize => (float)Width;
         public ImageLetter(ImageObject Image, bool Inline, WordInfo wordInfo) : base(wordInfo)
         {
             Type = LetterTypes.Image;
@@ -28,7 +27,9 @@ namespace EPUBRenderer
             else
             {
                 this.Width = this.Style.Width ?? this.Image.Width;
+                this.FontSize = (float)this.Width;
                 this.Height = this.Style.Height ?? this.Image.Height;
+               
                 double ratio = this.Image.Height / this.Image.Width;
                 if (this.Style.Width.HasValue) this.Height = ratio * this.Width;
                 else if (this.Style.Height.HasValue) this.Width = this.Height / ratio;
@@ -67,7 +68,8 @@ namespace EPUBRenderer
                 EndPosition = StartPosition + RenderSize;
                 NextWritePos = MustScale ? new Vector(-1, PageSize.Y + 1) : new Vector(this.EndPosition.X - LineDist, 0);
             }
-
+            return this.InsidePage(PageSize);
+        }
         public Point GetStartPoint() => new(StartPosition.X, StartPosition.Y);
         public Point GetEndPoint() => new(EndPosition.X, EndPosition.Y);
         public Rect GetImageRect() => new(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
@@ -78,7 +80,5 @@ namespace EPUBRenderer
             double IRatio = Width / Height;
             return PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
         }
-
-        public override object GetRenderElement() => Image;
     }
 }

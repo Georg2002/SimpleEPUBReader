@@ -121,7 +121,7 @@ namespace EPUBRenderer
             CurrBook.CurrPos = Position;
             var PageFile = CurrBook.PageFiles[Position.FileIndex];
             ShownPage = PageFile.Pages.Find(a => a.Within(Position));
-            Refresh();
+            this.Refresh();
         }
 
         public void Switch(int Dir)
@@ -146,16 +146,16 @@ namespace EPUBRenderer
                 else
                 {
                     FileIndex++;
-                    if (FileIndex >= CurrBook.PageFiles.Count)
+                    if (FileIndex >= CurrBook.PageFiles.Length)
                     {
-                        FileIndex = CurrBook.PageFiles.Count - 1;
+                        FileIndex = CurrBook.PageFiles.Length - 1;
                         PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count - 1;
                         break;
                     }
                     PageIndex -= CurrBook.PageFiles[FileIndex - 1].Pages.Count;
                 }
             }
-            OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
+            this.OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
         }
 
         private void SetCurrPos(PosDef pos)
@@ -179,14 +179,14 @@ namespace EPUBRenderer
         {
             CurrBook.RemoveMarking(FirstHit, SecondHit);
             SecondHit = ShownPage.Intersect(relPoint);
-            SetCurrPos(SecondHit);
+            this.SetCurrPos(SecondHit);
             CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
-            Refresh();
+            this.Refresh();
         }
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
-            this.DrawTempMarking(relPoint, ColorIndex, ignoreInterval:true);
+            this.DrawTempMarking(relPoint, ColorIndex);
             this.SecondHit = PosDef.InvalidPosition;
         }
 
