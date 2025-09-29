@@ -66,7 +66,7 @@ namespace EPUBRenderer
         }
 
         private void DoRender()
-        {
+        {           
             if (ShownPage is null || !Rerender) return;
             BeginDraw();
             Debug.WriteLine("Draw start");

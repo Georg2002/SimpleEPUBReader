@@ -78,7 +78,7 @@ extern "C"
 		auto state = hwndRt->CheckWindowState();
 		hr = hwndRt->EndDraw();
 		EndPaint(windowHandle, &ps);
-		InvalidateRect(windowHandle, NULL, FALSE);
+		//InvalidateRect(windowHandle, NULL, FALSE);
 	}
 
 
@@ -124,7 +124,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	RegisterClassEx(&wcex);
 
 	HWND hWnd = CreateWindow(wcex.lpszClassName, L"Direct2D", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, 1000, 1000, parentHWnd, nullptr, hInstance, nullptr);
-	windowHandle = hWnd;
+	//windowHandle = hWnd; set in Setup after getting called through WM_CREATE
 	SetParent(hWnd, parentHWnd);
 	auto style = GetWindowLongW(hWnd, GWL_STYLE);
 	SetWindowLongW(hWnd, GWL_STYLE, WS_CHILD | WS_VISIBLE | WS_CHILDWINDOW | WS_CLIPCHILDREN | style & !(WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_TILED));
@@ -174,8 +174,8 @@ void Setup(HWND wHandle, char* fontData, UINT32 fontDataLength)
 
 
 	d2d->CreateHwndRenderTarget(
-		D2D1::RenderTargetProperties(),
-		D2D1::HwndRenderTargetProperties(windowHandle, D2D1::SizeU(1000, 1000)),
+		D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_HARDWARE, D2D1::PixelFormat(), 96.0f, 96.0f),
+		D2D1::HwndRenderTargetProperties(windowHandle, D2D1::SizeU(1000, 1000), D2D1_PRESENT_OPTIONS_IMMEDIATELY),
 		&hwndRt);
 	hwndRt->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black, 1), &brushBlack);
 	hwndRt->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red, 1), &brushRed);
@@ -359,21 +359,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		mouseevent.dwFlags = TME_LEAVE;
 		mouseevent.hwndTrack = hWnd;
 		mouseevent.dwHoverTime = 1;
-
 	}
 	break;
 	case WM_PAINT:
 	{
-		//BeginDraw();
-		/*		wchar_t sampleText[] = L"これもテストです。心の底から事件以外の何物でも無い、難しい漢字使っても善いぞ!。憂鬱とか。";
-				int fs = 25;
-				int rows = (windowSize.height - 20) / fs;
-				for (size_t i = 0; i < 2000; i++)
-				{
-					DrawCharacter(windowSize.width - fs - 10 - fs * (int)(i / rows), 10 + fs * (i % rows), sampleText[i % 45], fs, false, i % 360);
+	/*	BeginDraw();
+		wchar_t sampleText[] = L"これもテストです。心の底から事件以外の何物でも無い、難しい漢字使っても善いぞ!。憂鬱とか。";
+		int fs = 25;
+		int rows = (windowSize.height - 20) / fs;
+		for (size_t i = 0; i < 2000; i++)
+		{
+			DrawCharacter(windowSize.width - fs - 10 - fs * (int)(i / rows), 10 + fs * (i % rows), sampleText[i % 45], fs, false, i % 360);
 
-				}*/
-				//EndDraw();
+		}
+		EndDraw();
+		*/
 	}
 
 
@@ -387,8 +387,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 
 		RECT rc;
-		GetClientRect(parentHWnd, &rc);
-		InvalidateRect(hWnd, &rc, false);
+		//GetClientRect(parentHWnd, &rc);
+		//InvalidateRect(hWnd, &rc, false);
 		break;
 	}
 	case WM_SIZE:
@@ -399,7 +399,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		windowSize = D2D1::SizeU(rc.right, rc.bottom);
 		hwndRt->Resize(windowSize);
 		GetClientRect(parentHWnd, &rc);
-		InvalidateRect(hWnd, &rc, false);
+		InvalidateRect(hWnd, &rc, true);
 	}
 
 	break;
