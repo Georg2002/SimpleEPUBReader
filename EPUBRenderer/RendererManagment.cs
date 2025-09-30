@@ -7,10 +7,11 @@ using System.Windows.Media;
 using EPUBParser;
 using EPUBRenderer;
 using Point = System.Windows.Point;
+using System.Windows.Controls;
 
 namespace EPUBRenderer
 {
-    public partial class Renderer : HwndHost
+    public partial class Renderer : Image
     {
         public RenderBook CurrBook;
         Vector PageSize;
@@ -22,11 +23,26 @@ namespace EPUBRenderer
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private bool Rerender = false;
 
+        private D3DImage D3DImage;
         public Renderer()
         {
             SizeChanged += this.Renderer_SizeChanged;
             this.MinHeight = 100;
             this.MinWidth = 100;
+            this.Source = this.D3DImage = new D3DImage();
+
+            IntPtr surface = DLL.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle,
+        (int)this.ActualWidth, (int)this.ActualHeight);
+
+            if (surface != IntPtr.Zero)
+            {
+                D3DImage.Lock();
+                D3DImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, surface);
+                D3DImage.Unlock();
+
+                CompositionTarget.Rendering += CompositionTarget_Rendering;
+            }
+
         }
 
         public void MoveSelection(int front, int end)
@@ -256,7 +272,7 @@ namespace EPUBRenderer
         {
             Rerender = true;
             this.DoRender();
-           // this.InvalidateVisual();
+            // this.InvalidateVisual();
         }
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {

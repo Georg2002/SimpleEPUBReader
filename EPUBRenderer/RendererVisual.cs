@@ -16,16 +16,15 @@ using System.Windows.Media.TextFormatting;
 using EPUBRenderer;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
-using System.Windows.Documents;
 using System.Security.Policy;
 using System.Windows.Input;
 using EPUBParser;
-using System.Diagnostics;
+using System.Windows.Controls;
 
 namespace EPUBRenderer
 {
 
-    public partial class Renderer : HwndHost
+    public partial class Renderer : Image
     {
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
         private static extern IntPtr PrepareWindow(IntPtr windowHandle);
@@ -46,16 +45,7 @@ namespace EPUBRenderer
         private static extern void drawMissingImage(float x0, float y0, float x1, float y1);
         [DllImport("RenderSupport.dll", CallingConvention = CallingConvention.StdCall)]
         private static extern void DrawMarkingRect(bool isMarked, int colorIndex, bool isSelected, float x0, float y0, float x1, float y1);
-        protected override HandleRef BuildWindowCore(HandleRef hwndParent)
-        {
-            var ptr = PrepareWindow(hwndParent.Handle);
-            return new HandleRef(this, ptr);
-        }
-        protected override void DestroyWindowCore(HandleRef hwnd)
-        {
-            DestroyW();
-        }
-        IntPtr childWindow;
+
         private void drawCharAt(char character, float size, bool bold, float rotation, Point topCenter)
         {
             DrawCharacter((float)topCenter.X, (float)topCenter.Y, character, size, bold, rotation);
