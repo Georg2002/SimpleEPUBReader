@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
       <UseWPF>true</UseWPF>
     <Nullable>disable</Nullable>
-    <LangVersion>10</LangVersion>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +30,10 @@
   <ItemGroup>
     <ProjectReference Include="..\EPUBParser\EPUBParser.csproj" />
     <ProjectReference Include="..\JapaneseDictionary\JapaneseDictionary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

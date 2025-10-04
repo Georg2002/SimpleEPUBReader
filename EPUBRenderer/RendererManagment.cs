@@ -40,7 +40,7 @@ namespace EPUBRenderer
             }
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            var length = CurrBook.GetPage(SelectionStart.FileIndex).Content.Count;
+            var length = CurrBook.GetPageFile(SelectionStart.FileIndex).Content.Count;
             this.MoveSelectionPoints(front, end, length);
 
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
@@ -125,46 +125,45 @@ namespace EPUBRenderer
             if (CurrBook == null) return;
             CurrBook.CurrPos = Position;
             var PageFile = await CurrBook.GetPositionedPage(Position.FileIndex);
-            this.ShownPage = PageFile.Pages.Find(a => a.Within(Position));
+            this.ShownPage = PageFile.GetShownPage(Position);
             this.Refresh();
         }
-        private async Task<Tuple<int, int>> GetFileAndPageForSwitch(int dir)
+
+        public async Task Switch(int dir)
         {
-            int FileIndex = CurrBook.CurrPos.FileIndex;
-            int PageIndex = (await CurrBook.GetPositionedPage(FileIndex)).Pages.IndexOf(ShownPage);
-            PageIndex += dir;
-            while (PageIndex < 0 || PageIndex >= (await CurrBook.GetPositionedPage(FileIndex)).Pages.Count)
+            if (CurrBook == null) return;
+
+            int fileIndex = CurrBook.CurrPos.FileIndex;
+            int pageIndex = (await CurrBook.GetPositionedPage(fileIndex)).GetPageIndex(ShownPage);
+            pageIndex += dir;
+            while (pageIndex < 0 || pageIndex >= (await CurrBook.GetPositionedPage(fileIndex)).GetPageCount())
             {
-                if (PageIndex < 0)
+                if (pageIndex < 0)
                 {
-                    FileIndex--;
-                    if (FileIndex < 0)
+                    fileIndex--;
+                    if (fileIndex < 0)
                     {
-                        FileIndex = 0;
-                        PageIndex = 0;
+                        fileIndex = 0;
+                        pageIndex = 0;
                         break;
                     }
-                    PageIndex += (await CurrBook.GetPositionedPage(FileIndex)).Pages.Count;
+                    pageIndex += (await CurrBook.GetPositionedPage(fileIndex)).GetPageCount();
                 }
                 else
                 {
-                    FileIndex++;
-                    if (FileIndex >= CurrBook.pageFileCount)
+                    fileIndex++;
+                    if (fileIndex >= CurrBook.pageFileCount)
                     {
-                        FileIndex = CurrBook.pageFileCount - 1;
-                        PageIndex = (await CurrBook.GetPositionedPage(FileIndex)).Pages.Count - 1;
+                        fileIndex = CurrBook.pageFileCount - 1;
+                        pageIndex = (await CurrBook.GetPositionedPage(fileIndex)).GetPageCount() - 1;
                         break;
                     }
-                    PageIndex -= (await CurrBook.GetPositionedPage(FileIndex - 1)).Pages.Count;
+                    pageIndex -= (await CurrBook.GetPositionedPage(fileIndex - 1)).GetPageCount();
                 }
             }
-            return new(FileIndex, PageIndex);
-        }
-        public async Task Switch(int Dir)
-        {
-            if (CurrBook == null) return;
-            (var FileIndex, var PageIndex) = await this.GetFileAndPageForSwitch(Dir);
-            this.OpenPage(CurrBook.GetPage(FileIndex).Pages[PageIndex].StartPos).CatchAll();
+
+            //will succeed opening some page, even if dist is not correct
+            this.OpenPage(CurrBook.GetPageFile(fileIndex).GetPage(pageIndex, safe: true).StartPos).CatchAll();
         }
 
         private void SetCurrPos(PosDef pos)
@@ -273,17 +272,21 @@ namespace EPUBRenderer
         }
         private SemaphoreSlim positioningSemaphore = new(1, 1);
         private bool recalculatingSizeWaiting = false;
+        private object recalculatingLockO = new();
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
+            lock (this.recalculatingLockO)
+            {
+                this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
+                if (CurrBook is null || this.recalculatingSizeWaiting) return;
+            }
 
-            if (CurrBook is null || this.recalculatingSizeWaiting) return;
             async Task loadAsync()
             {
 
-                recalculatingSizeWaiting = true;
+                lock (this.recalculatingLockO) recalculatingSizeWaiting = true;
                 await this.positioningSemaphore.WaitAsync();
-                recalculatingSizeWaiting = false;
+                lock (this.recalculatingLockO) recalculatingSizeWaiting = false;
 
                 this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
                 CurrBook.PositionPrepare(this.PageSize);

@@ -12,20 +12,17 @@ namespace EPUBRenderer
         private GlyphTypeface Typeface => PageFile.Typefaces[this.Style.Weight].Item1;
         private GlyphTypeface BackupTypeface => PageFile.Typefaces[this.Style.Weight].Item2;
         private Typography.OpenFont.Typeface LookupTypeface => PageFile.LookupTf;
-
-        public char Character;
+        public char Character { get; private set; }
 
         public Vector Offset;
         public bool Rotated => this.Rotation != 0;
         public double Rotation;
         public float RelScale = 1;
-        public char OrigChar;
+        public char OrigChar { get; private set; }
 
         private static readonly Vector HitboxExpansion = new((LineDist - StandardFontSize) / 2, 0);
-        private Vector _HitboxStart;
-        public override Vector HitboxStart => _HitboxStart;
-        private Vector _HitboxEnd;
-        public override Vector HitboxEnd => _HitboxEnd;
+        public override Vector HitboxStart => this.IsRuby ? OutsideVector : StartPosition + HitboxExpansion - VertSpacing;
+        public override Vector HitboxEnd => this.IsRuby ? OutsideVector : EndPosition + HitboxExpansion + VertSpacing;
         private Vector VertSpacing;
 
         public TextLetter(char character, WordInfo wordInfo) : base(wordInfo)
@@ -69,8 +66,6 @@ namespace EPUBRenderer
                 EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
                 if (IsWordEnd) NextWritePos = prevWord.Letters.Last().NextWritePos;
                 else NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
-                _HitboxStart = OutsideVector;
-                _HitboxEnd = OutsideVector;
                 return true;
             }
             else
@@ -96,8 +91,6 @@ namespace EPUBRenderer
                     EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
                 }
                 NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
-                _HitboxStart = StartPosition + HitboxExpansion - VertSpacing;
-                _HitboxEnd = EndPosition - HitboxExpansion + VertSpacing;
                 return this.InsidePageVert(PageSize);
             }
         }

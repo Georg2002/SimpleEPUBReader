@@ -26,10 +26,6 @@ namespace EPUBParser
         }
 
         public List<BaseLinePart> Parts;
-        public EpubLine()
-        {
-            Parts = new List<BaseLinePart>();
-        }
         public EpubLine(HtmlNode HtmlLine, List<ZipEntry> Entries, ZipEntry File)
         {
             Parts = new List<BaseLinePart>();
@@ -148,6 +144,7 @@ namespace EPUBParser
                         Parent = Parent.ParentNode;
                     }
                     var Image = new ImageLinePart(Link, Inline, info);
+                    Image.SetImage(info.Entries, info.File);
                     //Set later to allow parallelization
                     Parts.Add(Image);
                     break;

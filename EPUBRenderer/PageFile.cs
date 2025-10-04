@@ -16,12 +16,12 @@ namespace EPUBRenderer
     internal class PageFile
     {
         public List<Letter> Content = new();
-        public List<RenderPage> Pages = new();
+        private List<RenderPage> Pages = new();
         private int UsedCachePages = 0;
         private readonly List<RenderPage> CachedPages = new();
         internal int Index;
         internal static Typography.OpenFont.Typeface LookupTf;
-        internal Task PositioningTask;
+        internal Task PositioningTask { get; private set; }
         static PageFile()
         {
             var reader = new Typography.OpenFont.OpenFontReader();
@@ -45,7 +45,6 @@ namespace EPUBRenderer
         internal void Setup()
         {
             if (this.epubPage is null) return;
-            this.epubPage.Init();
             this.CreateContent(this.epubPage, CSS);
             foreach (var mrk in mrkDefs.Where(a => a.Pos.Letter < this.Content.Count))
             {
@@ -63,21 +62,22 @@ namespace EPUBRenderer
             var res = CachedPages[UsedCachePages++];
             return res;
         }
+
         private Vector lastPageSize = new(-1, -1);
-        private object lockO = new();
+        private readonly object lockO = new();
         public Task CalculatePages(Vector PageSize, int Index)
         {
             lock (this.lockO)
             {
-                if (this.PositioningTask is not null) return this.PositioningTask;
+                if (this.PositioningTask is not null && this.lastPageSize == PageSize) return this.PositioningTask;
+                this.lastPageSize = PageSize;
 
                 return this.PositioningTask = Task.Run(() =>
                       {
-                          if (this.lastPageSize == PageSize) return;
-                          this.lastPageSize = PageSize;
+
                           this.Setup();
                           this.Index = Index;
-                          Pages.Clear();
+                          lock (this.Pages) Pages.Clear();
                           UsedCachePages = 0;
                           var CurrentPage = this.GetFreshPage();
 
@@ -90,7 +90,7 @@ namespace EPUBRenderer
                               {
                                   var (fittingExtract, overflowExtract) = extract.Split(fitLetters);
                                   CurrentPage.Extract.endLetter = fittingExtract.endLetter;
-                                  Pages.Add(CurrentPage);
+                                  lock (this.Pages) Pages.Add(CurrentPage);
                                   CurrentPage = this.GetFreshPage();
                                   FitWords(overflowExtract);
                               }
@@ -101,7 +101,7 @@ namespace EPUBRenderer
                           }
 
                           FitWords(new PageExtractDef() { startLetter = 0, endLetter = Content.Count - 1 });
-                          Pages.Add(CurrentPage);
+                          lock (this.Pages) Pages.Add(CurrentPage);
                       });
             }
         }
@@ -156,12 +156,29 @@ namespace EPUBRenderer
             return NewStyle;
         }
 
-
+        internal int GetLocalPageCount(PosDef currPos, out bool inside)
+        {
+            inside = false;
+            lock (this.Pages)
+            {
+                int count = 0;
+                foreach (var Page in this.Pages)
+                {
+                    if (Page.StartPos > currPos)
+                    {
+                        inside = true;
+                        return count;
+                    }
+                    count++;
+                }
+                return count;
+            }
+        }
         private void CreateContent(EpubPage page, CSSExtract CSS)
         {
             WordInfo wordInfo = new();
             bool lastImage = false;
-            foreach (var Part in page.Lines.SelectMany(a => a.Parts))
+            foreach (var Part in page.GetTextParts().SelectMany(a => a.Parts))
             {
                 wordInfo.Style = GetStyle(Part, CSS);
                 wordInfo.IsRuby = Part.IsRuby;
@@ -231,6 +248,34 @@ namespace EPUBRenderer
                         prevLetter = letter;
                     }
                 }
+            }
+        }
+
+        internal int GetPageCount()
+        {
+            lock (this.Pages) return this.Pages.Count;
+        }
+
+        internal RenderPage GetShownPage(PosDef position)
+        {
+            lock (this.Pages) return this.Pages.Find(a => a.Within(position));
+        }
+
+        internal int GetPageIndex(RenderPage shownPage)
+        {
+            lock (this.Pages) return this.Pages.IndexOf(shownPage);
+        }
+
+        internal RenderPage GetPage(int pageIndex, bool safe = false)
+        {
+            lock (this.Pages)
+            {
+                if (safe)
+                {
+                    if (pageIndex < 0) pageIndex = 0;
+                    if (pageIndex >= this.Pages.Count) pageIndex = this.Pages.Count - 1;
+                }
+                return this.Pages[pageIndex];
             }
         }
     }

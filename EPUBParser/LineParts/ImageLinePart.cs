@@ -55,9 +55,9 @@ namespace EPUBParser
             {
                 try
                 {
-                    using (var client = new WebClient())
+                    //    using (var client = new WebClient())
                     {
-                        ImageData = client.DownloadData(Text);
+                        //    ImageData = client.DownloadData(Text);
                     }
                 }
                 catch (Exception)

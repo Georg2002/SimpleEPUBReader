@@ -12,7 +12,6 @@ namespace EPUBParser
     public class EpubPage : IBaseFile
     {
         public EpubSettings PageSettings;
-        public List<EpubLine> Lines;
 
 
         public string Name { get; set; }
@@ -22,9 +21,9 @@ namespace EPUBParser
         private EpubSettings BaseSettings;
         private ZipEntry File;
         public bool Initialized { get; private set; } = false;
-        public void Init()
+        public IEnumerable<EpubLine> GetTextParts()
         {
-            if (this.Initialized) return;
+            if (this.Initialized) yield break;
             this.Initialized = true;
 
             Logger.Report(string.Format("Parsing page \"{0}\"", File.Name), LogType.Info);
@@ -34,7 +33,7 @@ namespace EPUBParser
             if (htmlNode == null)
             {
                 Logger.Report("stopping parsing", LogType.Error);
-                return;
+                yield break;
             }
 
             var LangAttr = HTMLParser.SafeAttributeGet(htmlNode, "lang");
@@ -72,14 +71,11 @@ namespace EPUBParser
                     if (Node.Name != "#text")
                     {
                         var NewLine = new EpubLine(Node, Entries, File);
-                        if (NewLine.Parts.Count > 0) Lines.Add(NewLine);
+                        if (NewLine.Parts.Count > 0) yield return NewLine;
                     }
                 }
             }
-            //to make getting images from web faster
-            Lines.AsParallel().ForAll(a => a.Parts.Where(b => b.Type == LinePartTypes.image)
-            .AsParallel().ForAll(c => ((ImageLinePart)c).SetImage(Entries, File)));
-
+          
 
             //clear reference to allow gc to collect
             this.File = null;
@@ -89,13 +85,11 @@ namespace EPUBParser
         public void FreeMemory()
         {
             //delete references for unused large objects
-            this.Lines = null;
             this.Entries = null;
         }
         public EpubPage(ZipEntry File, EpubSettings Settings, List<ZipEntry> Entries)
         {
             PageSettings = new EpubSettings();
-            Lines = new List<EpubLine>();
             this.Name = File.Name;
             this.FullName = File.FullName;
             this.File = File;
