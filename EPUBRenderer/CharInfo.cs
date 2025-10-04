@@ -11,10 +11,10 @@ namespace EPUBRenderer
 {
     public static class CharInfo
     {
-        public readonly static FontFamily StandardFallbackFont = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Noto"));//"GlobalUserInterface.CompositeFont");//"Times New Roman");//
-        public readonly static FontFamily StandardFont = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").FirstOrDefault(a => a.ToString().Contains("Hiragino"));
-        public readonly static Typeface StandardTypeface = new(StandardFont, FontStyles.Normal,
-   FontWeights.Normal, new FontStretch(), StandardFallbackFont);
+        public readonly static FontFamily StandardFontFamily = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").First(a => a.ToString().Contains("Noto"));
+        public readonly static FontFamily StandardFallbackFontFamily = Fonts.SystemFontFamilies.First(a => a.ToString().Contains("Arial"));
+        public readonly static Typeface StandardTypeface = new(StandardFontFamily, FontStyles.Normal,
+   FontWeights.Normal, new FontStretch(), StandardFallbackFontFamily);
 
         public static readonly char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
         public static readonly char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();

@@ -9,35 +9,112 @@ using System.Windows.Controls;
 
 namespace EPUBRenderer
 {
+    public enum LoadArg
+    {
+        none, setup
+    }
     public class RenderBook
     {
-        public DateTime DateAdded;
+        public readonly DateTime DateAdded;
         readonly private Epub epub;
-        internal PageFile[] PageFiles;
+        private PageFile[] pageFiles;
         public PosDef CurrPos;
         public string Title => epub == null ? "" : this.epub.Settings.Title;
-
-        public RenderBook(Epub epub, DateTime DateAdded)
+        internal PageFile GetPage(int i, LoadArg type = LoadArg.setup)
+        {
+            var page = this.pageFiles[i];
+            if (type == LoadArg.setup) page.Setup();
+            return page;
+        }
+        internal async Task<PageFile> GetPositionedPage(int i)
+        {
+            var p = this.GetPage(i);
+            await p.CalculatePages(pageSize, i);
+            return p;
+        }
+        internal int pageFileCount => this.pageFiles.Length;
+        public RenderBook(Epub epub, DateTime DateAdded, List<MrkDef> markings)
         {
             this.epub = epub;
             this.DateAdded = DateAdded;
-            PageFiles = new PageFile[this.epub.Pages.Count];
-            Parallel.For(0, this.epub.Pages.Count, (i) =>
+            this.pageFiles = new PageFile[this.epub.PageCount];
+
+
+            List<MrkDef>[] pageMarkings;
+            pageMarkings = new List<MrkDef>[this.pageFileCount];
+
+            for (int i = 0; i < pageMarkings.Length; i++) pageMarkings[i] = new();
+            foreach (var Marking in markings)
             {
-                this.PageFiles[i] = new PageFile(this.epub.Pages[i], this.epub.CSSExtract);
-            });
-        }
-        internal void Position(Vector pageSize)
-        {
-            void pageOp(int a)
-            {
-                PageFiles[a].CalculatePages(pageSize, a);
+                var Pos = Marking.Pos;
+                if (!this.PossiblyValid(Pos)) continue;
+                pageMarkings[Pos.FileIndex].Add(Marking);//will be assigned on creation
             }
-#if (DEBUG)
-            for (int i = 0; i < PageFiles.Length; i++) pageOp(i);
-#else
-            Parallel.For(0, this.PageFiles.Length, a => pageOp(a));
-#endif
+
+            for (int i = 0; i < this.pageFiles.Length; i++)
+            {
+                this.pageFiles[i] = new PageFile(this.epub.GetPage(i), this.epub.CSSExtract, pageMarkings[i]);
+            }
+        }
+        private Vector pageSize;
+        internal void PositionPrepare(Vector pageSize)
+        {
+            foreach (var page in this.pageFiles) page.PositioningTask = null;
+            this.pageSize = pageSize;
+        }
+        public delegate void PageCountUpdatedEventHandler();
+        public event PageCountUpdatedEventHandler PageCountUpdated;
+
+        private int waitingCount = 0;
+        private SemaphoreSlim sem = new(1, 1);
+        internal async Task Position(PosDef openPage)
+        {
+
+            lock(sem)
+            {
+                this.waitingCount++;
+            }
+            await this.sem.WaitAsync();
+            lock (sem)
+            {
+                this.waitingCount--;
+            }
+            //before and after
+            int b = openPage.FileIndex;
+            int a = openPage.FileIndex + 1;
+            //calculate all pages starting from open
+            for (int i = 0; i < pageFiles.Length; i++)
+            {
+                lock (sem)
+                {
+                    if (this.waitingCount > 0)
+                    {
+                        this.sem.Release();
+                        return;
+                    }
+                }
+                Task bTask = null;
+                if (a < pageFiles.Length)
+                {
+                    bTask = this.pageFiles[a].CalculatePages(pageSize, a);
+                }
+                if (b >= 0)
+                {
+                    await this.pageFiles[b].CalculatePages(pageSize, b);
+                }
+                if (bTask is not null) await bTask;
+                b--;
+                a++;
+
+                this.PageCountUpdated.Invoke();
+            }
+            this.sem.Release();
+
+
+            //   for (int i = 0; i < PageFiles.Length; i++) pageOp(i); //better for debugging positioning
+
+            // Parallel.For(0, this.PageFiles.Length, a => pageOp(a));
+
         }
 
         internal void RemoveMarking(PosDef start, PosDef end) => this.Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);
@@ -60,29 +137,20 @@ namespace EPUBRenderer
                 catch
                 {
                     //nothing I guess?
-                }           
+                }
             }
         }
 
-        private bool Valid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Letter >= 0 &&
-                Pos.FileIndex < this.PageFiles.Length &&
-                Pos.Letter < PageFiles[Pos.FileIndex].Content.Count;
+        private bool PossiblyValid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Letter >= 0 &&
+                Pos.FileIndex < this.pageFileCount;
 
-        internal void SetMarkings(List<MrkDef> markings)
-        {
-            foreach (var Marking in markings)
-            {
-                var Pos = Marking.Pos;
-                if (this.Valid(Pos)) PageFiles[Pos.FileIndex].Content[Pos.Letter].MarkingColorIndex = Marking.ColorIndex;
-            }
-        }
 
         internal Letter GetLetter(PosDef Pos)
         {
             if (Pos == PosDef.InvalidPosition) return null;
-            if (Pos.FileIndex < this.PageFiles.Length && Pos.FileIndex >= 0)
+            if (Pos.FileIndex < this.pageFileCount && Pos.FileIndex >= 0)
             {
-                var letters = PageFiles[Pos.FileIndex].Content;
+                var letters = this.GetPage(Pos.FileIndex).Content;
                 if (Pos.Letter < letters.Count && Pos.Letter >= 0) return letters[Pos.Letter];
             }
             return null;
@@ -97,9 +165,8 @@ namespace EPUBRenderer
             bool Last = false;
             for (int F = A.FileIndex; F < B.FileIndex + 1; F++)
             {
-                var File = PageFiles[F];
                 Last = F == B.FileIndex;
-                var letters = File.Content;
+                var letters = this.GetPage(F).Content;
 
                 int startLetter = First ? A.Letter : 0;
                 int endLetter = Last ? B.Letter + 1 : letters.Count;
@@ -108,19 +175,21 @@ namespace EPUBRenderer
             }
         }
 
-        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage) => ShownPage.GetConnectedMarkings(Pos, PageFiles[this.CurrPos.FileIndex].Content);
+        internal Tuple<PosDef, PosDef> GetConnectedMarkings(PosDef Pos, RenderPage ShownPage) => ShownPage.GetConnectedMarkings(Pos, this.GetPage(this.CurrPos.FileIndex).Content);
 
-        internal int GetPageCount() => this.PageFiles.Sum(a => a.Pages.Count);
+        internal int GetPageCount() => this.pageFiles.Sum(a => a?.Pages?.Count ?? 0);
 
         internal int GetCurrentPage()
         {
             int Count = 0;
-            foreach (var File in PageFiles)
+            for (int i = 0; i < this.pageFileCount; i++)
             {
-                if (File.Pages.Last().EndPos < CurrPos) Count += File.Pages.Count;
+                var file = this.GetPage(i, type: LoadArg.none);
+                if (file.Pages.Count == 0) continue;
+                if (file.Pages.Last().EndPos < CurrPos) Count += file.Pages.Count;
                 else
                 {
-                    foreach (var Page in File.Pages)
+                    foreach (var Page in file.Pages)
                     {
                         if (Page.StartPos > CurrPos) return Count;
                         Count++;
@@ -178,17 +247,26 @@ namespace EPUBRenderer
 
         internal PosDef GetLastPos()
         {
-            var lastFile = this.PageFiles[^1];
-            return new PosDef(this.PageFiles.Length - 1, lastFile.Content.Count - 1);
+            var lastFile = this.GetPage(this.pageFileCount - 1);
+            return new PosDef(this.pageFileCount - 1, lastFile.Content.Count - 1);
         }
 
         internal PosDef GetChapterPos(int chapterIndex)
         {
             var Chapter = this.epub.toc.Chapters[chapterIndex];
-            var Index = this.epub.Pages.FindIndex(a => a.FullName == Chapter.Source);
+            var Index = -1;
+            for (int i = 0; i < this.epub.PageCount; i++)
+            {
+                var page = this.epub.GetPage(i);
+                if (page.FullName == Chapter.Source)
+                {
+                    Index = i;
+                    break;
+                }
+            }
             var Pos = new PosDef(Index, 0);
             if (string.IsNullOrEmpty(Chapter.Jumppoint)) return Pos;
-            var Page = PageFiles[Index];
+            var Page = this.GetPage(Index);
             Pos.Letter = Page.Content.FindIndex(a => a.Type == LetterTypes.Marker && ((MarkerLetter)a).Id == Chapter.Jumppoint);
             if (Pos.Letter == -1) Pos.Letter = 0;
             return Pos;

@@ -12,12 +12,15 @@ namespace EPUBParser
     public class Epub
     {
         public string FilePath;
-        public List<EpubPage> Pages = new();
+        private List<EpubPage> Pages = new();
         public PackageInfo Package;
         public TocInfo toc;
         public EpubSettings Settings = new();
         public CSSExtract CSSExtract = new();
 
+        public int PageCount => this.Pages.Count;
+        public EpubPage GetPage(int i) => this.Pages[i];
+      
         public Epub(string FilePath)
         {
             this.FilePath = FilePath;
@@ -58,7 +61,7 @@ namespace EPUBParser
                             else toc.AddChaptersFromNav(File, Files);
 
                         }
-                        this.Pages.Add(new EpubPage(File, Settings, Files));
+                        this.Pages.Add( new EpubPage(File, Settings, Files));
                         break;
                     case MediaType.toc:
                         toc = new TocInfo(File, Files, fromNav: false);

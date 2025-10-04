@@ -1,12 +1,15 @@
 ﻿using EPUBParser;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Permissions;
-using System.Windows;
-using System.Windows.Media.Media3D;
-using System.Windows.Media;
 using System.Text.Unicode;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace EPUBRenderer
 {
@@ -17,8 +20,42 @@ namespace EPUBRenderer
         private int UsedCachePages = 0;
         private readonly List<RenderPage> CachedPages = new();
         internal int Index;
+        internal static Typography.OpenFont.Typeface LookupTf;
+        internal Task PositioningTask;
+        static PageFile()
+        {
+            var reader = new Typography.OpenFont.OpenFontReader();
+            // var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream()
+            // var stream = File.Open(@"D:\Informatik\EPUBReader\EPUBRenderer\Fonts\NotoSansJP-Black.ttf", FileMode.Open, FileAccess.Read, FileShare.Read);
+            var stream = Application.GetResourceStream(new Uri("pack://application:,,,/EPUBRenderer;component/Fonts/NotoSansJP-Regular.ttf")).Stream;
+            var tf = reader.Read(stream);
+            stream.Close();
+            PageFile.LookupTf = tf;
+        }
+        private EpubPage epubPage;
+        private CSSExtract CSS;
+        private List<MrkDef> mrkDefs;
+        public PageFile(EpubPage page, CSSExtract CSS, List<MrkDef> mrkDefs)
+        {
+            this.epubPage = page;
+            this.CSS = CSS;
+            this.mrkDefs = mrkDefs;
+        }
 
-        public PageFile(EpubPage page, CSSExtract CSS) => this.CreateContent(page, CSS);
+        internal void Setup()
+        {
+            if (this.epubPage is null) return;
+            this.epubPage.Init();
+            this.CreateContent(this.epubPage, CSS);
+            foreach (var mrk in mrkDefs.Where(a => a.Pos.Letter < this.Content.Count))
+            {
+                this.Content[mrk.Pos.Letter].MarkingColorIndex = mrk.ColorIndex;
+            }
+            this.epubPage.FreeMemory();
+            this.epubPage = null;
+            this.CSS = null;
+            this.mrkDefs = null;
+        }
 
         private RenderPage GetFreshPage()
         {
@@ -26,34 +63,47 @@ namespace EPUBRenderer
             var res = CachedPages[UsedCachePages++];
             return res;
         }
-        public void CalculatePages(Vector PageSize, int Index)
+        private Vector lastPageSize = new(-1, -1);
+        private object lockO = new();
+        public Task CalculatePages(Vector PageSize, int Index)
         {
-            this.Index = Index;
-            Pages = new();
-            UsedCachePages = 0;
-            var CurrentPage = this.GetFreshPage();
-
-            //fit using indexes without creating new objects
-            void FitWords(PageExtractDef extract)
+            lock (this.lockO)
             {
-                CurrentPage.Extract = extract;
-                var fitLetters = CurrentPage.Position(PageSize);
-                if (fitLetters < extract.Length)
-                {
-                    var (fittingExtract, overflowExtract) = extract.Split(fitLetters);
-                    CurrentPage.Extract.endLetter = fittingExtract.endLetter;
-                    Pages.Add(CurrentPage);
-                    CurrentPage = this.GetFreshPage();
-                    FitWords(overflowExtract);
-                }
-                else
-                {
-                    CurrentPage.Extract.endLetter = extract.endLetter;
-                }
-            }
+                if (this.PositioningTask is not null) return this.PositioningTask;
 
-            FitWords(new PageExtractDef() { startLetter = 0, endLetter = Content.Count - 1 });
-            Pages.Add(CurrentPage);
+                return this.PositioningTask = Task.Run(() =>
+                      {
+                          if (this.lastPageSize == PageSize) return;
+                          this.lastPageSize = PageSize;
+                          this.Setup();
+                          this.Index = Index;
+                          Pages.Clear();
+                          UsedCachePages = 0;
+                          var CurrentPage = this.GetFreshPage();
+
+                          //fit using indexes without creating new objects
+                          void FitWords(PageExtractDef extract)
+                          {
+                              CurrentPage.Extract = extract;
+                              var fitLetters = CurrentPage.Position(PageSize);
+                              if (fitLetters < extract.Length)
+                              {
+                                  var (fittingExtract, overflowExtract) = extract.Split(fitLetters);
+                                  CurrentPage.Extract.endLetter = fittingExtract.endLetter;
+                                  Pages.Add(CurrentPage);
+                                  CurrentPage = this.GetFreshPage();
+                                  FitWords(overflowExtract);
+                              }
+                              else
+                              {
+                                  CurrentPage.Extract.endLetter = extract.endLetter;
+                              }
+                          }
+
+                          FitWords(new PageExtractDef() { startLetter = 0, endLetter = Content.Count - 1 });
+                          Pages.Add(CurrentPage);
+                      });
+            }
         }
 
         bool PosValid(PosDef Pos) => Content.Count > Pos.Letter && Pos.Letter >= 0;
@@ -62,32 +112,6 @@ namespace EPUBRenderer
 
         public static Dictionary<FontWeight, Tuple<GlyphTypeface, GlyphTypeface>> Typefaces = new();
         private static readonly object lockObj = new();
-        private static void PrepareTypeface(GlyphTypeface typeface)
-        {
-            void runRange(UnicodeRange range)
-            {
-                var start = range.FirstCodePoint;
-                var end = start + range.Length;
-                for (var c = start; c <= end; c++)
-                {
-                    typeface.CharacterToGlyphMap.TryGetValue(c, out _);
-                }
-            }
-            runRange(UnicodeRanges.CjkCompatibility);
-            runRange(UnicodeRanges.CjkCompatibilityForms);
-            runRange(UnicodeRanges.CjkCompatibilityIdeographs);
-            runRange(UnicodeRanges.CjkRadicalsSupplement);
-            runRange(UnicodeRanges.CjkStrokes);
-            runRange(UnicodeRanges.CjkSymbolsandPunctuation);
-            runRange(UnicodeRanges.CjkUnifiedIdeographs);
-            runRange(UnicodeRanges.CjkUnifiedIdeographsExtensionA);
-            runRange(UnicodeRanges.EnclosedCjkLettersandMonths);
-            runRange(UnicodeRanges.Hiragana);
-            runRange(UnicodeRanges.Katakana);
-            runRange(UnicodeRanges.GeneralPunctuation);
-            runRange(UnicodeRanges.SupplementalPunctuation);
-
-        }
         private static WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {
             var NewStyle = new WordStyle();
@@ -101,7 +125,7 @@ namespace EPUBRenderer
                     NewStyle.Width = Style.Width * TextLetter.StandardFontSize;
                     NewStyle.Height = Style.Height * TextLetter.StandardFontSize;
                     switch (Style.FontWeight)
-                    {//main font only supports up to W6, aka semi bold, or maybe none at all
+                    {
                         case EPUBParser.FontWeights.bold:
                             NewStyle.Weight = System.Windows.FontWeights.SemiBold;
                             break;
@@ -117,17 +141,15 @@ namespace EPUBRenderer
                     }
                 }
             }
-            if (!Typefaces.ContainsKey(NewStyle.Weight))
+            lock (lockObj)
             {
-                var tf = new Typeface(CharInfo.StandardFont, FontStyles.Normal, NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFont);
-
-                if (!tf.TryGetGlyphTypeface(out GlyphTypeface typeface)) throw new Exception("Can't get glyph typeface");
-                PrepareTypeface(typeface);
-                var backupTf = new Typeface(CharInfo.StandardFallbackFont, FontStyles.Normal, NewStyle.Weight, new FontStretch());
-                if (!backupTf.TryGetGlyphTypeface(out GlyphTypeface backupTypeface)) throw new Exception("Can't get backup glyph typeface");
-                PrepareTypeface(backupTypeface);
-                lock (lockObj)
+                if (!Typefaces.ContainsKey(NewStyle.Weight))
                 {
+                    var tf = new Typeface(CharInfo.StandardFontFamily, FontStyles.Normal, NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFontFamily);
+
+                    if (!tf.TryGetGlyphTypeface(out GlyphTypeface typeface)) throw new Exception("Can't get glyph typeface");
+                    var backupTf = new Typeface(CharInfo.StandardFallbackFontFamily, FontStyles.Normal, NewStyle.Weight, new FontStretch());
+                    if (!backupTf.TryGetGlyphTypeface(out GlyphTypeface backupTypeface)) throw new Exception("Can't get backup glyph typeface");
                     Typefaces[NewStyle.Weight] = new(typeface, backupTypeface);
                 }
             }

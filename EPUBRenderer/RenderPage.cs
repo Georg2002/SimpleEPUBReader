@@ -79,16 +79,18 @@ namespace EPUBRenderer
             return new PosDef(this.StartPos.FileIndex, Global.Letter - this.StartPos.Letter);
         }
         private PosDef ToGlobal(PosDef Local) => new(Local.FileIndex, Local.Letter + this.StartPos.Letter);
-        internal PosDef Intersect(Point relPoint)
+        internal PosDef Intersect(Point relPoint, bool useFuzzyHit = false)
         {
             var i = 0;
+            int fuzzyHitIndex = -1;
             foreach (var letter in this.Content)
             {
-                if (letter.Inside(relPoint)) break;
+                if (useFuzzyHit && letter.StartPosition.Y < relPoint.Y && letter.StartPosition.X > relPoint.X) fuzzyHitIndex = i;
+                if (letter.Inside(relPoint)) return this.ToGlobal(new PosDef(this.StartPos.FileIndex, i));
                 i++;
             }
-            if (i == Extract.Length) return PosDef.InvalidPosition;
-            return this.ToGlobal(new PosDef(this.StartPos.FileIndex, i));
+            if (useFuzzyHit && fuzzyHitIndex >= 0) return this.ToGlobal(new PosDef(this.StartPos.FileIndex, fuzzyHitIndex));
+            return PosDef.InvalidPosition;
         }
 
         private LetterPlacementInfo Info = new();//less garbage collection

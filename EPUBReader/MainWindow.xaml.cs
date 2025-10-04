@@ -82,7 +82,7 @@ namespace EPUBReader
                         Renderer.LoadBook(arg, DateTime.Now);
                         SetTitle();
                     }
-                }            
+                }
                 if (Save.CurrentBookIndex >= 0 && Save.CurrentBookIndex < Save.Books.Count && Renderer.CurrBook == null)
                 {
                     SetToBook(Save.CurrentBookIndex);
@@ -92,7 +92,7 @@ namespace EPUBReader
             {
 
                 //Height = 750;
-               // Width = 1170;
+                // Width = 1170;
                 if (Save.WindowSize.Y >= MinHeight && Save.WindowSize.X >= MinWidth)
                 {
                     Height = Save.WindowSize.Y;
@@ -135,17 +135,17 @@ namespace EPUBReader
             LoadSave(arg);
         }
 
-        private void Right_Click(object sender, RoutedEventArgs e) => JumpPages(-1);
-        private void Left_Click(object sender, RoutedEventArgs e) => JumpPages(1);
+        private void Right_Click(object sender, RoutedEventArgs e) => JumpPages(-1).CatchAll();
+        private void Left_Click(object sender, RoutedEventArgs e) => JumpPages(1).CatchAll();
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
                 case Key.Right:
-                    Right_Click(null, null);
+                    if (!e.IsRepeat || !this.Renderer.Rendering) JumpPages(-1).CatchAll();
                     break;
                 case Key.Left:
-                    Left_Click(null, null);
+                    if (!e.IsRepeat || !this.Renderer.Rendering) JumpPages(1).CatchAll();
                     break;
                 case Key.Tab:
                     e.Handled = true;
@@ -181,7 +181,7 @@ namespace EPUBReader
         private void SetTitle()
         {
             //const string PresetText = "Debug mode active, start window size preset";
-           // if (Renderer.CurrBook == null) Title = PresetText;
+            // if (Renderer.CurrBook == null) Title = PresetText;
             //else Title = Renderer.CurrBook.Title + "; " + PresetText;
             Title = Renderer.CurrBook == null ? "Epub Reader 2" : Renderer.CurrBook.Title;
             txtTitle.Text = Title;
@@ -228,9 +228,9 @@ namespace EPUBReader
             }
         }
 
-        public void SetChapter(int ChapterIndex)
+        public async Task SetChapter(int ChapterIndex)
         {
-            Renderer.SetChapter(ChapterIndex);
+            await Renderer.SetChapter(ChapterIndex);
             if (Menu.Visibility == Visibility.Visible) Chapter_Click(null, null);
         }
 
@@ -247,9 +247,9 @@ namespace EPUBReader
             MouseManager.Locked = false;
         }
 
-        public void JumpPages(int Amount)
+        public async Task JumpPages(int dir)
         {
-            Renderer.Switch(Amount);
+            await Renderer.Switch(dir);
             PagesControl.Refresh();
         }
 

@@ -11,6 +11,7 @@ namespace EPUBRenderer
     {
         private GlyphTypeface Typeface => PageFile.Typefaces[this.Style.Weight].Item1;
         private GlyphTypeface BackupTypeface => PageFile.Typefaces[this.Style.Weight].Item2;
+        private Typography.OpenFont.Typeface LookupTypeface => PageFile.LookupTf;
 
         public char Character;
 
@@ -108,45 +109,29 @@ namespace EPUBRenderer
             Width = this.FontSize,
             Height = this.VertSpacing.Y * 2 + this.FontSize
         };
+        static object lockO = new();
         public Tuple<GlyphTypeface, ushort> GetRenderingInfo()
         {
             var usedTf = this.Typeface;
-            if (!this.Typeface.CharacterToGlyphMap.TryGetValue(this.Character, out var glyphIndex))
+            ushort glyphIndex = 10;
+            lock (lockO)
             {
-                usedTf = this.BackupTypeface;
-                if (!this.BackupTypeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
+                glyphIndex = this.LookupTypeface.LookupIndex(this.Character);
+            }
+
+            if (glyphIndex <= 0)
+            {
+                if (!this.Typeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
                 {
-                    glyphIndex = this.Typeface.CharacterToGlyphMap['X'];
-                    usedTf = this.Typeface;
+                    usedTf = this.BackupTypeface;
+                    if (!this.BackupTypeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
+                    {
+                        glyphIndex = this.Typeface.CharacterToGlyphMap['X'];
+                        usedTf = this.Typeface;
+                    }
                 }
             }
             return new(usedTf, glyphIndex);
-
-        }
-        public GlyphRun CreateGlyphRun(Point baselineOrigin)
-        {
-
-            var glyphIndices = new ushort[1];
-            var advanceWidths = new double[1];
-
-            var usedTf = this.Typeface;
-
-            if (!this.Typeface.CharacterToGlyphMap.TryGetValue(this.Character, out var glyphIndex))
-            {
-                usedTf = this.BackupTypeface;
-                if (!this.BackupTypeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
-                {
-                    glyphIndex = this.Typeface.CharacterToGlyphMap['X'];
-                    usedTf = this.Typeface;
-                }
-            }
-            glyphIndices[0] = glyphIndex;
-            advanceWidths[0] = this.Typeface.AdvanceWidths[glyphIndex] * this.FontSize * this.RelScale;
-
-            return new GlyphRun(
-        usedTf, 0,false, this.FontSize * RelScale, 1,
-        glyphIndices, baselineOrigin, advanceWidths,
-        null, null, null, null, null, null);
         }
         public override string ToString() => Character.ToString();
     }

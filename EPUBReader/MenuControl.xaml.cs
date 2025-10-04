@@ -21,7 +21,7 @@ namespace EPUBReader
     /// </summary>
     public partial class MenuControl : UserControl
     {
-     public   bool ShowingChapters = false;
+        public bool ShowingChapters = false;
 
         public MenuControl()
         {
@@ -51,7 +51,7 @@ namespace EPUBReader
                 Items.Add(new ListItemStruct(Book.Title, i, true, Book.DateAdded));
             }
             ListBox.ItemsSource = Items;
-        }     
+        }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -66,7 +66,7 @@ namespace EPUBReader
             var Item = (ListItemStruct)Button.DataContext;
             if (ShowingChapters)
             {
-                Main.SetChapter(Item.Index);
+                Main.SetChapter(Item.Index).CatchAll();
             }
             else
             {
@@ -82,7 +82,7 @@ namespace EPUBReader
         public int Number { get; set; }
         public int Index;
         public Visibility visibility { get; set; }
-        public ListItemStruct(string Text, int Index, bool IsBook,DateTime Date)
+        public ListItemStruct(string Text, int Index, bool IsBook, DateTime Date)
         {
             this.Text = Text;
             Number = Index + 1;

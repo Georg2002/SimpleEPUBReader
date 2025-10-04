@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using Typography.OpenFont;
 
 namespace EPUBRenderer
 {
@@ -19,90 +21,96 @@ namespace EPUBRenderer
         private static readonly object LockObject = new();
         private static double GetAdvanceWidth(ushort index, GlyphTypeface tf)
         {
-            if (WidthDict.TryGetValue(new(tf, index), out var width)) return width;
-            width = tf.AdvanceWidths[index];
-            lock (LockObject)
-            {
-                WidthDict[new(tf, index)] = width;
-            }
-            return width;
+            return PageFile.LookupTf.GetHAdvanceWidthFromGlyphIndex(index) / 1000.0;
         }
 
+        private class GlyphRunData
+        {
+            public List<Point> offsets = new();
+            public List<ushort> glyphs = new();
+            public GlyphRunData()
+            {
+            }
+        }
+
+        private Dictionary<Tuple<float, GlyphTypeface>, GlyphRunData> RunDict = new();
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (ShownPage == null || !Rerender) return;
-            bool SingleImage = ShownPage.IsSingleImage();
+            if (ShownPage == null) return;// || !Rendering
 
+            foreach (var data in this.RunDict.Values)
             {
+                //can't clear after draw call because arrays are as ref
+                data.offsets.Clear();
+                data.glyphs.Clear();
+            }
 
-                var offsets = new List<Point>();
-                var glyphs = new List<ushort>();
-                float size = 0;
-                GlyphTypeface tf = null;
-                void push()
-                {
-                    if (glyphs.Any())
-                    {
-                        var advanceWidths = new double[glyphs.Count];//not used
-
-                        var run = new GlyphRun(
-                tf, 0, false, size, 1,
-                glyphs, new Point(), advanceWidths,
-                offsets, null, null, null, null, null);
-
-
-                        drawingContext.DrawGlyphRun(Brushes.Black, run);
-
-                    }
-
-                    //everything is passed as reference
-                    offsets = new();
-                    glyphs = new();
-                }
-
-
-
-                float prevFontSize = -1;
-
+            bool SingleImage = ShownPage.IsSingleImage();
+            {
                 foreach (TextLetter textLetter in ShownPage.Content.Where(a => a is TextLetter).Cast<TextLetter>())
                 {
                     (var letterTf, var glyphIndex) = textLetter.GetRenderingInfo();
-                    if (tf != letterTf || prevFontSize != textLetter.FontSize)
-                    {
-                        push();
-                        prevFontSize = textLetter.FontSize;
-                        tf = letterTf;
-                        size = textLetter.FontSize * textLetter.RelScale;
-                    }
+                    float size = size = textLetter.FontSize * textLetter.RelScale;
 
                     var drawPos = textLetter.StartPosition + textLetter.Offset * textLetter.FontSize;
-                    if (textLetter.Rotated)
-                    {
-                        push();
-                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));
-                    }
 
-                    var width = Renderer.GetAdvanceWidth(glyphIndex, tf);
+                    var width = Renderer.GetAdvanceWidth(glyphIndex, letterTf);
                     var ul = 0.1;
-                    offsets.Add(new Point(drawPos.X - size * (1 + width) / 2, -textLetter.FontSize * (1 - ul) - drawPos.Y));
-                    glyphs.Add(glyphIndex);
-
+                    var offset = new Point(drawPos.X - size * (1 + width) / 2, -textLetter.FontSize * (1 - ul) - drawPos.Y);
                     if (textLetter.Rotated)
                     {
-                        push();
+                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));
+                        //glyph run can't give each letter its own rotation, so it has to be handled extra
+                        //theoretically all equally rotated letters could be drawn in one call, but offsets need to be transformed
+                        var advanceWidths = new double[1];//not used
+
+                        var run = new GlyphRun(
+                letterTf, 0, false, size, 1,
+                new ushort[] { glyphIndex }, new Point(), advanceWidths,
+                new Point[] { offset }, null, null, null, null, null);
+                        drawingContext.DrawGlyphRun(Brushes.Black, run);
+
                         drawingContext.Pop();
                     }
+                    else
+                    {
+                        var key = new Tuple<float, GlyphTypeface>(size, letterTf);
+                        if (!RunDict.TryGetValue(key, out var data))
+                        {
+                            data = new();
+                            RunDict[key] = data;
+                        }
+                        data.offsets.Add(offset);
+                        data.glyphs.Add(glyphIndex);
+                    }
+
 
                     if (textLetter.DictSelected && !textLetter.IsRuby)
                     {
                         var Rect = textLetter.GetMarkingRect();
                         drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
                     }
-
-                    if (textLetter.OwnWord.Letters.Last() == textLetter) push();
                 }
             }
 
+            foreach (var data in this.RunDict)
+            {
+                var glyphs = data.Value.glyphs;
+                var offsets = data.Value.offsets;
+                var size = data.Key.Item1;
+                var tf = data.Key.Item2;
+                if (glyphs.Any())
+                {
+                    var advanceWidths = new double[glyphs.Count];//not used
+
+                    var run = new GlyphRun(
+            tf, 0, false, size, 1,
+            glyphs, new Point(), advanceWidths,
+            offsets, null, null, null, null, null);
+
+                    drawingContext.DrawGlyphRun(Brushes.Black, run);
+                }
+            }
 
             foreach (var Let in ShownPage.Content)
             {
@@ -152,9 +160,7 @@ namespace EPUBRenderer
                 FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black, 1);
             double Width = PageText.Width;
             drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
-            this.Rerender = false;
-
-
+            this.Rendering = false;
         }
 
         public void ResetSelection()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPUBRenderer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,17 +31,17 @@ namespace EPUBReader
 
         private void M100(object sender, RoutedEventArgs e)
         {
-            Jump(-100);
+            Jump(-100).CatchAll();
         }
 
         private void M10(object sender, RoutedEventArgs e)
         {
-            Jump(-10);
-        }      
+            Jump(-10).CatchAll();
+        }
 
         private void M1(object sender, RoutedEventArgs e)
         {
-            Jump(-1);
+            Jump(-1).CatchAll();
         }
 
         private void Finished(object sender, RoutedEventArgs e)
@@ -50,22 +51,22 @@ namespace EPUBReader
 
         private void P1(object sender, RoutedEventArgs e)
         {
-            Jump(1);
+            Jump(1).CatchAll();
         }
 
         private void P10(object sender, RoutedEventArgs e)
         {
-            Jump(10);
+            Jump(10).CatchAll();
         }
 
         private void P100(object sender, RoutedEventArgs e)
         {
-            Jump(100);
+            Jump(100).CatchAll();
         }
 
-        private void Jump(int Amount)
+        private async Task Jump(int Amount)
         {
-            Main.JumpPages(Amount);
+            await Main.JumpPages(Amount);
             Refresh();
         }
 

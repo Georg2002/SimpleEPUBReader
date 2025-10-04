@@ -1,6 +1,7 @@
 ﻿using EPUBParser;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -16,8 +17,8 @@ namespace EPUBRenderer
         public Brush[] MarkingColors;
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
-        private bool Rerender = false;
 
+        public bool Rendering { get; private set; } = false;
 
         public Renderer()
         {
@@ -39,7 +40,7 @@ namespace EPUBRenderer
             }
             var EndOld = SelectionEnd;
             var StartOld = SelectionStart;
-            var length = CurrBook.PageFiles[SelectionStart.FileIndex].Content.Count;
+            var length = CurrBook.GetPage(SelectionStart.FileIndex).Content.Count;
             this.MoveSelectionPoints(front, end, length);
 
             Letter StartLetter = CurrBook.GetLetter(SelectionStart);
@@ -101,56 +102,38 @@ namespace EPUBRenderer
             this.SelectionEnd = PosDef.InvalidPosition;
             Markings ??= new List<MrkDef>();
             Epub epub = new Epub(Path);
-            this.CurrBook = new RenderBook(epub, DateAdded);
-            this.SetMarkings(Markings);
-            CurrBook.Position(PageSize);
-            this.OpenPage(Position);
-        }
+            if (this.CurrBook is not null) this.CurrBook.PageCountUpdated -= this.UpdatePageCount;
+            this.CurrBook = new RenderBook(epub, DateAdded, Markings);
+            this.CurrBook.PageCountUpdated += this.UpdatePageCount;
 
-        private void SetMarkings(List<MrkDef> Markings)
-        {
-            CurrBook.SetMarkings(Markings);
-        }
-        private void LoadAdjacentPages()
-        {
-
-            void load(int file, int page)
+            async Task loadAsync()
             {
-                var letters = CurrBook.PageFiles[file].Pages[page].Content.Where(a => a is TextLetter).Cast<TextLetter>();
-                Parallel.ForEach(letters, new ParallelOptions() { MaxDegreeOfParallelism = 3 }, (textLetter) =>
-                {
-                    (var typeface, var index) = textLetter.GetRenderingInfo();
-                    GetAdvanceWidth(index, typeface);
-                });
+                await this.positioningSemaphore.WaitAsync();
+                CurrBook.PositionPrepare(this.PageSize);
+                await this.OpenPage(Position);
+                this.positioningSemaphore.Release();
+                await CurrBook.Position(Position);
+                //  await posTask;
             }
-
-            (int nextFile, int nextPage) = this.GetFileAndPageForSwitch(1);
-            (int prevFile, int prevPage) = this.GetFileAndPageForSwitch(-1);
-
-            Task.Run(() =>
-             {
-                 Thread.Sleep(1000);
-                 load(nextFile, nextPage);
-                 Thread.Sleep(1000);
-                 load(prevFile, prevPage);
-             });
+            loadAsync().CatchAll();
         }
 
-        public void OpenPage(PosDef Position)
+        private void UpdatePageCount() => this.Dispatcher.Invoke(this.Refresh);
+
+        public async Task OpenPage(PosDef Position)
         {
             if (CurrBook == null) return;
             CurrBook.CurrPos = Position;
-            var PageFile = CurrBook.PageFiles[Position.FileIndex];
+            var PageFile = await CurrBook.GetPositionedPage(Position.FileIndex);
             this.ShownPage = PageFile.Pages.Find(a => a.Within(Position));
             this.Refresh();
-            this.LoadAdjacentPages();
         }
-        private Tuple<int, int> GetFileAndPageForSwitch(int dir)
+        private async Task<Tuple<int, int>> GetFileAndPageForSwitch(int dir)
         {
             int FileIndex = CurrBook.CurrPos.FileIndex;
-            int PageIndex = CurrBook.PageFiles[FileIndex].Pages.IndexOf(ShownPage);
+            int PageIndex = (await CurrBook.GetPositionedPage(FileIndex)).Pages.IndexOf(ShownPage);
             PageIndex += dir;
-            while (PageIndex < 0 || PageIndex >= CurrBook.PageFiles[FileIndex].Pages.Count)
+            while (PageIndex < 0 || PageIndex >= (await CurrBook.GetPositionedPage(FileIndex)).Pages.Count)
             {
                 if (PageIndex < 0)
                 {
@@ -161,27 +144,27 @@ namespace EPUBRenderer
                         PageIndex = 0;
                         break;
                     }
-                    PageIndex += CurrBook.PageFiles[FileIndex].Pages.Count;
+                    PageIndex += (await CurrBook.GetPositionedPage(FileIndex)).Pages.Count;
                 }
                 else
                 {
                     FileIndex++;
-                    if (FileIndex >= CurrBook.PageFiles.Length)
+                    if (FileIndex >= CurrBook.pageFileCount)
                     {
-                        FileIndex = CurrBook.PageFiles.Length - 1;
-                        PageIndex = CurrBook.PageFiles[FileIndex].Pages.Count - 1;
+                        FileIndex = CurrBook.pageFileCount - 1;
+                        PageIndex = (await CurrBook.GetPositionedPage(FileIndex)).Pages.Count - 1;
                         break;
                     }
-                    PageIndex -= CurrBook.PageFiles[FileIndex - 1].Pages.Count;
+                    PageIndex -= (await CurrBook.GetPositionedPage(FileIndex - 1)).Pages.Count;
                 }
             }
             return new(FileIndex, PageIndex);
         }
-        public void Switch(int Dir)
+        public async Task Switch(int Dir)
         {
             if (CurrBook == null) return;
-            (var FileIndex, var PageIndex) = this.GetFileAndPageForSwitch(Dir);
-            this.OpenPage(CurrBook.PageFiles[FileIndex].Pages[PageIndex].StartPos);
+            (var FileIndex, var PageIndex) = await this.GetFileAndPageForSwitch(Dir);
+            this.OpenPage(CurrBook.GetPage(FileIndex).Pages[PageIndex].StartPos).CatchAll();
         }
 
         private void SetCurrPos(PosDef pos)
@@ -191,19 +174,19 @@ namespace EPUBRenderer
         public bool StartMarking(Point relPoint)
         {
             bool Valid = false;
-            if (CurrBook != null)
-            {
-                this.FirstHit = ShownPage.Intersect(relPoint);
-                this.SetCurrPos(FirstHit);
-                Valid = !FirstHit.IsInvalid;
-            }
+            if (CurrBook is null || this.ShownPage is null) return Valid;
+
+            this.FirstHit = ShownPage.Intersect(relPoint, useFuzzyHit: true);
+            this.SetCurrPos(FirstHit);
+            Valid = !FirstHit.IsInvalid;
+
             return Valid;
         }
 
         private DateTime lastTempMarkDraw = DateTime.MinValue;
-        public void DrawTempMarking(Point relPoint, byte ColorIndex, bool ignoreInterval=false)
+        public void DrawTempMarking(Point relPoint, byte ColorIndex, bool ignoreInterval = false)
         {
-            var newSecondHit = ShownPage.Intersect(relPoint);
+            var newSecondHit = ShownPage.Intersect(relPoint, useFuzzyHit: true);
             if (newSecondHit == this.SecondHit) return;
             if (!ignoreInterval && DateTime.Now.Subtract(lastTempMarkDraw).TotalMilliseconds < 1 / 60.0) return;
             lastTempMarkDraw = DateTime.Now;
@@ -217,7 +200,7 @@ namespace EPUBRenderer
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
-            this.DrawTempMarking(relPoint, ColorIndex, ignoreInterval:true);
+            this.DrawTempMarking(relPoint, ColorIndex, ignoreInterval: true);
             this.SecondHit = PosDef.InvalidPosition;
         }
 
@@ -269,10 +252,10 @@ namespace EPUBRenderer
 
         public List<string> GetChapters() => CurrBook?.GetChapters() ?? new List<string>();
 
-        public void SetChapter(int chapterIndex)
+        public async Task SetChapter(int chapterIndex)
         {
             PosDef Pos = CurrBook.GetChapterPos(chapterIndex);
-            this.OpenPage(Pos);
+            await this.OpenPage(Pos);
         }
         public LibraryBook GetCurrentBook() => CurrBook?.GetLibraryBook() ?? new LibraryBook() { CurrPos = PosDef.InvalidPosition };
 
@@ -285,18 +268,33 @@ namespace EPUBRenderer
 
         private void Refresh()
         {
-            this.Rerender = true;
+            this.Rendering = true;
             this.InvalidateVisual();
         }
+        private SemaphoreSlim positioningSemaphore = new(1, 1);
+        private bool recalculatingSizeWaiting = false;
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
-            if (CurrBook != null)
+
+            if (CurrBook is null || this.recalculatingSizeWaiting) return;
+            async Task loadAsync()
             {
-                CurrBook.Position(PageSize);
-                this.OpenPage(CurrBook.CurrPos);
+
+                recalculatingSizeWaiting = true;
+                await this.positioningSemaphore.WaitAsync();
+                recalculatingSizeWaiting = false;
+
+                this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
+                CurrBook.PositionPrepare(this.PageSize);
+                await this.OpenPage(CurrBook.CurrPos);
+                this.positioningSemaphore.Release();
+                await CurrBook.Position(CurrBook.CurrPos);
             }
-            this.Rerender = true;
+            loadAsync().CatchAll();
+
+            this.Rendering = true;
+
         }
     }
 }

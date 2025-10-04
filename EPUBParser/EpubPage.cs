@@ -14,17 +14,19 @@ namespace EPUBParser
         public EpubSettings PageSettings;
         public List<EpubLine> Lines;
 
+
         public string Name { get; set; }
         public string FullName { get; set; }
-
         public override string ToString() => PageSettings.Title;
-    
-        public EpubPage(ZipEntry File, EpubSettings Settings, List<ZipEntry> Entries)
+        private List<ZipEntry> Entries;
+        private EpubSettings BaseSettings;
+        private ZipEntry File;
+        public bool Initialized { get; private set; } = false;
+        public void Init()
         {
-            PageSettings = new EpubSettings();
-            Lines = new List<EpubLine>();
-            this.Name = File.Name;
-            this.FullName = File.FullName;
+            if (this.Initialized) return;
+            this.Initialized = true;
+
             Logger.Report(string.Format("Parsing page \"{0}\"", File.Name), LogType.Info);
             var doc = HTMLParser.Parse(File);
 
@@ -39,9 +41,9 @@ namespace EPUBParser
             if (LangAttr == "")
             {
                 Logger.Report("language not found, set to standard", LogType.Info);
-                PageSettings.Language = Settings.Language;
-                PageSettings.Vertical = Settings.Vertical;
-                PageSettings.RTL = Settings.RTL;
+                PageSettings.Language = BaseSettings.Language;
+                PageSettings.Vertical = BaseSettings.Vertical;
+                PageSettings.RTL = BaseSettings.RTL;
             }
             else
             {
@@ -57,9 +59,9 @@ namespace EPUBParser
                 if (string.IsNullOrEmpty(ParsedTitle))
                 {
                     Logger.Report("title not found, set to standard", LogType.Info);
-                    PageSettings.Title = Settings.Title;
+                    PageSettings.Title = BaseSettings.Title;
                 }
-                else PageSettings.Title = ParsedTitle;               
+                else PageSettings.Title = ParsedTitle;
             }
 
             var BodyNode = HTMLParser.SafeNodeGet(htmlNode, "body");
@@ -68,15 +70,37 @@ namespace EPUBParser
                 foreach (var Node in BodyNode.ChildNodes)
                 {
                     if (Node.Name != "#text")
-                    {                   
+                    {
                         var NewLine = new EpubLine(Node, Entries, File);
-                        if (NewLine.Parts.Count > 0) Lines.Add(NewLine);                        
+                        if (NewLine.Parts.Count > 0) Lines.Add(NewLine);
                     }
                 }
             }
             //to make getting images from web faster
             Lines.AsParallel().ForAll(a => a.Parts.Where(b => b.Type == LinePartTypes.image)
             .AsParallel().ForAll(c => ((ImageLinePart)c).SetImage(Entries, File)));
+
+
+            //clear reference to allow gc to collect
+            this.File = null;
+            this.BaseSettings = null;
+            this.Entries = null;
+        }
+        public void FreeMemory()
+        {
+            //delete references for unused large objects
+            this.Lines = null;
+            this.Entries = null;
+        }
+        public EpubPage(ZipEntry File, EpubSettings Settings, List<ZipEntry> Entries)
+        {
+            PageSettings = new EpubSettings();
+            Lines = new List<EpubLine>();
+            this.Name = File.Name;
+            this.FullName = File.FullName;
+            this.File = File;
+            this.BaseSettings = Settings;
+            this.Entries = Entries;
         }
     }
 }

@@ -94,7 +94,7 @@ namespace EPUBReader
             if (DictActive) HandleSelection();
             else HandleMarkings();
 
-            HandleGestures();
+            HandleGestures().CatchAll();
             HandleAnimation();
 
             LastMousePos = Pos;
@@ -113,7 +113,7 @@ namespace EPUBReader
                 if (Liftup) MarkingInProgress = false;
                 if (Draw && Delta > 0)
                 {
-                 Renderer.ContinueSelection(RelPoint);
+                    Renderer.ContinueSelection(RelPoint);
                     MainWindow.Lookup(Renderer.GetSelection());
                 }
             }
@@ -147,7 +147,7 @@ namespace EPUBReader
                     if (Draw) Renderer.FinishMarking(RelPoint, MainWindow.ColorIndex);
                     MarkingInProgress = false;
                 }
-                else if (Draw && Delta > 0) Renderer.DrawTempMarking(RelPoint, MainWindow.ColorIndex, ignoreInterval:false);
+                else if (Draw && Delta > 0) Renderer.DrawTempMarking(RelPoint, MainWindow.ColorIndex, ignoreInterval: false);
             }
             else
             {
@@ -159,7 +159,7 @@ namespace EPUBReader
             }
         }
 
-        private void HandleGestures()
+        private async Task HandleGestures()
         {
             SwipeDetectCount = MouseDown ? SwipeDetectCount : 0;
             if (MouseDown && MainWindow.MouseOverText() && !Switched && Math.Abs(AverageSpeed.X) * ResScal > 50 && Math.Abs(AverageSpeed.Y) / Math.Abs(AverageSpeed.X) < 0.25
@@ -170,7 +170,7 @@ namespace EPUBReader
                 {
                     SwipeDetectCount = 0;
                     int Direction = AverageSpeed.X > 0 ? 1 : -1;
-                    MainWindow.JumpPages(Direction);
+                    await MainWindow.JumpPages(Direction);
                     Switched = true;
                     AverageSpeed = new Vector();
                     MarkingInProgress = false;
