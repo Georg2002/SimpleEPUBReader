@@ -47,62 +47,62 @@ namespace EPUBRenderer
             canvas.Clear(SKColors.White);
 
             bool SingleImage = ShownPage.IsSingleImage();
-            if (this.Rendering)
+
+            foreach (var data in this.RunDict.Values)
             {
-                foreach (var data in this.RunDict.Values)
+                //can't clear after draw call because arrays are as ref
+                data.offsets.Clear();
+                data.codepoints.Clear();
+                data.run = null;
+            }
+
+            foreach (TextLetter textLetter in ShownPage.Content.Where(a => a is TextLetter).Cast<TextLetter>())
+            {
+                (var letterTf, var codepoint) = textLetter.GetRenderingInfo();
+                float size = size = textLetter.FontSize * textLetter.RelScale;
+
+                var drawPos = textLetter.StartPosition + textLetter.Offset * textLetter.FontSize;
+
+                var ul = 0.1;
+                var offset = new Point(drawPos.X, +textLetter.FontSize * (1 - ul) + drawPos.Y);
+                if (textLetter.Rotated)
                 {
-                    //can't clear after draw call because arrays are as ref
-                    data.offsets.Clear();
-                    data.codepoints.Clear();
-                    data.run = null;
+                    var x = (float)textLetter.Middle.X;
+                    var y = (float)textLetter.Middle.Y;
+                    canvas.RotateDegrees(textLetter.Rotation, x, y);
+                    //glyph run can't give each letter its own rotation, so it has to be handled extra
+                    //theoretically all equally rotated letters could be drawn in one call, but offsets need to be transformed
+
+                    using var font = new SKFont
+                    {
+                        Typeface = letterTf,
+                        Size = size,
+                        Subpixel = true
+                    };
+                    canvas.DrawText(textLetter.Character.ToString(), offset.ToSKPoint(), SKTextAlign.Center, font, this.blackPaint);
+
+                    canvas.RotateDegrees(-textLetter.Rotation, x, y);
                 }
-                foreach (TextLetter textLetter in ShownPage.Content.Where(a => a is TextLetter).Cast<TextLetter>())
+                else
                 {
-                    (var letterTf, var codepoint) = textLetter.GetRenderingInfo();
-                    float size = size = textLetter.FontSize * textLetter.RelScale;
-
-                    var drawPos = textLetter.StartPosition + textLetter.Offset * textLetter.FontSize;
-
-                    var ul = 0.1;
-                    var offset = new Point(drawPos.X, +textLetter.FontSize * (1 - ul) + drawPos.Y);
-                    if (textLetter.Rotated)
+                    var key = new Tuple<float, SKTypeface>(size, letterTf);
+                    if (!RunDict.TryGetValue(key, out var data))
                     {
-                        var x = (float)textLetter.Middle.X;
-                        var y = (float)textLetter.Middle.Y;
-                        canvas.RotateDegrees(textLetter.Rotation, x, y);
-                        //glyph run can't give each letter its own rotation, so it has to be handled extra
-                        //theoretically all equally rotated letters could be drawn in one call, but offsets need to be transformed
-
-                        using var font = new SKFont
-                        {
-                            Typeface = letterTf,
-                            Size = size,
-                            Subpixel = true
-                        };
-                        canvas.DrawText(textLetter.Character.ToString(), offset.ToSKPoint(), SKTextAlign.Center, font, this.blackPaint);
-
-                        canvas.RotateDegrees(-textLetter.Rotation, x, y);
+                        data = new();
+                        RunDict[key] = data;
                     }
-                    else
-                    {
-                        var key = new Tuple<float, SKTypeface>(size, letterTf);
-                        if (!RunDict.TryGetValue(key, out var data))
-                        {
-                            data = new();
-                            RunDict[key] = data;
-                        }
-                        data.offsets.Add(offset.ToSKPoint());
-                        data.codepoints.Add(codepoint);
-                    }
+                    data.offsets.Add(offset.ToSKPoint());
+                    data.codepoints.Add(codepoint);
+                }
 
 
-                    if (textLetter.DictSelected && !textLetter.IsRuby)
-                    {
-                        var Rect = textLetter.GetMarkingRect();
-                        canvas.DrawRect(Rect.ToSKRect(), Letter.DictSelectionPaint);
-                    }
+                if (textLetter.DictSelected && !textLetter.IsRuby)
+                {
+                    var Rect = textLetter.GetMarkingRect();
+                    canvas.DrawRect(Rect.ToSKRect(), Letter.DictSelectionPaint);
                 }
             }
+
 
             foreach (var data in this.RunDict)
             {
