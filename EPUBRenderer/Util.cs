@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,5 +23,7 @@ namespace EPUBRenderer
                 Application.Current.Shutdown();
             }
         }
+
+        public static SKPoint ToPoint(this Vector vector) => new SKPoint((float)vector.X, (float)vector.Y);
     }
 }

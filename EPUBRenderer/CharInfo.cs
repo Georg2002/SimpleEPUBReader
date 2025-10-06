@@ -1,7 +1,13 @@
-﻿using System;
+﻿using ExCSS;
+using SkiaSharp;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing.Text;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,16 +17,42 @@ namespace EPUBRenderer
 {
     public static class CharInfo
     {
-        public readonly static FontFamily StandardFontFamily = Fonts.GetFontFamilies(new Uri("pack://application:,,,/EPUBRenderer;component/"), "./Fonts/").First(a => a.ToString().Contains("Noto"));
-        public readonly static FontFamily StandardFallbackFontFamily = Fonts.SystemFontFamilies.First(a => a.ToString().Contains("Arial"));
-        public readonly static Typeface StandardTypeface = new(StandardFontFamily, FontStyles.Normal,
-   FontWeights.Normal, new FontStretch(), StandardFallbackFontFamily);
+        static CharInfo()
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name.Contains(nameof(EPUBRenderer)));
+            string[] resourceNames = assembly.GetManifestResourceNames();
+            foreach (string resName in resourceNames)
+            {
+                if (resName.EndsWith(".g.resources", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Found resource pack: {resName}");
+                    using Stream? stream = assembly.GetManifestResourceStream(resName);
+                    if (stream == null) continue;
+
+                    using var reader = new ResourceReader(stream);
+                    foreach (DictionaryEntry entry in reader)
+                    {
+                        var name = entry.Key as string;
+                        if (name.Contains("noto"))
+                        {
+                            var entryStream = entry.Value as Stream;
+                            SKFontManager.Default.CreateTypeface(SKData.Create(entryStream));
+                            entryStream.Close();
+                        }
+                    }
+                }
+            }          
+        }
+
+        public readonly static string StandardFontFamily = "Noto Sans JP";
+        public readonly static string StandardFallbackFontFamily = "Arial";
+        public readonly static SKFont StandardFont = new SKFont { Size = 15, Subpixel = true, Typeface = SKTypeface.FromFamilyName(StandardFontFamily, SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) };
 
         public static readonly char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
         public static readonly char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();
         public static readonly char[] TrimCharacters = PossibleLineBreaksAfter.Concat(PossibleLineBreaksBefore).ToArray();
 
-        private static readonly SpecialCharacter Wiggle = new(new Vector(0.1, 0), 1.25f, '〜', rotation: 91.5);//0.02, -0.26
+        private static readonly SpecialCharacter Wiggle = new(new Vector(0.1, 0), 1.25f, '〜', rotation: 91.5f);//0.02, -0.26
         private static readonly SpecialCharacter Questionmark = new(new Vector(0.21, 0), 1, '？');
 
         public const float FontOffset = 0.24f;//0.24
@@ -59,8 +91,8 @@ namespace EPUBRenderer
         public Vector Offset;
         public float Scaling;
         public char Replacement;
-        public double Rotation;
-        public SpecialCharacter(Vector Offset, float Scaling, char Replacement, double rotation = 0)
+        public float Rotation;
+        public SpecialCharacter(Vector Offset, float Scaling, char Replacement, float rotation = 0)
         {
             this.Offset = Offset;
             this.Scaling = Scaling;

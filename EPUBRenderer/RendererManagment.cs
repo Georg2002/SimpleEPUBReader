@@ -1,24 +1,28 @@
 ﻿using EPUBParser;
+using SkiaSharp;
+using SkiaSharp.Views.WPF;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace EPUBRenderer
 {
-    public partial class Renderer : FrameworkElement
+    public partial class Renderer : SKElement
     {
         public RenderBook CurrBook;
         Vector PageSize;
         RenderPage ShownPage = null;
         PosDef FirstHit = PosDef.InvalidPosition;
         PosDef SecondHit = PosDef.InvalidPosition;
-        public Brush[] MarkingColors;
+        public SKPaint[] MarkingColors;
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
-
+        private SKPaint blackPaint = new SKPaint { Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Fill };
         public bool Rendering { get; private set; } = false;
+
 
         public Renderer()
         {
@@ -26,7 +30,6 @@ namespace EPUBRenderer
             this.MinHeight = 100;
             this.MinWidth = 100;
         }
-
         public void MoveSelection(int front, int end)
         {
             if (SelectionEnd == PosDef.InvalidPosition || SelectionStart == PosDef.InvalidPosition)
@@ -57,7 +60,6 @@ namespace EPUBRenderer
                 this.SelectionEnd = EndOld;
             }
             CurrBook.AddSelection(SelectionStart, SelectionEnd);
-            this.Refresh();
         }
 
         private void MoveSelectionPoints(int front, int end, int letterCount)
@@ -118,7 +120,7 @@ namespace EPUBRenderer
             loadAsync().CatchAll();
         }
 
-        private void UpdatePageCount() => this.Dispatcher.Invoke(()=>this.Refresh());
+        private void UpdatePageCount() => this.Dispatcher.Invoke(() => this.Refresh());
 
         public async Task OpenPage(PosDef Position)
         {
@@ -126,7 +128,7 @@ namespace EPUBRenderer
             CurrBook.CurrPos = Position;
             var PageFile = await CurrBook.GetPositionedPage(Position.FileIndex);
             this.ShownPage = PageFile.GetShownPage(Position);
-            this.Refresh(rerender:true);
+            this.Refresh(rerender: true);
         }
 
         public async Task Switch(int dir)
@@ -286,7 +288,7 @@ namespace EPUBRenderer
         {
             lock (this.recalculatingLockO)
             {
-                this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
+                this.PageSize = this.GetPageSize();
                 if (CurrBook is null || this.recalculatingSizeWaiting) return;
             }
 
@@ -296,7 +298,7 @@ namespace EPUBRenderer
                 await this.positioningSemaphore.WaitAsync();
                 lock (this.recalculatingLockO) recalculatingSizeWaiting = false;
 
-                this.PageSize = new Vector(this.ActualWidth, this.ActualHeight);
+                this.PageSize = this.GetPageSize();
                 CurrBook.PositionPrepare(this.PageSize);
                 await this.OpenPage(CurrBook.CurrPos);
                 this.positioningSemaphore.Release();
@@ -306,5 +308,7 @@ namespace EPUBRenderer
 
             loadAsync().CatchAll();
         }
+        private Vector GetPageSize() => new Vector(this.ActualWidth, this.ActualHeight - 20);
     }
+
 }

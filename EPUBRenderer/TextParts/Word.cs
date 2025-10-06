@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using System.Windows.Media;
 using System.Text;
+using SkiaSharp;
 
 namespace EPUBRenderer
 {
@@ -14,7 +15,7 @@ namespace EPUBRenderer
 
     internal class WordStyle
     {
-        public FontWeight Weight = FontWeights.Normal;
+        public SKFontStyleWeight Weight = SKFontStyleWeight.Normal;
         public float RelativeFontSize = 1;
         public double? Width = null;
         public double? Height = null;         

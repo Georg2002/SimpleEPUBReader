@@ -1,7 +1,11 @@
-﻿using System;
+﻿using SkiaSharp;
+using SkiaSharp.Views.Desktop;
+using SkiaSharp.Views.WPF;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
@@ -12,40 +16,35 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using Typography.OpenFont;
+
 
 namespace EPUBRenderer
 {
 
-    public partial class Renderer : FrameworkElement
+    public partial class Renderer : SKElement
     {
         private static readonly Dictionary<ushort, double> WidthDict = new();
         private static readonly object LockObject = new();
-        private static double GetAdvanceWidth(ushort index)
-        {
-            if (!WidthDict.TryGetValue(index, out double width))
-            {
-                width = WidthDict[index] = PageFile.LookupTf.GetHAdvanceWidthFromGlyphIndex(index) / 1000.0;
-            }
-            return width;
-        }
 
         private class GlyphRunData
         {
-            public List<Point> offsets = new();
-            public List<ushort> glyphs = new();
-            public GlyphRun run;
+            public List<SKPoint> offsets = new();
+            public List<int> codepoints = new();
+            public SKTextBlob run;
             public GlyphRunData()
             {
             }
         }
 
-        private Dictionary<Tuple<float, GlyphTypeface>, GlyphRunData> RunDict = new();
+        private Dictionary<Tuple<float, SKTypeface>, GlyphRunData> RunDict = new();
 
-        protected override void OnRender(DrawingContext drawingContext)
+        protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
         {
             if (ShownPage is null) return;
+            var canvas = e.Surface.Canvas;
 
+            // make sure the canvas is blank
+            canvas.Clear(SKColors.White);
 
             bool SingleImage = ShownPage.IsSingleImage();
             if (this.Rendering)
@@ -54,78 +53,89 @@ namespace EPUBRenderer
                 {
                     //can't clear after draw call because arrays are as ref
                     data.offsets.Clear();
-                    data.glyphs.Clear();
+                    data.codepoints.Clear();
                     data.run = null;
                 }
                 foreach (TextLetter textLetter in ShownPage.Content.Where(a => a is TextLetter).Cast<TextLetter>())
                 {
-                    (var letterTf, var glyphIndex) = textLetter.GetRenderingInfo();
+                    (var letterTf, var codepoint) = textLetter.GetRenderingInfo();
                     float size = size = textLetter.FontSize * textLetter.RelScale;
 
                     var drawPos = textLetter.StartPosition + textLetter.Offset * textLetter.FontSize;
 
-                    var width = Renderer.GetAdvanceWidth(glyphIndex);
                     var ul = 0.1;
-                    var offset = new Point(drawPos.X - size * (1 + width) / 2, -textLetter.FontSize * (1 - ul) - drawPos.Y);
+                    var offset = new Point(drawPos.X, +textLetter.FontSize * (1 - ul) + drawPos.Y);
                     if (textLetter.Rotated)
                     {
-                        drawingContext.PushTransform(new RotateTransform(textLetter.Rotation, textLetter.Middle.X, textLetter.Middle.Y));
+                        var x = (float)textLetter.Middle.X;
+                        var y = (float)textLetter.Middle.Y;
+                        canvas.RotateDegrees(textLetter.Rotation, x, y);
                         //glyph run can't give each letter its own rotation, so it has to be handled extra
                         //theoretically all equally rotated letters could be drawn in one call, but offsets need to be transformed
-                        var advanceWidths = new double[1];//not used
 
-                        var run = new GlyphRun(
-                letterTf, 0, false, size, 1,
-                new ushort[] { glyphIndex }, new Point(), advanceWidths,
-                new Point[] { offset }, null, null, null, null, null);
-                        drawingContext.DrawGlyphRun(Brushes.Black, run);
+                        using var font = new SKFont
+                        {
+                            Typeface = letterTf,
+                            Size = size,
+                            Subpixel = true
+                        };
+                        canvas.DrawText(textLetter.Character.ToString(), offset.ToSKPoint(), SKTextAlign.Center, font, this.blackPaint);
 
-                        drawingContext.Pop();
+                        canvas.RotateDegrees(-textLetter.Rotation, x, y);
                     }
                     else
                     {
-                        var key = new Tuple<float, GlyphTypeface>(size, letterTf);
+                        var key = new Tuple<float, SKTypeface>(size, letterTf);
                         if (!RunDict.TryGetValue(key, out var data))
                         {
                             data = new();
                             RunDict[key] = data;
                         }
-                        data.offsets.Add(offset);
-                        data.glyphs.Add(glyphIndex);
+                        data.offsets.Add(offset.ToSKPoint());
+                        data.codepoints.Add(codepoint);
                     }
 
 
                     if (textLetter.DictSelected && !textLetter.IsRuby)
                     {
                         var Rect = textLetter.GetMarkingRect();
-                        drawingContext.DrawRectangle(Letter.DictSelectionColor, null, Rect);
+                        canvas.DrawRect(Rect.ToSKRect(), Letter.DictSelectionPaint);
                     }
                 }
             }
 
             foreach (var data in this.RunDict)
             {
-                var glyphs = data.Value.glyphs;
                 var offsets = data.Value.offsets;
                 var size = data.Key.Item1;
                 var tf = data.Key.Item2;
+                var glyphs = tf.GetGlyphs(data.Value.codepoints.ToArray());
                 if (glyphs.Any())
                 {
-                    var advanceWidths = new double[glyphs.Count];//not used
+                    using var font = new SKFont
+                    {
+                        Size = size,
+                        Typeface = tf,
+                        Subpixel = true,
+                    };
+                    var widths = font.GetGlyphWidths(glyphs);
+                    for (int i = 0; i < offsets.Count; i++) offsets[i] = new(offsets[i].X - widths[i], offsets[i].Y);
 
-                    data.Value.run ??= new GlyphRun(
-           tf, 0, false, size, 1,
-           glyphs, new Point(), advanceWidths,
-           offsets, null, null, null, null, null);
+                    if (data.Value.run is null)
+                    {
+                        var builder = new SKTextBlobBuilder();
+                        builder.AddPositionedRun(glyphs, font, offsets.ToArray());
+                        data.Value.run = builder.Build();
+                    }
 
-                    drawingContext.DrawGlyphRun(Brushes.Black, data.Value.run);
+                    canvas.DrawText(data.Value.run, 0, 0, blackPaint);
                 }
             }
 
             Rect combinedRect = new();
             bool combinationRunning = false;
             var lastColor = -1;
-            int x = 0;
+            int xx = 0;
             foreach (var Let in ShownPage.Content)
             {
                 switch (Let.Type)
@@ -134,15 +144,15 @@ namespace EPUBRenderer
                         break;
                     case LetterTypes.Image:
                         var ImgLetter = (ImageLetter)Let;
-                        var Img = (ImageSource)ImgLetter.GetImage();
+                        var Img = ImgLetter.GetImage();
                         var StartPoint = ImgLetter.GetStartPoint();
                         var EndPoint = ImgLetter.GetEndPoint();
                         if (Img == null)
                         {
-                            var RedPen = new Pen(Brushes.Red, 1);
-                            drawingContext.DrawRectangle(Brushes.Transparent, RedPen, ImgLetter.GetImageRect());
-                            drawingContext.DrawLine(RedPen, StartPoint, EndPoint);
-                            drawingContext.DrawLine(RedPen, new Point(StartPoint.X, EndPoint.Y), new Point(EndPoint.X, StartPoint.Y));
+                            using var redPaint = new SKPaint { Color = SKColors.Red, IsAntialias = true, Style = SKPaintStyle.Fill };
+                            // drawingContext.DrawRectangle(Brushes.Transparent, RedPaint, ImgLetter.GetImageRect());
+                            canvas.DrawLine(StartPoint.ToSKPoint(), EndPoint.ToSKPoint(), redPaint);
+                            canvas.DrawLine(new Point(StartPoint.X, EndPoint.Y).ToSKPoint(), new Point(EndPoint.X, StartPoint.Y).ToSKPoint(), redPaint);
                         }
                         else
                         {
@@ -152,7 +162,7 @@ namespace EPUBRenderer
                                 ImgLetter.StartPosition = (PageSize - RenderSize) / 2;
                                 ImgLetter.EndPosition = ImgLetter.StartPosition + RenderSize;
                             }
-                            drawingContext.DrawImage(Img, ImgLetter.GetImageRect());
+                            canvas.DrawImage(Img, ImgLetter.GetImageRect().ToSKRect());
                         }
                         break;
                     case LetterTypes.Break:
@@ -172,7 +182,7 @@ namespace EPUBRenderer
                         }
                         else
                         {
-                            drawingContext.DrawRectangle(MarkingColors[1+(x++)%4], null, combinedRect);
+                            canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[1 + (xx++) % 4]);
                             combinedRect = rect;
                         }
                     }
@@ -185,20 +195,17 @@ namespace EPUBRenderer
                 {
                     if (!combinationRunning) continue;
 
-                    drawingContext.DrawRectangle(MarkingColors[1 + (x++) % 4], null, combinedRect);
+                    canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[1 + (xx++) % 4]);
                     combinationRunning = false;
                 }
             }
-            if (combinationRunning) drawingContext.DrawRectangle(MarkingColors[1 + (x++) % 4], null, combinedRect);
+            if (combinationRunning) canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[1 + (xx++) % 4]);
 
 
 
             int Total = this.GetPageCount();
             int Current = this.GetCurrentPage();
-            var PageText = new FormattedText($"{Current}/{Total}", CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight, CharInfo.StandardTypeface, 15, Brushes.Black, 1);
-            double Width = PageText.Width;
-            drawingContext.DrawText(PageText, new Point((PageSize.X - Width) / 2, PageSize.Y + 10));
+            canvas.DrawText($"{Current}/{Total}", new SKPoint((float)PageSize.X / 2.0f, (float)PageSize.Y + 10.0f), SKTextAlign.Center, CharInfo.StandardFont, this.blackPaint);
             this.Rendering = false;
         }
 

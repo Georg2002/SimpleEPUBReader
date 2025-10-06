@@ -4,19 +4,18 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using JapaneseDictionary;
+using SkiaSharp;
 
 namespace EPUBRenderer
 {
     internal class TextLetter : Letter
     {
-        private GlyphTypeface Typeface => PageFile.Typefaces[this.Style.Weight].Item1;
-        private GlyphTypeface BackupTypeface => PageFile.Typefaces[this.Style.Weight].Item2;
-        private Typography.OpenFont.Typeface LookupTypeface => PageFile.LookupTf;
+        private SKTypeface Typeface => PageFile.Typefaces[this.Style.Weight];
         public char Character { get; private set; }
 
         public Vector Offset;
         public bool Rotated => this.Rotation != 0;
-        public double Rotation;
+        public float Rotation;
         public float RelScale = 1;
         public char OrigChar { get; private set; }
 
@@ -102,33 +101,7 @@ namespace EPUBRenderer
             Width = this.FontSize,
             Height = this.VertSpacing.Y * 2 + this.FontSize
         };
-        private static Dictionary<char, ushort> IndexDict = new();
-        public Tuple<GlyphTypeface, ushort> GetRenderingInfo()
-        {
-            var usedTf = this.Typeface;
-            ushort glyphIndex = 0;
-            if (!IndexDict.TryGetValue(this.Character, out glyphIndex))
-            {
-                lock (IndexDict)
-                {
-                    glyphIndex = IndexDict[this.Character] = this.LookupTypeface.LookupIndex(this.Character);
-                }
-            }
-
-            if (glyphIndex <= 0)
-            {
-                if (!this.Typeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
-                {
-                    usedTf = this.BackupTypeface;
-                    if (!this.BackupTypeface.CharacterToGlyphMap.TryGetValue(this.Character, out glyphIndex))
-                    {
-                        glyphIndex = this.Typeface.CharacterToGlyphMap['X'];
-                        usedTf = this.Typeface;
-                    }
-                }
-            }
-            return new(usedTf, glyphIndex);
-        }
+        public Tuple<SKTypeface, int> GetRenderingInfo() => new(this.Typeface, this.Character);        
         public override string ToString() => Character.ToString();
     }
 }

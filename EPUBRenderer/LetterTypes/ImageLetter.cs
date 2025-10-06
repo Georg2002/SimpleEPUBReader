@@ -1,20 +1,43 @@
-﻿using System.Drawing;
+﻿using EPUBParser;
+using SkiaSharp;
+using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using static System.Net.Mime.MediaTypeNames;
 using Point = System.Windows.Point;
 
 namespace EPUBRenderer
 {
     internal class ImageLetter : Letter
     {
-        public ImageSource Image;
+        public SKImage Image;
         public bool Inline;
-        public ImageLetter(ImageSource Image, bool Inline, WordInfo wordInfo) : base(wordInfo)
+        public ImageLetter(byte[] imageData, bool Inline, WordInfo wordInfo) : base(wordInfo)
         {
             Type = LetterTypes.Image;
             this.Inline = Inline;
             this.IsWordEnd = true;
-            this.Image = Image;
+
+            if (imageData == null)
+            {
+                Logger.Report("image data a missing", LogType.Error);
+                this.Image = null;
+            }
+
+            try
+            {
+                using (var memStream = new MemoryStream(imageData))
+                {
+                    this.Image = SKImage.FromBitmap(SKBitmap.Decode(SKCodec.Create(SKData.Create(memStream))));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Report("image from couldn't be loaded", LogType.Error);
+                Logger.Report(ex.Message, LogType.Error);
+            }
         }
 
         private double Width;
@@ -87,6 +110,6 @@ namespace EPUBRenderer
             return PRatio < IRatio ? new Vector(-PageSize.X, PageSize.X / IRatio) : new Vector(-PageSize.Y * IRatio, PageSize.Y);
         }
 
-        public ImageSource GetImage() => Image;
+        public SKImage GetImage() => Image;
     }
 }

@@ -11,7 +11,7 @@ namespace EPUBParser
         private static List<string> _Log = new List<string>();
         public static List<string> Log { get => _Log; set => _Log = value; }
 
-        internal static void Report(string Message, LogType type)
+        public static void Report(string Message, LogType type)
         {
             Message = type.ToString() + ": " + Message;
             Log.Add(Message);            
@@ -24,7 +24,7 @@ namespace EPUBParser
         }
     }
 
-    internal enum LogType
+    public enum LogType
     {
         Info, Error
     }

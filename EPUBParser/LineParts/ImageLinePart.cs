@@ -9,37 +9,10 @@ namespace EPUBParser
 {
     public class ImageLinePart : BaseLinePart
     {
-        private byte[] ImageData;
+        public byte[] ImageData { get; private set; }
         public bool Inline;
 
-        public ImageSource GetImage()
-        {
-            if (ImageData == null)
-            {
-                Logger.Report(string.Format("image at \"{0}\" missing", Text), LogType.Error);
-                return null;
-            }
-            BitmapImage Image = null;
-            try
-            {
-                using (var mem = new MemoryStream(ImageData))
-                {
-                    Image = new BitmapImage();
-                    Image.BeginInit();
-                    Image.CacheOption = BitmapCacheOption.OnLoad; // here
-                    Image.StreamSource = mem;
-                    Image.EndInit();
-                    Image.Freeze();
-                    return Image;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Report(string.Format("image from \"{0}\" couldn't be loaded", Text), LogType.Error);
-                Logger.Report(ex.Message, LogType.Error);
-            }
-            return Image;
-        }
+  
 
         public ImageLinePart(string Path, bool Inline, LineSplitInfo info) : base(info)
         {

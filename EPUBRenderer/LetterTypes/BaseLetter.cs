@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -42,7 +43,7 @@ namespace EPUBRenderer
         internal bool IsWordEnd;
         internal bool IsPageStart;
         public byte MarkingColorIndex;
-        internal readonly static Brush DictSelectionColor;
+        internal readonly static SKPaint DictSelectionPaint;
 
         internal WordStyle Style;
         internal Word OwnWord;
@@ -56,7 +57,7 @@ namespace EPUBRenderer
         public static float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
 
 
-       
+
         public Vector StartPosition;
         public Vector EndPosition;
         public virtual Vector HitboxStart => this.StartPosition;
@@ -66,8 +67,7 @@ namespace EPUBRenderer
         public LetterTypes Type;
         static Letter()
         {
-            DictSelectionColor = new SolidColorBrush(new Color() { A = 100, B = 50, G = 50, R = 50 });
-            DictSelectionColor.Freeze();
+            DictSelectionPaint = new SKPaint { Color = new SKColor(50, 50, 50, 100), IsAntialias = true, Style = SKPaintStyle.Fill };
         }
         public virtual bool Position(LetterPlacementInfo Info) => false;
         internal bool Inside(Point relPoint) => relPoint.X <= this.HitboxStart.X && relPoint.Y >= this.HitboxStart.Y && relPoint.X >= this.HitboxEnd.X && relPoint.Y <= this.HitboxEnd.Y;

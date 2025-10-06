@@ -1,4 +1,5 @@
 ﻿using EPUBParser;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,18 +21,8 @@ namespace EPUBRenderer
         private int UsedCachePages = 0;
         private readonly List<RenderPage> CachedPages = new();
         internal int Index;
-        internal static Typography.OpenFont.Typeface LookupTf;
         internal Task PositioningTask { get; private set; }
-        static PageFile()
-        {
-            var reader = new Typography.OpenFont.OpenFontReader();
-            // var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream()
-            // var stream = File.Open(@"D:\Informatik\EPUBReader\EPUBRenderer\Fonts\NotoSansJP-Black.ttf", FileMode.Open, FileAccess.Read, FileShare.Read);
-            var stream = Application.GetResourceStream(new Uri("pack://application:,,,/EPUBRenderer;component/Fonts/NotoSansJP-Regular.ttf")).Stream;
-            var tf = reader.Read(stream);
-            stream.Close();
-            PageFile.LookupTf = tf;
-        }
+     
         private EpubPage epubPage;
         private CSSExtract CSS;
         private List<MrkDef> mrkDefs;
@@ -68,7 +59,7 @@ namespace EPUBRenderer
 
         private Vector lastPageSize = new(-1, -1);
         private readonly object lockO = new();
-   
+
         public Task CalculatePages(Vector PageSize, int Index)
         {
             lock (this.lockO)
@@ -114,7 +105,7 @@ namespace EPUBRenderer
 
         public override string ToString() => string.Join("", Content.Select(a => a.ToString()));
 
-        public static Dictionary<FontWeight, Tuple<GlyphTypeface, GlyphTypeface>> Typefaces = new();
+        public static Dictionary<SKFontStyleWeight, SKTypeface> Typefaces = new();
         private static readonly object lockObj = new();
         private static WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {
@@ -131,16 +122,16 @@ namespace EPUBRenderer
                     switch (Style.FontWeight)
                     {
                         case EPUBParser.FontWeights.bold:
-                            NewStyle.Weight = System.Windows.FontWeights.SemiBold;
+                            NewStyle.Weight = SKFontStyleWeight.SemiBold; ;
                             break;
                         case EPUBParser.FontWeights.bolder:
-                            NewStyle.Weight = System.Windows.FontWeights.Medium;
+                            NewStyle.Weight = SKFontStyleWeight.Medium;
                             break;
                         case EPUBParser.FontWeights.lighter:
-                            NewStyle.Weight = System.Windows.FontWeights.Light;
+                            NewStyle.Weight = SKFontStyleWeight.Light;
                             break;
                         case EPUBParser.FontWeights.normal:
-                            NewStyle.Weight = System.Windows.FontWeights.Normal;
+                            NewStyle.Weight = SKFontStyleWeight.Normal;
                             break;
                     }
                 }
@@ -149,12 +140,9 @@ namespace EPUBRenderer
             {
                 if (!Typefaces.ContainsKey(NewStyle.Weight))
                 {
-                    var tf = new Typeface(CharInfo.StandardFontFamily, FontStyles.Normal, NewStyle.Weight, new FontStretch(), CharInfo.StandardFallbackFontFamily);
+                    var typeface = SKTypeface.FromFamilyName(CharInfo.StandardFontFamily, NewStyle.Weight, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
 
-                    if (!tf.TryGetGlyphTypeface(out GlyphTypeface typeface)) throw new Exception("Can't get glyph typeface");
-                    var backupTf = new Typeface(CharInfo.StandardFallbackFontFamily, FontStyles.Normal, NewStyle.Weight, new FontStretch());
-                    if (!backupTf.TryGetGlyphTypeface(out GlyphTypeface backupTypeface)) throw new Exception("Can't get backup glyph typeface");
-                    Typefaces[NewStyle.Weight] = new(typeface, backupTypeface);
+                    Typefaces[NewStyle.Weight] = typeface;
                 }
             }
             return NewStyle;
@@ -213,7 +201,7 @@ namespace EPUBRenderer
                         break;
                     case LinePartTypes.image:
                         var ImagePart = (ImageLinePart)Part;
-                        Content.Add(new ImageLetter(ImagePart.GetImage(), ImagePart.Inline, wordInfo));
+                        Content.Add(new ImageLetter(ImagePart.ImageData, ImagePart.Inline, wordInfo));
                         lastImage = !ImagePart.Inline;
                         break;
                     case LinePartTypes.paragraph:

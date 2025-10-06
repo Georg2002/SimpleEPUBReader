@@ -36,6 +36,7 @@ namespace EPUBReader
         public byte ColorIndex = 1;
         private const byte Alpha = 100;
         private bool DictionaryActive = false;
+        //needed for changing button bg
         readonly Brush[] MarkingColors = new Brush[] {null,
             new SolidColorBrush(new Color() { R = 255, G = 0, B = 0, A = Alpha }),
             new SolidColorBrush( new Color() { R = 0, G = 255,B = 0,A = Alpha}),
@@ -49,7 +50,13 @@ namespace EPUBReader
         {
             InitializeComponent();
             MouseManager = new MouseManager(Bar, ContentGrid, Renderer, this);
-            Renderer.MarkingColors = MarkingColors;
+            Renderer.MarkingColors = new SkiaSharp.SKPaint[] {
+                null,
+                new SkiaSharp.SKPaint {Color=new SkiaSharp.SKColor(255, 0, 0, Alpha) },
+                new SkiaSharp.SKPaint {Color=new SkiaSharp.SKColor(0, 255, 0, Alpha) },
+                new SkiaSharp.SKPaint {Color=new SkiaSharp.SKColor(255, 255, 0, Alpha) },
+                new SkiaSharp.SKPaint {Color=new SkiaSharp.SKColor(0, 0, 255, Alpha) }
+            };
             Bar.Margin = new Thickness(0, -MouseManager.BarHeight, 0, 0);
             ContentGrid.Margin = new Thickness(0, MouseManager.BarHeight / 2, 0, MouseManager.BarHeight / 2);
             Bar.Height = MouseManager.BarHeight;
