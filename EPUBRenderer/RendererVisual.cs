@@ -119,7 +119,7 @@ namespace EPUBRenderer
                         Subpixel = true,
                     };
                     var widths = font.GetGlyphWidths(glyphs);
-                    for (int i = 0; i < offsets.Count; i++) offsets[i] = new(offsets[i].X - widths[i], offsets[i].Y);
+                    for (int i = 0; i < offsets.Count; i++) offsets[i] = new(offsets[i].X - (size + widths[i]) / 2, offsets[i].Y);
 
                     if (data.Value.run is null)
                     {
@@ -135,7 +135,6 @@ namespace EPUBRenderer
             Rect combinedRect = new();
             bool combinationRunning = false;
             var lastColor = -1;
-            int xx = 0;
             foreach (var Let in ShownPage.Content)
             {
                 switch (Let.Type)
@@ -182,7 +181,7 @@ namespace EPUBRenderer
                         }
                         else
                         {
-                            canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[1 + (xx++) % 4]);
+                            canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[lastColor]);
                             combinedRect = rect;
                         }
                     }
@@ -195,17 +194,17 @@ namespace EPUBRenderer
                 {
                     if (!combinationRunning) continue;
 
-                    canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[1 + (xx++) % 4]);
+                    canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[lastColor]);
                     combinationRunning = false;
                 }
             }
-            if (combinationRunning) canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[1 + (xx++) % 4]);
+            if (combinationRunning) canvas.DrawRect(combinedRect.ToSKRect(), MarkingColors[lastColor]);
 
 
 
             int Total = this.GetPageCount();
             int Current = this.GetCurrentPage();
-            canvas.DrawText($"{Current}/{Total}", new SKPoint((float)PageSize.X / 2.0f, (float)PageSize.Y + 10.0f), SKTextAlign.Center, CharInfo.StandardFont, this.blackPaint);
+            canvas.DrawText($"{Current}/{Total}", new SKPoint((float)PageSize.X / 2.0f, (float)PageSize.Y + 20.0f), SKTextAlign.Center, CharInfo.StandardFont, this.blackPaint);
             this.Rendering = false;
         }
 
