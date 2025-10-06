@@ -92,12 +92,10 @@ namespace EPUBRenderer
                 {
                     if (this.waitingCount > 0)
                     {
-                        Debug.WriteLine("Leaving loop because of waiting task");
                         this.sem.Release();
                         return;
                     }
                 }
-                Debug.WriteLine("Entering positioning loop");
                 Task bTask = null;
                 if (a < pageFiles.Length)
                 {
@@ -116,7 +114,6 @@ namespace EPUBRenderer
                     this.PageCountUpdated.Invoke();
                 }
             }
-            Debug.WriteLine("Leaving loop because finished");
             this.PageCountUpdated.Invoke();
             this.sem.Release();
 
@@ -129,6 +126,7 @@ namespace EPUBRenderer
 
         internal void RemoveMarking(PosDef start, PosDef end) => this.Iterate(start, end, (a, b) => a.MarkingColorIndex = 0);
 
+        public string MarkedText { get; private set; }
         internal void AddMarking(PosDef start, PosDef end, byte colInd)
         {
             StringBuilder sb = new();
@@ -137,18 +135,7 @@ namespace EPUBRenderer
                 a.MarkingColorIndex = colInd;
                 if (a is TextLetter textLetter && !textLetter.IsRuby) sb.Append(textLetter.OrigChar);
             });
-            if (sb.Length > 0)
-            {
-                //to fix https://github.com/Georg2002/SimpleEPUBReader/issues/3
-                try
-                {
-                    Clipboard.SetDataObject(sb.ToString(), true);
-                }
-                catch
-                {
-                    //nothing I guess?
-                }
-            }
+            this.MarkedText = sb.ToString();       
         }
 
         private bool PossiblyValid(PosDef Pos) => Pos.FileIndex >= 0 && Pos.Letter >= 0 &&

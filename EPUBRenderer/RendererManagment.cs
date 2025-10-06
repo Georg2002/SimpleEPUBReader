@@ -118,7 +118,7 @@ namespace EPUBRenderer
             loadAsync().CatchAll();
         }
 
-        private void UpdatePageCount() => this.Dispatcher.Invoke(this.Refresh);
+        private void UpdatePageCount() => this.Dispatcher.Invoke(()=>this.Refresh());
 
         public async Task OpenPage(PosDef Position)
         {
@@ -126,7 +126,7 @@ namespace EPUBRenderer
             CurrBook.CurrPos = Position;
             var PageFile = await CurrBook.GetPositionedPage(Position.FileIndex);
             this.ShownPage = PageFile.GetShownPage(Position);
-            this.Refresh();
+            this.Refresh(rerender:true);
         }
 
         public async Task Switch(int dir)
@@ -193,13 +193,22 @@ namespace EPUBRenderer
             CurrBook.RemoveMarking(FirstHit, SecondHit);
             this.SecondHit = newSecondHit;
             this.SetCurrPos(SecondHit);
-            CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
+            this.CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
             this.Refresh();
         }
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
             this.DrawTempMarking(relPoint, ColorIndex, ignoreInterval: true);
+            //to fix https://github.com/Georg2002/SimpleEPUBReader/issues/3
+            try
+            {
+                Clipboard.SetDataObject(this.CurrBook.MarkedText, true);
+            }
+            catch
+            {
+                //nothing I guess?
+            }
             this.SecondHit = PosDef.InvalidPosition;
         }
 
@@ -265,9 +274,9 @@ namespace EPUBRenderer
             this.SelectionEnd = PosDef.InvalidPosition;
         }
 
-        private void Refresh()
+        private void Refresh(bool rerender = false)
         {
-            this.Rendering = true;
+            if (rerender) this.Rendering = true;
             this.InvalidateVisual();
         }
         private SemaphoreSlim positioningSemaphore = new(1, 1);
@@ -283,7 +292,6 @@ namespace EPUBRenderer
 
             async Task loadAsync()
             {
-
                 lock (this.recalculatingLockO) recalculatingSizeWaiting = true;
                 await this.positioningSemaphore.WaitAsync();
                 lock (this.recalculatingLockO) recalculatingSizeWaiting = false;
@@ -294,10 +302,9 @@ namespace EPUBRenderer
                 this.positioningSemaphore.Release();
                 await CurrBook.Position(CurrBook.CurrPos);
             }
-            loadAsync().CatchAll();
-
             this.Rendering = true;
 
+            loadAsync().CatchAll();
         }
     }
 }

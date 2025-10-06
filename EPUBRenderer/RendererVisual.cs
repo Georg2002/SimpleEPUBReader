@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,36 +19,44 @@ namespace EPUBRenderer
 
     public partial class Renderer : FrameworkElement
     {
-        private static readonly Dictionary<Tuple<GlyphTypeface, ushort>, double> WidthDict = new();
+        private static readonly Dictionary<ushort, double> WidthDict = new();
         private static readonly object LockObject = new();
-        private static double GetAdvanceWidth(ushort index, GlyphTypeface tf)
+        private static double GetAdvanceWidth(ushort index)
         {
-            return PageFile.LookupTf.GetHAdvanceWidthFromGlyphIndex(index) / 1000.0;
+            if (!WidthDict.TryGetValue(index, out double width))
+            {
+                width = WidthDict[index] = PageFile.LookupTf.GetHAdvanceWidthFromGlyphIndex(index) / 1000.0;
+            }
+            return width;
         }
 
         private class GlyphRunData
         {
             public List<Point> offsets = new();
             public List<ushort> glyphs = new();
+            public GlyphRun run;
             public GlyphRunData()
             {
             }
         }
 
         private Dictionary<Tuple<float, GlyphTypeface>, GlyphRunData> RunDict = new();
+
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (ShownPage == null) return;// || !Rendering
+            if (ShownPage is null) return;
 
-            foreach (var data in this.RunDict.Values)
-            {
-                //can't clear after draw call because arrays are as ref
-                data.offsets.Clear();
-                data.glyphs.Clear();
-            }
 
             bool SingleImage = ShownPage.IsSingleImage();
+            if (this.Rendering)
             {
+                foreach (var data in this.RunDict.Values)
+                {
+                    //can't clear after draw call because arrays are as ref
+                    data.offsets.Clear();
+                    data.glyphs.Clear();
+                    data.run = null;
+                }
                 foreach (TextLetter textLetter in ShownPage.Content.Where(a => a is TextLetter).Cast<TextLetter>())
                 {
                     (var letterTf, var glyphIndex) = textLetter.GetRenderingInfo();
@@ -54,7 +64,7 @@ namespace EPUBRenderer
 
                     var drawPos = textLetter.StartPosition + textLetter.Offset * textLetter.FontSize;
 
-                    var width = Renderer.GetAdvanceWidth(glyphIndex, letterTf);
+                    var width = Renderer.GetAdvanceWidth(glyphIndex);
                     var ul = 0.1;
                     var offset = new Point(drawPos.X - size * (1 + width) / 2, -textLetter.FontSize * (1 - ul) - drawPos.Y);
                     if (textLetter.Rotated)
@@ -103,15 +113,19 @@ namespace EPUBRenderer
                 {
                     var advanceWidths = new double[glyphs.Count];//not used
 
-                    var run = new GlyphRun(
-            tf, 0, false, size, 1,
-            glyphs, new Point(), advanceWidths,
-            offsets, null, null, null, null, null);
+                    data.Value.run ??= new GlyphRun(
+           tf, 0, false, size, 1,
+           glyphs, new Point(), advanceWidths,
+           offsets, null, null, null, null, null);
 
-                    drawingContext.DrawGlyphRun(Brushes.Black, run);
+                    drawingContext.DrawGlyphRun(Brushes.Black, data.Value.run);
                 }
             }
 
+            Rect combinedRect = new();
+            bool combinationRunning = false;
+            var lastColor = -1;
+            int x = 0;
             foreach (var Let in ShownPage.Content)
             {
                 switch (Let.Type)
@@ -149,10 +163,35 @@ namespace EPUBRenderer
                 }
                 if (Let.MarkingColorIndex != 0)
                 {
-                    var Rect = Let.GetMarkingRect();
-                    drawingContext.DrawRectangle(MarkingColors[Let.MarkingColorIndex], null, Rect);
+                    if (combinationRunning)
+                    {
+                        var rect = Let.GetMarkingRect();
+                        if (Let.MarkingColorIndex == lastColor && combinedRect.Left == rect.Left && combinedRect.Right == rect.Right)
+                        {
+                            combinedRect = new Rect(new Point(combinedRect.Left, combinedRect.Top), new Point(combinedRect.Right, rect.Bottom));
+                        }
+                        else
+                        {
+                            drawingContext.DrawRectangle(MarkingColors[1+(x++)%4], null, combinedRect);
+                            combinedRect = rect;
+                        }
+                    }
+                    else combinedRect = Let.GetMarkingRect();
+
+                    combinationRunning = true;
+                    lastColor = Let.MarkingColorIndex;
+                }
+                else
+                {
+                    if (!combinationRunning) continue;
+
+                    drawingContext.DrawRectangle(MarkingColors[1 + (x++) % 4], null, combinedRect);
+                    combinationRunning = false;
                 }
             }
+            if (combinationRunning) drawingContext.DrawRectangle(MarkingColors[1 + (x++) % 4], null, combinedRect);
+
+
 
             int Total = this.GetPageCount();
             int Current = this.GetCurrentPage();

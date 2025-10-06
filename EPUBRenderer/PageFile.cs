@@ -41,17 +41,20 @@ namespace EPUBRenderer
             this.CSS = CSS;
             this.mrkDefs = mrkDefs;
         }
-
+        private readonly object setupLockO = new();
         internal void Setup()
         {
-            if (this.epubPage is null) return;
+            lock (this.setupLockO)
+            {
+                if (this.epubPage is null) return;
+            }
             this.CreateContent(this.epubPage, CSS);
             foreach (var mrk in mrkDefs.Where(a => a.Pos.Letter < this.Content.Count))
             {
                 this.Content[mrk.Pos.Letter].MarkingColorIndex = mrk.ColorIndex;
             }
             this.epubPage.FreeMemory();
-            this.epubPage = null;
+            lock (this.setupLockO) this.epubPage = null;
             this.CSS = null;
             this.mrkDefs = null;
         }
@@ -65,16 +68,17 @@ namespace EPUBRenderer
 
         private Vector lastPageSize = new(-1, -1);
         private readonly object lockO = new();
+   
         public Task CalculatePages(Vector PageSize, int Index)
         {
             lock (this.lockO)
             {
                 if (this.PositioningTask is not null && this.lastPageSize == PageSize) return this.PositioningTask;
+
                 this.lastPageSize = PageSize;
 
                 return this.PositioningTask = Task.Run(() =>
                       {
-
                           this.Setup();
                           this.Index = Index;
                           lock (this.Pages) Pages.Clear();

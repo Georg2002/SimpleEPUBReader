@@ -21,8 +21,8 @@ namespace EPUBRenderer
         public char OrigChar { get; private set; }
 
         private static readonly Vector HitboxExpansion = new((LineDist - StandardFontSize) / 2, 0);
-        public override Vector HitboxStart => this.IsRuby ? OutsideVector : StartPosition + HitboxExpansion - VertSpacing;
-        public override Vector HitboxEnd => this.IsRuby ? OutsideVector : EndPosition + HitboxExpansion + VertSpacing;
+        public override Vector HitboxStart => this.IsRuby ? OutsideVector : StartPosition + HitboxExpansion;// - VertSpacing;
+        public override Vector HitboxEnd => this.IsRuby ? OutsideVector : EndPosition - HitboxExpansion;// + VertSpacing;
         private Vector VertSpacing;
 
         public TextLetter(char character, WordInfo wordInfo) : base(wordInfo)
@@ -102,14 +102,17 @@ namespace EPUBRenderer
             Width = this.FontSize,
             Height = this.VertSpacing.Y * 2 + this.FontSize
         };
-        static object lockO = new();
+        private static Dictionary<char, ushort> IndexDict = new();
         public Tuple<GlyphTypeface, ushort> GetRenderingInfo()
         {
             var usedTf = this.Typeface;
-            ushort glyphIndex = 10;
-            lock (lockO)
+            ushort glyphIndex = 0;
+            if (!IndexDict.TryGetValue(this.Character, out glyphIndex))
             {
-                glyphIndex = this.LookupTypeface.LookupIndex(this.Character);
+                lock (IndexDict)
+                {
+                    glyphIndex = IndexDict[this.Character] = this.LookupTypeface.LookupIndex(this.Character);
+                }
             }
 
             if (glyphIndex <= 0)
