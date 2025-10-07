@@ -108,7 +108,7 @@ namespace EPUBRenderer
                 if (bTask is not null) await bTask;
                 b--;
                 a++;
-                if (DateTime.Now.Subtract(lastUpdate).TotalMilliseconds > 500)
+                if (DateTime.Now.Subtract(lastUpdate).TotalMilliseconds > 100)
                 {
                     lastUpdate = DateTime.Now;
                     this.PageCountUpdated.Invoke();

@@ -136,23 +136,24 @@ namespace EPUBReader
         internal int GetPageCount() => Renderer.GetPageCount();
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Renderer.RefreshedEvent += this.PagesControl.Refresh;
             DictControl.Init(this);
             var Args = Environment.GetCommandLineArgs();
             string arg = Args.Length > 1 ? Args[1] : null;
             LoadSave(arg);
         }
 
-        private void Right_Click(object sender, RoutedEventArgs e) => JumpPages(-1).CatchAll();
-        private void Left_Click(object sender, RoutedEventArgs e) => JumpPages(1).CatchAll();
+        private void Right_Click(object sender, RoutedEventArgs e) => JumpPages(-1);
+        private void Left_Click(object sender, RoutedEventArgs e) => JumpPages(1);
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
                 case Key.Right:
-                    if (!e.IsRepeat || !this.Renderer.Rendering) JumpPages(-1).CatchAll();
+                    if (!e.IsRepeat || !this.Renderer.Rendering) JumpPages(-1);
                     break;
                 case Key.Left:
-                    if (!e.IsRepeat || !this.Renderer.Rendering) JumpPages(1).CatchAll();
+                    if (!e.IsRepeat || !this.Renderer.Rendering) JumpPages(1);
                     break;
                 case Key.Tab:
                     e.Handled = true;
@@ -235,9 +236,9 @@ namespace EPUBReader
             }
         }
 
-        public async Task SetChapter(int ChapterIndex)
+        public void SetChapter(int ChapterIndex)
         {
-            await Renderer.SetChapter(ChapterIndex);
+            Renderer.SetChapter(ChapterIndex);
             if (Menu.Visibility == Visibility.Visible) Chapter_Click(null, null);
         }
 
@@ -254,10 +255,9 @@ namespace EPUBReader
             MouseManager.Locked = false;
         }
 
-        public async Task JumpPages(int dir)
+        public void JumpPages(int dir)
         {
-            await Renderer.Switch(dir);
-            PagesControl.Refresh();
+            this.Renderer.InputQueue.Add(() => Renderer.Switch(dir));
         }
 
         private void Color_Click(object sender, RoutedEventArgs e)
@@ -298,7 +298,6 @@ namespace EPUBReader
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            PagesControl.Refresh();
             if (WindowState == WindowState.Normal)
             {
                 WindowSize.X = ActualWidth;

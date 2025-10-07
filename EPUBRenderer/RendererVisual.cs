@@ -1,6 +1,5 @@
 ﻿using SkiaSharp;
 using SkiaSharp.Views.Desktop;
-using SkiaSharp.Views.WPF;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,13 +14,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 
 
 namespace EPUBRenderer
 {
 
-    public partial class Renderer : SKElement
+    public partial class Renderer : SKElementCust
     {
         private static readonly Dictionary<ushort, double> WidthDict = new();
         private static readonly object LockObject = new();
@@ -37,10 +37,15 @@ namespace EPUBRenderer
         }
 
         private Dictionary<Tuple<float, SKTypeface>, GlyphRunData> RunDict = new();
-
+        private object renderLockObject = new();
         protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
         {
-            if (ShownPage is null) return;
+            lock (this.renderLockObject)
+            {
+                if (ShownPage is null || !this.Rendering) return;
+            }
+           
+            Debug.WriteLine("Render executed");
             var canvas = e.Surface.Canvas;
 
             // make sure the canvas is blank
@@ -73,12 +78,7 @@ namespace EPUBRenderer
                     //glyph run can't give each letter its own rotation, so it has to be handled extra
                     //theoretically all equally rotated letters could be drawn in one call, but offsets need to be transformed
 
-                    using var font = new SKFont
-                    {
-                        Typeface = letterTf,
-                        Size = size,
-                        Subpixel = true
-                    };
+                    using var font = this.GetFont(letterTf, size);
                     canvas.DrawText(textLetter.Character.ToString(), offset.ToSKPoint(), SKTextAlign.Center, font, this.blackPaint);
 
                     canvas.RotateDegrees(-textLetter.Rotation, x, y);
@@ -112,12 +112,7 @@ namespace EPUBRenderer
                 var glyphs = tf.GetGlyphs(data.Value.codepoints.ToArray());
                 if (glyphs.Any())
                 {
-                    using var font = new SKFont
-                    {
-                        Size = size,
-                        Typeface = tf,
-                        Subpixel = true,
-                    };
+                    using var font = this.GetFont(tf, size);
                     var widths = font.GetGlyphWidths(glyphs);
                     for (int i = 0; i < offsets.Count; i++) offsets[i] = new(offsets[i].X - (size + widths[i]) / 2, offsets[i].Y);
 
@@ -161,7 +156,7 @@ namespace EPUBRenderer
                                 ImgLetter.StartPosition = (PageSize - RenderSize) / 2;
                                 ImgLetter.EndPosition = ImgLetter.StartPosition + RenderSize;
                             }
-                            canvas.DrawImage(Img, ImgLetter.GetImageRect().ToSKRect());
+                            canvas.DrawImage(Img, ImgLetter.GetImageRect().ToSKRect(), this.samplingOptions);
                         }
                         break;
                     case LetterTypes.Break:
@@ -205,7 +200,9 @@ namespace EPUBRenderer
             int Total = this.GetPageCount();
             int Current = this.GetCurrentPage();
             canvas.DrawText($"{Current}/{Total}", new SKPoint((float)PageSize.X / 2.0f, (float)PageSize.Y + 20.0f), SKTextAlign.Center, CharInfo.StandardFont, this.blackPaint);
-            this.Rendering = false;
+            lock (this.renderLockObject) this.Rendering = false;
+
+            this.renderingSemaphore.Release();
         }
 
         public void ResetSelection()

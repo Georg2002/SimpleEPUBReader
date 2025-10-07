@@ -38,7 +38,6 @@ namespace EPUBReader
             }
         }
 
-        private static object LockObject;
         public async void SelectionChanged(string text)
         {
             if (!Active) return;
@@ -54,7 +53,7 @@ namespace EPUBReader
 
         private void MoveSelection(int Front, int End)
         {
-            if (Active) main.DictSelectionMoved(Front, End);
+            if (Active)  main.DictSelectionMoved(Front, End);
         }
 
         private void clrBtn_Click(object sender, RoutedEventArgs e)

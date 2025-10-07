@@ -66,7 +66,7 @@ namespace EPUBReader
             var Item = (ListItemStruct)Button.DataContext;
             if (ShowingChapters)
             {
-                Main.SetChapter(Item.Index).CatchAll();
+                Main.SetChapter(Item.Index);
             }
             else
             {

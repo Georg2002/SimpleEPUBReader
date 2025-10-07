@@ -26,7 +26,7 @@ namespace EPUBRenderer
                 if (resName.EndsWith(".g.resources", StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine($"Found resource pack: {resName}");
-                    using Stream? stream = assembly.GetManifestResourceStream(resName);
+                    using Stream stream = assembly.GetManifestResourceStream(resName);
                     if (stream == null) continue;
 
                     using var reader = new ResourceReader(stream);
@@ -41,12 +41,12 @@ namespace EPUBRenderer
                         }
                     }
                 }
-            }          
+            }
         }
 
         public readonly static string StandardFontFamily = "Noto Sans JP";
         public readonly static string StandardFallbackFontFamily = "Arial";
-        public readonly static SKFont StandardFont = new SKFont { Size = 15, Subpixel = true, Typeface = SKTypeface.FromFamilyName(StandardFontFamily, SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) };
+        public readonly static SKFont StandardFont = new SKFont { Size = 15, Subpixel = true, Typeface = SKTypeface.FromFamilyName(StandardFontFamily, SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright), Edging = SKFontEdging.SubpixelAntialias };
 
         public static readonly char[] PossibleLineBreaksAfter = ", .」』、?？！!を。─）〉):\n\r　\t】≫》〟…".ToCharArray();
         public static readonly char[] PossibleLineBreaksBefore = "（「『〈【≪《(〔〝".ToCharArray();

@@ -31,6 +31,7 @@ namespace EPUBRenderer
                 using (var memStream = new MemoryStream(imageData))
                 {
                     this.Image = SKImage.FromBitmap(SKBitmap.Decode(SKCodec.Create(SKData.Create(memStream))));
+                 
                 }
             }
             catch (Exception ex)

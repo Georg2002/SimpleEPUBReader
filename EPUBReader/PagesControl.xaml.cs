@@ -31,17 +31,17 @@ namespace EPUBReader
 
         private void M100(object sender, RoutedEventArgs e)
         {
-            Jump(-100).CatchAll();
+            Jump(-100);
         }
 
         private void M10(object sender, RoutedEventArgs e)
         {
-            Jump(-10).CatchAll();
+            Jump(-10);
         }
 
         private void M1(object sender, RoutedEventArgs e)
         {
-            Jump(-1).CatchAll();
+            Jump(-1);
         }
 
         private void Finished(object sender, RoutedEventArgs e)
@@ -51,28 +51,28 @@ namespace EPUBReader
 
         private void P1(object sender, RoutedEventArgs e)
         {
-            Jump(1).CatchAll();
+            Jump(1);
         }
 
         private void P10(object sender, RoutedEventArgs e)
         {
-            Jump(10).CatchAll();
+            Jump(10);
         }
 
         private void P100(object sender, RoutedEventArgs e)
         {
-            Jump(100).CatchAll();
+            Jump(100);
         }
 
-        private async Task Jump(int Amount)
+        private void Jump(int Amount)
         {
-            await Main.JumpPages(Amount);
+            Main.JumpPages(Amount);
             Refresh();
         }
 
         public void Refresh()
         {
-            TxtInidicator.Text = $"{Main.GetCurrentPage()}/{Main.GetPageCount()}";
+            Dispatcher.Invoke(() => TxtInidicator.Text = $"{Main.GetCurrentPage()}/{Main.GetPageCount()}");
         }
 
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)

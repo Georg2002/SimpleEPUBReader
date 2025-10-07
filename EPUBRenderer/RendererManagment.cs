@@ -1,6 +1,6 @@
 ﻿using EPUBParser;
 using SkiaSharp;
-using SkiaSharp.Views.WPF;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace EPUBRenderer
 {
-    public partial class Renderer : SKElement
+    public partial class Renderer : SKElementCust
     {
         public RenderBook CurrBook;
         Vector PageSize;
@@ -21,15 +21,27 @@ namespace EPUBRenderer
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private SKPaint blackPaint = new SKPaint { Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Fill };
+        private SKSamplingOptions samplingOptions = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
         public bool Rendering { get; private set; } = false;
 
+        public delegate void RefreshedEventHandler();
+        public event RefreshedEventHandler RefreshedEvent;
 
         public Renderer()
         {
             SizeChanged += this.Renderer_SizeChanged;
             this.MinHeight = 100;
             this.MinWidth = 100;
+
+            this.WorkInputQueue();
         }
+        private SKFont GetFont(SKTypeface tf, float size) => new SKFont
+        {
+            Size = size,
+            Typeface = tf,
+            Subpixel = true,
+            Edging = SKFontEdging.SubpixelAntialias,
+        };
         public void MoveSelection(int front, int end)
         {
             if (SelectionEnd == PosDef.InvalidPosition || SelectionStart == PosDef.InvalidPosition)
@@ -60,6 +72,7 @@ namespace EPUBRenderer
                 this.SelectionEnd = EndOld;
             }
             CurrBook.AddSelection(SelectionStart, SelectionEnd);
+            this.QueueRefresh();
         }
 
         private void MoveSelectionPoints(int front, int end, int letterCount)
@@ -108,27 +121,28 @@ namespace EPUBRenderer
             this.CurrBook = new RenderBook(epub, DateAdded, Markings);
             this.CurrBook.PageCountUpdated += this.UpdatePageCount;
 
+            if (Position.FileIndex >= this.CurrBook.pageFileCount) Position.FileIndex = this.CurrBook.pageFileCount - 1;
+
             async Task loadAsync()
             {
-                await this.positioningSemaphore.WaitAsync();
+                this.PageSize = this.GetPageSize();
                 CurrBook.PositionPrepare(this.PageSize);
                 await this.OpenPage(Position);
-                this.positioningSemaphore.Release();
-                await CurrBook.Position(Position);
-                //  await posTask;
+                CurrBook.Position(Position).CatchAll();
             }
-            loadAsync().CatchAll();
+            this.InputQueue.Add(loadAsync);
         }
 
-        private void UpdatePageCount() => this.Dispatcher.Invoke(() => this.Refresh());
+        private void UpdatePageCount() => this.QueueRefresh();
 
         public async Task OpenPage(PosDef Position)
         {
             if (CurrBook == null) return;
+            this.FirstHit = this.SecondHit = PosDef.InvalidPosition;
+
             CurrBook.CurrPos = Position;
             var PageFile = await CurrBook.GetPositionedPage(Position.FileIndex);
             this.ShownPage = PageFile.GetShownPage(Position);
-            this.Refresh(rerender: true);
         }
 
         public async Task Switch(int dir)
@@ -165,7 +179,7 @@ namespace EPUBRenderer
             }
 
             //will succeed opening some page, even if dist is not correct
-            this.OpenPage(CurrBook.GetPageFile(fileIndex).GetPage(pageIndex, safe: true).StartPos).CatchAll();
+            await this.OpenPage(CurrBook.GetPageFile(fileIndex).GetPage(pageIndex, safe: true).StartPos);
         }
 
         private void SetCurrPos(PosDef pos)
@@ -183,48 +197,63 @@ namespace EPUBRenderer
 
             return Valid;
         }
+        public bool MarkingInProgress() => this.FirstHit != PosDef.InvalidPosition || this.SelectionStart != PosDef.InvalidPosition;
 
         private DateTime lastTempMarkDraw = DateTime.MinValue;
         public void DrawTempMarking(Point relPoint, byte ColorIndex, bool ignoreInterval = false)
         {
-            var newSecondHit = ShownPage.Intersect(relPoint, useFuzzyHit: true);
-            if (newSecondHit == this.SecondHit) return;
-            if (!ignoreInterval && DateTime.Now.Subtract(lastTempMarkDraw).TotalMilliseconds < 1 / 60.0) return;
-            lastTempMarkDraw = DateTime.Now;
+            var lessThanFrame = DateTime.Now.Subtract(lastTempMarkDraw).TotalMilliseconds < 1 / 60.0;
+            async Task fun()
+            {
 
-            CurrBook.RemoveMarking(FirstHit, SecondHit);
-            this.SecondHit = newSecondHit;
-            this.SetCurrPos(SecondHit);
-            this.CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
-            this.Refresh();
+                var newSecondHit = ShownPage.Intersect(relPoint, useFuzzyHit: true);
+                if (newSecondHit == this.SecondHit) return;
+                if (!ignoreInterval && lessThanFrame) return;
+                lastTempMarkDraw = DateTime.Now;
+
+                CurrBook.RemoveMarking(FirstHit, SecondHit);
+                this.SecondHit = newSecondHit;
+                this.SetCurrPos(SecondHit);
+                this.CurrBook.AddMarking(FirstHit, SecondHit, ColorIndex);
+
+                await Task.CompletedTask;
+            }
+            this.InputQueue.Add(fun);
         }
 
         public void FinishMarking(Point relPoint, byte ColorIndex)
         {
             this.DrawTempMarking(relPoint, ColorIndex, ignoreInterval: true);
             //to fix https://github.com/Georg2002/SimpleEPUBReader/issues/3
-            try
+            if (!string.IsNullOrEmpty(this.CurrBook.MarkedText))
             {
-                Clipboard.SetDataObject(this.CurrBook.MarkedText, true);
+                try
+                {
+                    Clipboard.SetDataObject(this.CurrBook.MarkedText, true);
+                }
+                catch
+                {
+                    //nothing I guess?
+                }
             }
-            catch
-            {
-                //nothing I guess?
-            }
-            this.SecondHit = PosDef.InvalidPosition;
+            this.FirstHit = this.SecondHit = PosDef.InvalidPosition;
         }
 
         public void RemoveMarking(Point relPoint)
         {
-            if (CurrBook != null)
+            async Task fun()
             {
-                PosDef Hit = ShownPage.Intersect(relPoint);
-                this.SetCurrPos(Hit);
-                if (Hit.IsInvalid) return;
-                (PosDef A, PosDef B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
-                CurrBook.RemoveMarking(A, B);
+                if (CurrBook != null)
+                {
+                    PosDef Hit = ShownPage.Intersect(relPoint);
+                    this.SetCurrPos(Hit);
+                    if (Hit.IsInvalid) return;
+                    (PosDef A, PosDef B) = CurrBook.GetConnectedMarkings(Hit, ShownPage);
+                    CurrBook.RemoveMarking(A, B);
+                }
+                await Task.CompletedTask;
             }
-            this.Refresh();
+            this.InputQueue.Add(fun);
         }
 
         public bool StartSelection(Point relPoint)
@@ -243,15 +272,16 @@ namespace EPUBRenderer
         {
             if (CurrBook == null) return;
             CurrBook.RemoveSelection(SelectionStart, SelectionEnd);
+
         }
 
         public void ContinueSelection(Point relPoint)
         {
-            Application.Current.Dispatcher.Invoke(() => this.Refresh());
             this.RemoveSelection();
             this.SelectionEnd = ShownPage.Intersect(relPoint);
             this.SetCurrPos(SelectionEnd);
             if (!SelectionStart.IsInvalid && !SelectionEnd.IsInvalid) CurrBook.AddSelection(SelectionStart, SelectionEnd);
+            this.QueueRefresh();
         }
 
         public string GetSelection() => CurrBook.GetSelection(SelectionStart, SelectionEnd);
@@ -262,10 +292,10 @@ namespace EPUBRenderer
 
         public List<string> GetChapters() => CurrBook?.GetChapters() ?? new List<string>();
 
-        public async Task SetChapter(int chapterIndex)
+        public void SetChapter(int chapterIndex)
         {
             PosDef Pos = CurrBook.GetChapterPos(chapterIndex);
-            await this.OpenPage(Pos);
+            this.InputQueue.Add(() => this.OpenPage(Pos));
         }
         public LibraryBook GetCurrentBook() => CurrBook?.GetLibraryBook() ?? new LibraryBook() { CurrPos = PosDef.InvalidPosition };
 
@@ -274,40 +304,98 @@ namespace EPUBRenderer
             this.RemoveSelection();
             this.SelectionStart = PosDef.InvalidPosition;
             this.SelectionEnd = PosDef.InvalidPosition;
+            this.QueueRefresh();
         }
 
-        private void Refresh(bool rerender = false)
+        private SemaphoreSlim renderingSemaphore = new(0, 1);
+        private async Task Refresh()
         {
-            if (rerender) this.Rendering = true;
-            this.InvalidateVisual();
+            Debug.WriteLine("Refresh triggered");
+            lock (this.renderLockObject) this.Rendering = true;
+            this.Dispatcher.Invoke(this.InvalidateVisual);
+            await this.renderingSemaphore.WaitAsync();
+            RefreshedEvent?.Invoke();
         }
-        private SemaphoreSlim positioningSemaphore = new(1, 1);
-        private bool recalculatingSizeWaiting = false;
-        private object recalculatingLockO = new();
+
         private void Renderer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            lock (this.recalculatingLockO)
-            {
-                this.PageSize = this.GetPageSize();
-                if (CurrBook is null || this.recalculatingSizeWaiting) return;
-            }
+            if (this.CurrBook is null) return;
 
             async Task loadAsync()
             {
-                lock (this.recalculatingLockO) recalculatingSizeWaiting = true;
-                await this.positioningSemaphore.WaitAsync();
-                lock (this.recalculatingLockO) recalculatingSizeWaiting = false;
-
                 this.PageSize = this.GetPageSize();
                 CurrBook.PositionPrepare(this.PageSize);
                 await this.OpenPage(CurrBook.CurrPos);
-                this.positioningSemaphore.Release();
-                await CurrBook.Position(CurrBook.CurrPos);
+                CurrBook.Position(CurrBook.CurrPos).CatchAll();
             }
-            this.Rendering = true;
 
-            loadAsync().CatchAll();
+            this.InputQueue.Add(loadAsync);
         }
+
+
+
+        public readonly BlockingCollection<Func<Task>> InputQueue = new(new ConcurrentQueue<Func<Task>>());
+
+        public void QueueRefresh() => this.InputQueue.Add(null);
+        private void WorkInputQueue()
+        {
+            //  this.TestLoop();
+            Task.Run(async () =>
+            {
+
+                try
+                {
+                    while (true)
+                    {
+                        var func = InputQueue.Take();
+                        if (func is null) Debug.WriteLine("Refresh passed");
+                        else
+                        {
+                            Debug.WriteLine(func.Method.ToString());
+                            await func?.Invoke();
+                        }
+                        await this.Refresh();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    Application.Current.Shutdown(-1);
+                }
+            });
+
+        }
+
+        /*
+        private void TestLoop()
+        {
+            async Task delayFun()
+            {
+                Debug.WriteLine("Starting delay");
+                await Task.Delay(2000);
+                Debug.WriteLine("Stopping delay");
+            }
+            Task.Run(async () =>
+            {
+
+                try
+                {
+                    while (true)
+                    {
+                        Debug.WriteLine("adding delay");
+                        InputQueue.Add(delayFun);
+                        await Task.Delay(2000);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    Application.Current.Shutdown(-1);
+                }
+            });
+
+        }
+        */
         private Vector GetPageSize() => new Vector(this.ActualWidth, this.ActualHeight - 20);
     }
 

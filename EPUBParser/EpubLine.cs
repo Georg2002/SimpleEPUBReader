@@ -61,8 +61,27 @@ namespace EPUBParser
                     Parts.Add(new BreakLinePart(info));
                     info.ActiveClasses.Remove(Node.Name);
                     break;
-                case "#text":
                 case "nav":
+                    Text = Node.InnerText.Trim();
+                    var split = Node.InnerText.Trim().Split("\r\n");
+                    if (split.Length == 1)
+                    {
+                        if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text.Trim(), info));
+                    }
+                    else if (split.Length > 1)
+                    {
+                        foreach (var splitPart in split)
+                        {
+                            if (!string.IsNullOrWhiteSpace(splitPart))
+                            {
+                                Parts.Add(new TextLinePart(splitPart.Trim(), info));
+                                Parts.Add(new BreakLinePart(info));
+                            }
+                        }
+                        Parts.Add(new BreakLinePart(info));
+                    }
+                    break;
+                case "#text":
                     Text = Node.InnerText.Trim();
                     if (!string.IsNullOrWhiteSpace(Text)) Parts.Add(new TextLinePart(Text.Trim(), info));
                     break;

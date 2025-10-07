@@ -59,7 +59,6 @@ namespace EPUBParser
                         {
                             if (toc == null) toc = new TocInfo(File, Files, fromNav: true);
                             else toc.AddChaptersFromNav(File, Files);
-                            continue;//don't need to see this
                         }
                         this.Pages.Add( new EpubPage(File, Settings, Files));
                         break;
