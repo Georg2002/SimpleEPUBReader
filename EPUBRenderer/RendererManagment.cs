@@ -354,6 +354,10 @@ namespace EPUBRenderer
                         await this.Refresh();
                     }
                 }
+                catch (TaskCanceledException)
+                {
+                    //expected behavior on shutdown
+                }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);

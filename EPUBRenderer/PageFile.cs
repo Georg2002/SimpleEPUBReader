@@ -22,7 +22,7 @@ namespace EPUBRenderer
         private readonly List<RenderPage> CachedPages = new();
         internal int Index;
         internal Task PositioningTask { get; private set; }
-     
+
         private EpubPage epubPage;
         private CSSExtract CSS;
         private List<MrkDef> mrkDefs;
@@ -38,16 +38,16 @@ namespace EPUBRenderer
             lock (this.setupLockO)
             {
                 if (this.epubPage is null) return;
+                this.CreateContent(this.epubPage, CSS);
+                foreach (var mrk in mrkDefs.Where(a => a.Pos.Letter < this.Content.Count))
+                {
+                    this.Content[mrk.Pos.Letter].MarkingColorIndex = mrk.ColorIndex;
+                }
+                this.epubPage.FreeMemory();
+                this.epubPage = null;
+                this.CSS = null;
+                this.mrkDefs = null;
             }
-            this.CreateContent(this.epubPage, CSS);
-            foreach (var mrk in mrkDefs.Where(a => a.Pos.Letter < this.Content.Count))
-            {
-                this.Content[mrk.Pos.Letter].MarkingColorIndex = mrk.ColorIndex;
-            }
-            this.epubPage.FreeMemory();
-            lock (this.setupLockO) this.epubPage = null;
-            this.CSS = null;
-            this.mrkDefs = null;
         }
 
         private RenderPage GetFreshPage()
