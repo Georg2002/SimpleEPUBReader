@@ -259,8 +259,9 @@ namespace EPUBRenderer
         public bool StartSelection(Point relPoint)
         {
             bool Valid = false;
-            if (CurrBook != null)
+            if (this.CurrBook != null && this.ShownPage is not null)
             {
+                this.RemoveSelection();
                 var NewStart = ShownPage.Intersect(relPoint);
                 Valid = NewStart.FileIndex != -1;
                 if (Valid) this.SelectionStart = NewStart;
@@ -310,7 +311,6 @@ namespace EPUBRenderer
         private SemaphoreSlim renderingSemaphore = new(0, 1);
         private async Task Refresh()
         {
-            Debug.WriteLine("Refresh triggered");
             lock (this.renderLockObject) this.Rendering = true;
             this.Dispatcher.Invoke(this.InvalidateVisual);
             await this.renderingSemaphore.WaitAsync();
@@ -342,16 +342,13 @@ namespace EPUBRenderer
             //  this.TestLoop();
             Task.Run(async () =>
             {
-
                 try
                 {
                     while (true)
                     {
                         var func = InputQueue.Take();
-                        if (func is null) Debug.WriteLine("Refresh passed");
-                        else
+                        if (func is not null)
                         {
-                            Debug.WriteLine(func.Method.ToString());
                             await func?.Invoke();
                         }
                         await this.Refresh();

@@ -45,6 +45,7 @@ namespace EPUBReader
         };
         private Vector WindowSize;
         private DispatcherTimer Timer = new DispatcherTimer();
+        private DispatcherTimer SaveTimer = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -65,8 +66,13 @@ namespace EPUBReader
             Timer.Interval = TimeSpan.FromSeconds(1);
             Timer.Tick += timer_tick;
             Timer.Start();
+
+            this.SaveTimer.Interval = TimeSpan.FromSeconds(60);
+            this.SaveTimer.Tick += this.save_tick;
+            this.SaveTimer.Start();
         }
 
+        private void save_tick(object sender, EventArgs e) => this.Renderer.InputQueue.Add(() => Task.Run(() => SaveAndLoad.Save(this.GetSave())));
         private void timer_tick(object sender, EventArgs e) => txtTimer.Text = DateTime.Now.ToString("HH:mm");
         private void LoadSave(string arg)
         {
@@ -284,15 +290,15 @@ namespace EPUBReader
         private SaveStruc GetSave()
         {
             var Save = new SaveStruc();
-            var Book = Renderer.GetCurrentBook();
+            var Book = this.Renderer.GetCurrentBook();
             Library.AddOrReplaceBook(Book);
-            Save.CurrentBookIndex = Library.GetIndex(Book);
-            Save.Books = Library.GetBooks();
-            Save.Fullscreen = WindowState == WindowState.Maximized;
-            Save.ColorIndex = ColorIndex;
-            Save.LastDirectory = Dialog.InitialDirectory;
-            Save.WindowSize = WindowSize;
-            Save.DictOpen = DictionaryActive;
+            Save.CurrentBookIndex = this.Library.GetIndex(Book);
+            Save.Books = this.Library.GetBooks();
+            Save.Fullscreen = this.Dispatcher.Invoke<bool>(() => this.WindowState == WindowState.Maximized);
+            Save.ColorIndex = this.ColorIndex;
+            Save.LastDirectory = this.Dialog.InitialDirectory;
+            Save.WindowSize = this.Dispatcher.Invoke<Vector>(() => this.WindowSize);
+            Save.DictOpen = this.DictionaryActive;
             return Save;
         }
 

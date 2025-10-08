@@ -45,7 +45,6 @@ namespace EPUBRenderer
                 if (ShownPage is null || !this.Rendering) return;
             }
            
-            Debug.WriteLine("Render executed");
             var canvas = e.Surface.Canvas;
 
             // make sure the canvas is blank

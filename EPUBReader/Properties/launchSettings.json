@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "EPUBReader": {
+      "commandName": "Project"
+    },
+    "file open": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\Georg\\Desktop\\Books\\本好きの下克上\\本好きの下剋上第五部.epub\""
+    }
+  }
+}

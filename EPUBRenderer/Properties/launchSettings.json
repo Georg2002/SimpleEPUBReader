@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EPUBRenderer": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
