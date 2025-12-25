@@ -81,6 +81,7 @@ namespace EPUBRenderer
         private PosDef ToGlobal(PosDef Local) => new(Local.FileIndex, Local.Letter + this.StartPos.Letter);
         internal PosDef Intersect(Point relPoint, bool useFuzzyHit = false)
         {
+            relPoint = new Point(relPoint.X * Renderer.WindowScale, relPoint.Y * Renderer.WindowScale);
             var i = 0;
             int fuzzyHitIndex = -1;
             foreach (var letter in this.Content)
@@ -92,27 +93,30 @@ namespace EPUBRenderer
             if (useFuzzyHit && fuzzyHitIndex >= 0) return this.ToGlobal(new PosDef(this.StartPos.FileIndex, fuzzyHitIndex));
             return PosDef.InvalidPosition;
         }
+       
 
-        private LetterPlacementInfo Info = new();//less garbage collection
+        private LetterPlacementInfo info = new();//less garbage collection
         public int Position(Vector PageSize)
         {
-            this.Info.PageSize = PageSize;
-            this.Info.State = PositionState.Normal;
+            this.info.PageSize = PageSize;
+            this.info.State = PositionState.Normal;
+            this.info.AllWhitespace = true;
+
+
             int FitCount = 0;
-            Info.AllWhitespace = true;
 
             for (int i = 0; i < this.Content.Count(); i++)
             {
                 var letter = this.Content.ElementAt(i);
 
                 letter.IsPageStart = i == 0;
-                bool LetterFit = letter.Position(Info);
-                if (Info.State == PositionState.Newline) Info.State++;//only one newline
+                bool LetterFit = letter.Position(info);
+                if (info.State == PositionState.Newline) info.State++;//only one newline
                 if (!LetterFit)
                 {
-                    Info.State++;
+                    info.State++;
                     i = FitCount - 1;//++ right after
-                    if (Info.State == PositionState.Final)
+                    if (info.State == PositionState.Final)
                     {
                         if (FitCount == 0) return 1;//always 1 at least
                         else return FitCount;
@@ -123,9 +127,9 @@ namespace EPUBRenderer
                 {
                     if (!letter.InsidePageHor(PageSize)) return FitCount;
                     FitCount = i + 1;//only set when full word has been written, only increased after
-                    Info.State = PositionState.Normal;//reset
+                    info.State = PositionState.Normal;//reset
                 }
-                if (letter.Type == LetterTypes.Image || letter.Type == LetterTypes.Letter) Info.AllWhitespace = false;
+                if (letter.Type == LetterTypes.Image || letter.Type == LetterTypes.Letter) info.AllWhitespace = false;
             }
             return FitCount;
         }

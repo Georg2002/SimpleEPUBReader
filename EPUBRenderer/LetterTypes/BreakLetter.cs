@@ -10,14 +10,14 @@ namespace EPUBRenderer
             IsWordEnd = true;
         }
 
-        public override bool Position(LetterPlacementInfo Info)
+        public override bool Position(LetterPlacementInfo info)
         {
-            var PageSize = Info.PageSize;
-
-            if (IsPageStart)
+            var PageSize = info.PageSize;
+            
+            if (this.IsPageStart)
             {
-                StartPosition = new Vector(PageSize.X - LineDist + StandardFontSize, 0);
-                EndPosition = new Vector(PageSize.X - LineDist, 0);
+                StartPosition = new Vector(PageSize.X - this.LineDist + StandardFontSize, 0);
+                EndPosition = new Vector(PageSize.X - this.LineDist, 0);
             }
             else
             {

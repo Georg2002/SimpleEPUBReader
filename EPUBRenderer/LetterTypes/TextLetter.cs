@@ -19,9 +19,9 @@ namespace EPUBRenderer
         public float RelScale = 1;
         public char OrigChar { get; private set; }
 
-        private static readonly Vector HitboxExpansion = new((LineDist - StandardFontSize) / 2, 0);
-        public override Vector HitboxStart => this.IsRuby ? OutsideVector : StartPosition + HitboxExpansion;// - VertSpacing;
-        public override Vector HitboxEnd => this.IsRuby ? OutsideVector : EndPosition - HitboxExpansion;// + VertSpacing;
+        private Vector HitboxExpansion => new((this.LineDist - this.FontSize) / 2, 0);
+        public override Vector HitboxStart => this.IsRuby ? OutsideVector : StartPosition + this.HitboxExpansion;// - VertSpacing;
+        public override Vector HitboxEnd => this.IsRuby ? OutsideVector : EndPosition - this.HitboxExpansion;// + VertSpacing;
         private Vector VertSpacing;
 
         public TextLetter(char character, WordInfo wordInfo) : base(wordInfo)
@@ -30,20 +30,19 @@ namespace EPUBRenderer
             Type = LetterTypes.Letter;
             this.OrigChar = this.Character;
 
-            if (CharInfo.SpecialCharacters.ContainsKey(this.Character))
+            if (CharInfo.SpecialCharacters.TryGetValue(this.Character, out SpecialCharacter info))
             {
-                var info = CharInfo.SpecialCharacters[this.Character];
                 Offset = info.Offset;
                 RelScale = info.Scaling;
                 this.Rotation = info.Rotation;
                 this.Character = info.Replacement;
             }
         }
-        public override bool Position(LetterPlacementInfo Info)
+        public override bool Position(LetterPlacementInfo info)
         {
-            var PageSize = Info.PageSize;
-            var TightFit = Info.State == PositionState.TightFit;
-            var NewLine = Info.State == PositionState.Newline;
+            var PageSize = info.PageSize;
+            var tightFit = info.State == PositionState.TightFit;
+            var newLine = info.State == PositionState.Newline;
 
             if (IsRuby)
             {
@@ -51,15 +50,15 @@ namespace EPUBRenderer
                 if (prevWord.Letters.Count() == 1 && prevWord.Letters.First() is MarkerLetter) prevWord = prevWord.Prev;//marker inbetween               
 
                 var MainWordFontSize = prevWord.Letters.Last().FontSize;
-                this.FontSize = RubyFontSize * Style.RelativeFontSize;
+                this.FontSize = Letter.StandardFontSize *Letter.RubyScale * this.Style.RelativeFontSize;
                 float RubyCount = OwnWord.LetterCount;
                 float TextCount = prevWord.LetterCount;
                 VertSpacing = new Vector();
                 VertSpacing.Y = Math.Max((TextCount / RubyCount - RubyScale) * MainWordFontSize / 2, 0);
 
                 double TextLength = prevWord.Length();
-                double RubyLength = OwnWord.LetterCount * (RubyFontSize * Style.RelativeFontSize + 2 * VertSpacing.Y);
-                if (this.OwnWord.Letters.First() == this) StartPosition = prevWord.Letters.Last().EndPosition + new Vector(RubyOffset * Style.RelativeFontSize, -0.5 * (TextLength + RubyLength));
+                double RubyLength = OwnWord.LetterCount * (this.FontSize + 2 * VertSpacing.Y);
+                if (this.OwnWord.Letters.First() == this) StartPosition = prevWord.Letters.Last().EndPosition + new Vector(this.RubyOffset, -0.5 * (TextLength + RubyLength));
                 else StartPosition = PrevLetter.NextWritePos;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
@@ -70,23 +69,23 @@ namespace EPUBRenderer
             else
             {
                 this.FontSize = StandardFontSize * Style.RelativeFontSize;
-                StartPosition = IsPageStart ? new Vector(PageSize.X - LineDist, 0) : PrevLetter.NextWritePos;
+                StartPosition = IsPageStart ? new Vector(PageSize.X - this.LineDist, 0) : PrevLetter.NextWritePos;
                 VertSpacing = new Vector();
                 if (this.OwnWord.Next != null && this.OwnWord.Next.Type == WordTypes.Ruby)
                 {
                     float RubyCount = this.OwnWord.Next.LetterCount;
                     float TextCount = OwnWord.LetterCount;
-                    VertSpacing.Y = Math.Max((RubyCount * RubyScale / TextCount - 1) * StandardFontSize / 2, 0);
+                    VertSpacing.Y = Math.Max((RubyCount * RubyScale / TextCount - 1) * this.FontSize / 2, 0);
                 }
 
-                StartPosition = NewLine ? new Vector(StartPosition.X - this.GetNewLineDist(), 0) : StartPosition;
+                StartPosition = newLine ? new Vector(StartPosition.X - this.GetNewLineDist(), 0) : StartPosition;
                 StartPosition += VertSpacing;
                 EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
 
-                if (TightFit && EndPosition.Y > PageSize.Y)
+                if (tightFit && EndPosition.Y > PageSize.Y)
                 {
                     StartPosition.Y = 0;
-                    StartPosition.X -= LineDist;
+                    StartPosition.X -= this.GetNewLineDist();
                     EndPosition = StartPosition + new Vector(-this.FontSize, this.FontSize);
                 }
                 NextWritePos = EndPosition + new Vector(this.FontSize, 0) + VertSpacing;
@@ -101,7 +100,7 @@ namespace EPUBRenderer
             Width = this.FontSize,
             Height = this.VertSpacing.Y * 2 + this.FontSize
         };
-        public Tuple<SKTypeface, int> GetRenderingInfo() => new(this.Typeface, this.Character);        
-        public override string ToString() => Character.ToString();
+        public Tuple<SKTypeface, int> GetRenderingInfo() => new(this.Typeface, this.Character);
+        public override string ToString() => this.Character.ToString();
     }
 }

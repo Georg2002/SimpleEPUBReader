@@ -32,10 +32,10 @@ namespace EPUBRenderer
     {
         public float FontSize;
         public const float StandardFontSize = 19;//19
+        public const double StandardLineDist = StandardFontSize * 1.1 * (1.0 + RubyScale);
         public const float RubyScale = 0.7f;//0.7
-        public const float RubyFontSize = RubyScale * StandardFontSize;
-        public const float LineDist = 1.1f * (StandardFontSize + RubyFontSize);
-        public const float RubyOffset = 0.93f * LineDist;
+        public double LineDist => 1.1 * (1.0 + RubyScale) * (this.IsRuby ? this.PrevLetter.OwnWord.Letters.Last().FontSize : this.FontSize);
+        public double RubyOffset => 0.93 * this.LineDist;
         public static readonly Vector OutsideVector = new(-100000, -100000);
 
         public bool DictSelected;
@@ -53,9 +53,9 @@ namespace EPUBRenderer
             this.IsRuby = wordInfo.IsRuby;
             this.Style = wordInfo.Style;
         }
-        public static float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
-        public static float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
-
+        /*     public static float GetLineDist(float fontSize) => 1.1f * (fontSize + GetRubyFontSize(fontSize));
+             public static float GetRubyFontSize(float fontSize) => RubyScale * fontSize;
+        */
 
 
         public Vector StartPosition;
@@ -76,7 +76,9 @@ namespace EPUBRenderer
         public virtual Rect GetMarkingRect() => new(EndPosition.X, StartPosition.Y, StartPosition.X - EndPosition.X, EndPosition.Y - StartPosition.Y);
         public override string ToString() => Type.ToString();
         public bool InsidePageVert(Vector PageSize) => EndPosition.Y <= PageSize.Y;
+#pragma warning disable IDE0060 // Remove unused parameter
         public bool InsidePageHor(Vector PageSize) => EndPosition.X >= 0;
+#pragma warning restore IDE0060 // Remove unused parameter
         public bool InsidePage(Vector PageSize) => this.InsidePageHor(PageSize) && this.InsidePageVert(PageSize);
 
         public (Vector, Vector) GetNeutralStartingPosition(LetterPlacementInfo Info)
@@ -86,8 +88,8 @@ namespace EPUBRenderer
             var PageSize = Info.PageSize;
             if (IsPageStart)
             {
-                StartPosition = new Vector(PageSize.X - LineDist + StandardFontSize, 0);
-                EndPosition = new Vector(PageSize.X - LineDist, 0);
+                StartPosition = new Vector(PageSize.X - this.LineDist + StandardFontSize, 0);
+                EndPosition = new Vector(PageSize.X - this.LineDist, 0);
             }
             else
             {
@@ -98,23 +100,25 @@ namespace EPUBRenderer
             return (StartPosition, EndPosition);
         }
 
-        public float GetNewLineDist()
+
+        public double GetNewLineDist()
         {
-            float maxSize = -1;
-            Letter prev = this.PrevLetter;
+            double maxDist = -1;
+            Letter l = this;
+      
             while (true)
             {
-                if (prev == null) break;
-                if (prev.Type == LetterTypes.Letter)
+                if (l == null) break;
+                if (l.Type == LetterTypes.Letter && !l.IsRuby)
                 {
-                    var prevLetter = (TextLetter)prev;
-                    if (prevLetter.StartPosition.X != this.StartPosition.X) break;
-                    if (maxSize < prevLetter.FontSize) maxSize = prevLetter.FontSize;
+                    var txtLetter = (TextLetter)l;
+                    if (txtLetter.StartPosition.X != this.StartPosition.X) break;
+                    if (maxDist < txtLetter.LineDist) maxDist = txtLetter.LineDist;
                 }
-                prev = prev.PrevLetter;
+                l = l.PrevLetter;
             }
-            if (maxSize < 0) maxSize = Letter.StandardFontSize;
-            return GetLineDist(maxSize);
+            if (maxDist < 0) maxDist = Letter.StandardFontSize;
+            return maxDist;
         }
     }
 }

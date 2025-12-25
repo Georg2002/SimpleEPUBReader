@@ -36,15 +36,15 @@ namespace EPUBRenderer
             }
         }
 
-        private Dictionary<Tuple<float, SKTypeface>, GlyphRunData> RunDict = new();
-        private object renderLockObject = new();
+        private readonly Dictionary<Tuple<float, SKTypeface>, GlyphRunData> RunDict = new();
+        private readonly object renderLockObject = new();
         protected override void OnPaintSurface(SKPaintSurfaceEventArgs e)
         {
             lock (this.renderLockObject)
             {
                 if (ShownPage is null || !this.Rendering) return;
             }
-           
+
             var canvas = e.Surface.Canvas;
 
             // make sure the canvas is blank
@@ -77,7 +77,7 @@ namespace EPUBRenderer
                     //glyph run can't give each letter its own rotation, so it has to be handled extra
                     //theoretically all equally rotated letters could be drawn in one call, but offsets need to be transformed
 
-                    using var font = this.GetFont(letterTf, size);
+                    using var font = Renderer.GetFont(letterTf, size);
                     canvas.DrawText(textLetter.Character.ToString(), offset.ToSKPoint(), SKTextAlign.Center, font, this.blackPaint);
 
                     canvas.RotateDegrees(-textLetter.Rotation, x, y);
@@ -109,9 +109,9 @@ namespace EPUBRenderer
                 var size = data.Key.Item1;
                 var tf = data.Key.Item2;
                 var glyphs = tf.GetGlyphs(data.Value.codepoints.ToArray());
-                if (glyphs.Any())
+                if (glyphs.Length != 0)
                 {
-                    using var font = this.GetFont(tf, size);
+                    using var font = Renderer.GetFont(tf, size);
                     var widths = font.GetGlyphWidths(glyphs);
                     for (int i = 0; i < offsets.Count; i++) offsets[i] = new(offsets[i].X - (size + widths[i]) / 2, offsets[i].Y);
 

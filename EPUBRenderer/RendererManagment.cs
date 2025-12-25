@@ -3,15 +3,19 @@ using SkiaSharp;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace EPUBRenderer
 {
     public partial class Renderer : SKElementCust
     {
+        public static float WindowScale { get; private set; } = 1.0f;//Scale from Windows display settings
+
         public RenderBook CurrBook;
         Vector PageSize;
         RenderPage ShownPage = null;
@@ -20,12 +24,39 @@ namespace EPUBRenderer
         public SKPaint[] MarkingColors;
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
-        private SKPaint blackPaint = new SKPaint { Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Fill };
-        private SKSamplingOptions samplingOptions = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
+        private readonly SKPaint blackPaint = new() { Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Fill };
+        private readonly SKSamplingOptions samplingOptions = new(SKFilterMode.Linear, SKMipmapMode.Linear);
         public bool Rendering { get; private set; } = false;
 
         public delegate void RefreshedEventHandler();
         public event RefreshedEventHandler RefreshedEvent;
+
+        [DllImport("gdi32.dll")]
+        private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+        public enum DeviceCap
+        {
+            VERTRES = 10,
+            DESKTOPVERTRES = 117,
+            LOGPIXELSY = 90,
+        }
+        private static readonly object lockO = new();
+        static Renderer()
+        {
+            using System.Drawing.Graphics g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
+            IntPtr desktop = g.GetHdc();
+            int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
+            int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+            int logpixelsy = GetDeviceCaps(desktop, (int)DeviceCap.LOGPIXELSY);
+            g.ReleaseHdc(desktop);
+
+            float screenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
+            float dpiScalingFactor = (float)logpixelsy / (float)96;
+
+            if (screenScalingFactor > 1 || dpiScalingFactor > 1)
+            {
+                Renderer.WindowScale = dpiScalingFactor;
+            }
+        }
 
         public Renderer()
         {
@@ -35,7 +66,7 @@ namespace EPUBRenderer
 
             this.WorkInputQueue();
         }
-        private SKFont GetFont(SKTypeface tf, float size) => new SKFont
+        private static SKFont GetFont(SKTypeface tf, float size) => new()
         {
             Size = size,
             Typeface = tf,
@@ -308,7 +339,7 @@ namespace EPUBRenderer
             this.QueueRefresh();
         }
 
-        private SemaphoreSlim renderingSemaphore = new(0, 1);
+        private readonly SemaphoreSlim  renderingSemaphore = new(0, 1);
         private async Task Refresh()
         {
             lock (this.renderLockObject) this.Rendering = true;
@@ -397,7 +428,7 @@ namespace EPUBRenderer
 
         }
         */
-        private Vector GetPageSize() => new Vector(this.ActualWidth, this.ActualHeight - 20);
+        private Vector GetPageSize() => new Vector(this.ActualWidth, this.ActualHeight - 20) * Renderer.WindowScale;
     }
 
 }

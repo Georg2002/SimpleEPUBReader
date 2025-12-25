@@ -17,7 +17,7 @@ namespace EPUBRenderer
     internal class PageFile
     {
         public List<Letter> Content = new();
-        private List<RenderPage> Pages = new();
+        private readonly List<RenderPage> Pages = new();
         private int UsedCachePages = 0;
         private readonly List<RenderPage> CachedPages = new();
         internal int Index;
@@ -110,6 +110,7 @@ namespace EPUBRenderer
         private static WordStyle GetStyle(BaseLinePart Part, CSSExtract CSS)
         {
             var NewStyle = new WordStyle();
+            NewStyle.RelativeFontSize = Renderer.WindowScale;
             if (Part.ActiveClasses == null) return NewStyle;
             foreach (string SelectorText in Part.ActiveClasses)
             {
@@ -117,8 +118,8 @@ namespace EPUBRenderer
                 if (Style != null)
                 {
                     NewStyle.RelativeFontSize = Style.FontSize;
-                    NewStyle.Width = Style.Width * TextLetter.StandardFontSize;
-                    NewStyle.Height = Style.Height * TextLetter.StandardFontSize;
+                    NewStyle.Width = Style.Width * TextLetter.StandardFontSize * Renderer.WindowScale;
+                    NewStyle.Height = Style.Height * TextLetter.StandardFontSize * Renderer.WindowScale;
                     switch (Style.FontWeight)
                     {
                         case EPUBParser.FontWeights.bold:
@@ -140,7 +141,7 @@ namespace EPUBRenderer
             {
                 if (!Typefaces.ContainsKey(NewStyle.Weight))
                 {
-                    var typeface = SKTypeface.FromFamilyName(CharInfo.StandardFontFamily, NewStyle.Weight, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
+                    var typeface = CharInfo.TypefaceDict[NewStyle.Weight];
 
                     Typefaces[NewStyle.Weight] = typeface;
                 }
