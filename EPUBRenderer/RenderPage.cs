@@ -102,7 +102,6 @@ namespace EPUBRenderer
             this.info.State = PositionState.Normal;
             this.info.AllWhitespace = true;
 
-
             int FitCount = 0;
 
             for (int i = 0; i < this.Content.Count(); i++)

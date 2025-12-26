@@ -121,7 +121,7 @@ namespace EPUBParser
                     break;
                 case "hr":
                 case "br":
-                    Parts.Add(new BreakLinePart(info));
+                    Parts.Add(new BreakLinePart(info, breakWidth: 1.5));
                     break;
                 case "span":
                     AddSpanElement(Node, info);
@@ -129,12 +129,12 @@ namespace EPUBParser
                 case "a":
                 case "svg":
                 case "div":
-                    AddChapterMarker(Node, info);
+                    this.AddChapterMarker(Node, info);
                     foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, info);
                     break;
                 case "p":
                     AddChapterMarker(Node, info);
-                    if (Node.ChildNodes.Count > 1 || Node.FirstChild.Name != "br")
+                    if (Node.ChildNodes.Count > 0)//was > 1
                     {
                         foreach (var ChildNode in Node.ChildNodes) AddAppropriatePart(ChildNode, info);
                     }

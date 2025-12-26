@@ -4,9 +4,11 @@ namespace EPUBParser
 {
     public class BreakLinePart : BaseLinePart
     {
-        public BreakLinePart(LineSplitInfo info) : base(info)
+        public double BreakWidth { get; private set; }
+        public BreakLinePart(LineSplitInfo info, double breakWidth = 1) : base(info)
         {
             Type = LinePartTypes.paragraph;
+            this.BreakWidth = breakWidth;
         }
-    } 
+    }
 }

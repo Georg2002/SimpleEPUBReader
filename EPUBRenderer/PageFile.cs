@@ -206,7 +206,7 @@ namespace EPUBRenderer
                         lastImage = !ImagePart.Inline;
                         break;
                     case LinePartTypes.paragraph:
-                        if (!lastImage) Content.Add(new BreakLetter(wordInfo));
+                        if (!lastImage) Content.Add(new BreakLetter(wordInfo, ((BreakLinePart)Part).BreakWidth));
                         break;
                     default:
                         throw new NotImplementedException();

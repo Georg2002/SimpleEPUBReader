@@ -25,6 +25,8 @@ namespace EPUBRenderer
         private PosDef SelectionEnd = PosDef.InvalidPosition;
         private PosDef SelectionStart = PosDef.InvalidPosition;
         private readonly SKPaint blackPaint = new() { Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Fill };
+        private readonly SKPaint redPaint = new() { Color = SKColors.Red, IsAntialias = true, Style = SKPaintStyle.Fill };
+        private readonly SKPaint greenPaint = new() { Color = SKColors.Green, IsAntialias = true, Style = SKPaintStyle.Fill };
         private readonly SKSamplingOptions samplingOptions = new(SKFilterMode.Linear, SKMipmapMode.Linear);
         public bool Rendering { get; private set; } = false;
 

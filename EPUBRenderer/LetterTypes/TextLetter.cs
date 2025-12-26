@@ -43,7 +43,7 @@ namespace EPUBRenderer
             var PageSize = info.PageSize;
             var tightFit = info.State == PositionState.TightFit;
             var newLine = info.State == PositionState.Newline;
-
+        
             if (IsRuby)
             {
                 var prevWord = this.OwnWord.Prev;

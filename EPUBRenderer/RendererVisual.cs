@@ -65,7 +65,9 @@ namespace EPUBRenderer
                 (var letterTf, var codepoint) = textLetter.GetRenderingInfo();
                 float size = size = textLetter.FontSize * textLetter.RelScale;
 
+
                 var drawPos = textLetter.StartPosition + textLetter.Offset * textLetter.FontSize;
+
 
                 var ul = 0.1;
                 var offset = new Point(drawPos.X, +textLetter.FontSize * (1 - ul) + drawPos.Y);
@@ -94,6 +96,7 @@ namespace EPUBRenderer
                     data.codepoints.Add(codepoint);
                 }
 
+              
 
                 if (textLetter.DictSelected && !textLetter.IsRuby)
                 {
@@ -105,7 +108,9 @@ namespace EPUBRenderer
 
             foreach (var data in this.RunDict)
             {
-                var offsets = data.Value.offsets;
+                var offsets = data.Value.offsets.ToArray();
+
+
                 var size = data.Key.Item1;
                 var tf = data.Key.Item2;
                 var glyphs = tf.GetGlyphs(data.Value.codepoints.ToArray());
@@ -113,12 +118,12 @@ namespace EPUBRenderer
                 {
                     using var font = Renderer.GetFont(tf, size);
                     var widths = font.GetGlyphWidths(glyphs);
-                    for (int i = 0; i < offsets.Count; i++) offsets[i] = new(offsets[i].X - (size + widths[i]) / 2, offsets[i].Y);
+                    for (int i = 0; i < offsets.Length; i++) offsets[i] = new(offsets[i].X - (size + widths[i]) / 2, offsets[i].Y);
 
                     if (data.Value.run is null)
                     {
                         var builder = new SKTextBlobBuilder();
-                        builder.AddPositionedRun(glyphs, font, offsets.ToArray());
+                        builder.AddPositionedRun(glyphs, font, offsets);
                         data.Value.run = builder.Build();
                     }
 
