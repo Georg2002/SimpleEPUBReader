@@ -74,6 +74,7 @@ namespace JapaneseDictionary
            new Inflection("てる","つ"), new Inflection("ねる","ぬ"),
            new Inflection("べる","ぶ"), new Inflection("める","む"),
            new Inflection("できる","する"), new Inflection("こられる","くる"),
+           new Inflection("れる","る"),
 
            //passive form
            new Inflection("される","す"), new Inflection("される","する"),

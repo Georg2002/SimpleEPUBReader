@@ -27,11 +27,13 @@ namespace JapaneseDictionary
                 var TDict = new Dictionary<char, List<DictWord>>();
                 var tempList = new List<string>(20);
                 var tempCharList = new List<char>(20);
+                int counter = 0;
                 using (StreamReader reader = new StreamReader(resourcePath))
                 {
                     while (!reader.EndOfStream)
                     {
                         var NewWord = new DictWord(reader, tempList);
+                        counter++;
                         IncludeDict(NewWord, TDict, tempCharList);
                     }
                 }
@@ -40,6 +42,7 @@ namespace JapaneseDictionary
                 {
                     Dict.Add(entry.Key, entry.Value.ToArray());
                 }
+                TDict.Clear();//maybe help GC?
             });            
         }
 
@@ -89,7 +92,7 @@ namespace JapaneseDictionary
                      char FirstLetter = Searchword[0];
                      if (!Dict.ContainsKey(FirstLetter)) continue;
                      var PartialDict = Dict[FirstLetter];
-                     var NewResults = PartialDict.Where(a => a.Readings.Any(b => b == Searchword) || a.WrittenForms.Any(c => c == Searchword)).Take(10).ToList();
+                     var NewResults = PartialDict.Where(a => a.MatchesSearchword(Searchword)).Take(10).ToList();
                      Res.AddRange(NewResults);
                  }
              });
