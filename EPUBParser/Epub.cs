@@ -20,7 +20,7 @@ namespace EPUBParser
 
         public int PageCount => this.Pages.Count;
         public EpubPage GetPage(int i) => this.Pages[i];
-      
+
         public Epub(string FilePath)
         {
             this.FilePath = FilePath;
@@ -60,7 +60,10 @@ namespace EPUBParser
                             if (toc == null) toc = new TocInfo(File, Files, fromNav: true);
                             else toc.AddChaptersFromNav(File, Files);
                         }
-                        this.Pages.Add( new EpubPage(File, Settings, Files));
+                        else
+                        {
+                            this.Pages.Add(new EpubPage(File, Settings, Files));
+                        }
                         break;
                     case MediaType.toc:
                         toc = new TocInfo(File, Files, fromNav: false);

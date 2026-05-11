@@ -12,7 +12,7 @@ namespace EPUBParser
         public string Title;
         public List<ChapterDefinition> Chapters;
 
-        public TocInfo(ZipEntry file, List<ZipEntry> files,bool fromNav = false)
+        public TocInfo(ZipEntry file, List<ZipEntry> files, bool fromNav = false)
         {
             Chapters = new List<ChapterDefinition>();
             if (file == null)
@@ -22,8 +22,8 @@ namespace EPUBParser
             }
 
             if (fromNav) AddChaptersFromNav(file, files);
-            else AddChaptersFromToc(file, files);      
-            
+            else AddChaptersFromToc(file, files);
+
         }
 
         private void AddChaptersFromToc(ZipEntry file, List<ZipEntry> files)
@@ -97,20 +97,22 @@ namespace EPUBParser
                 {
                     Logger.Report(string.Format("can't determine order of chapter \"{0}\", " +
                         "appending at the end of current list", NewChapter.Title), LogType.Error);
-                    NewChapter.Index = Chapters.Max(a => a.Index) + 1;
-                    continue;
+                    NewChapter.Index = Chapters.Any() ? Chapters.Max(a => a.Index) + 1 : 0;
                 }
-             
-                try
+                else
                 {
-                    NewChapter.Index = Convert.ToInt32(OrderAttribute.Value);
+                    try
+                    {
+                        NewChapter.Index = Convert.ToInt32(OrderAttribute.Value);
+                    }
+                    catch (Exception)
+                    {
+                        Logger.Report(string.Format("can't convert {0} to uint, appending chapter at the end of current list"
+                            , OrderAttribute.Value), LogType.Error);
+                        NewChapter.Index = Chapters.Max(a => a.Index) + 1;
+                    }
                 }
-                catch (Exception)
-                {
-                    Logger.Report(string.Format("can't convert {0} to uint, appending chapter at the end of current list"
-                        , OrderAttribute.Value), LogType.Error);
-                    NewChapter.Index = Chapters.Max(a=>a.Index)+1;
-                }
+
                 InsertChapter(NewChapter);
             }
             Chapters.RemoveAll(a => a == null);
@@ -126,7 +128,7 @@ namespace EPUBParser
                 Logger.Report("toc node doesn't exist", LogType.Error);
                 return;
             }
-            var linkNodes = tocNode.SelectNodes("//a");   
+            var linkNodes = tocNode.SelectNodes("//a");
             foreach (var linkNode in linkNodes)
             {
                 var NewChapter = new ChapterDefinition();
@@ -159,12 +161,12 @@ namespace EPUBParser
             Chapters.RemoveAll(a => a == null);
         }
 
-        private void InsertChapter(ChapterDefinition newChapter )
+        private void InsertChapter(ChapterDefinition newChapter)
         {
             bool insert = !Chapters.Exists(a => a != null && a.Source == newChapter.Source && a.Jumppoint == newChapter.Jumppoint);
             if (insert)
             {
-                if (newChapter.Index==-1)
+                if (newChapter.Index == -1)
                 {
                     Chapters.Add(newChapter);
                     return;

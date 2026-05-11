@@ -10,6 +10,10 @@ namespace EPUBParser
 {
     public static class HTMLParser
     {
+        static HTMLParser()
+        {
+            HtmlNode.ElementsFlags["script"] =  HtmlElementFlag.Empty;
+        }
         public static HtmlDocument Parse(ZipEntry File)
         {
             var Doc = new HtmlDocument
@@ -18,6 +22,7 @@ namespace EPUBParser
                 OptionOutputAsXml = true,
                 OptionFixNestedTags = true
             };
+            
             if (File == null)
             {
                 Logger.Report("file is null, can't parse HTML", LogType.Error);
