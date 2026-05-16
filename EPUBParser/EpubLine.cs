@@ -189,8 +189,9 @@ namespace EPUBParser
 
         private void AddSpanElement(HtmlNode node, LineSplitInfo info)
         {
-            AddChapterMarker(node, info);
             var classAttribute = HTMLParser.SafeAttributeGet(node, "class", true);
+            if (classAttribute != "koboSpan") AddChapterMarker(node, info);
+
             var IgnoreAttribute = HTMLParser.SafeAttributeGet(node, "data-amznremoved-m8", true);
             if (IgnoreAttribute == "true") return;
 

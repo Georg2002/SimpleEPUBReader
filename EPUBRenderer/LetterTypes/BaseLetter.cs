@@ -81,26 +81,7 @@ namespace EPUBRenderer
 #pragma warning restore IDE0060 // Remove unused parameter
         public bool InsidePage(Vector PageSize) => this.InsidePageHor(PageSize) && this.InsidePageVert(PageSize);
 
-        public (Vector, Vector) GetNeutralStartingPosition(LetterPlacementInfo Info)
-        {
-            Vector StartPosition;
-            Vector EndPosition;
-            var PageSize = Info.PageSize;
-            if (IsPageStart)
-            {
-                StartPosition = new Vector(PageSize.X - this.LineDist + StandardFontSize, 0);
-                EndPosition = new Vector(PageSize.X - this.LineDist, 0);
-            }
-            else
-            {
-                StartPosition = PrevLetter.NextWritePos;
-                EndPosition = StartPosition + new Vector(-StandardFontSize, 0);
-            }
-
-            return (StartPosition, EndPosition);
-        }
-
-
+      
         public double GetNewLineDist()
         {
             double maxDist = -1;

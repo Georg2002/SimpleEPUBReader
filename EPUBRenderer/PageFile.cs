@@ -2,6 +2,7 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -75,6 +76,7 @@ namespace EPUBRenderer
                           lock (this.Pages) Pages.Clear();
                           UsedCachePages = 0;
                           var CurrentPage = this.GetFreshPage();
+
 
                           //fit using indexes without creating new objects
                           void FitWords(PageExtractDef extract)

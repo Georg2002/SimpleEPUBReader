@@ -57,7 +57,7 @@ namespace EPUBRenderer
                 else if (this.Style.Height.HasValue) this.Width = this.Height / ratio;
             }
 
-            this.FontSize = StandardFontSize;
+            this.FontSize = this.PrevLetter?.FontSize ?? StandardFontSize;
 
             bool MustScale = PageSize.X < Width || PageSize.Y < Height;
             StartPosition = IsPageStart ? new Vector(PageSize.X, 0) : new Vector(this.PrevLetter.EndPosition.X, 0);
